@@ -1,0 +1,240 @@
+"use client"
+
+import { useSignUp } from "@clerk/nextjs"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { firstClerkErrorMessage } from "@/lib/auth/clerk-errors"
+import { splitFullName } from "@/lib/auth/signup-metadata"
+
+type Props = {
+  unsafeMetadata?: Record<string, unknown>
+}
+
+export function SignUpForm({ unsafeMetadata }: Props) {
+  const { signUp, errors, fetchStatus } = useSignUp()
+  const router = useRouter()
+
+  const [fullName, setFullName] = useState("")
+  const [emailAddress, setEmailAddress] = useState("")
+  const [password, setPassword] = useState("")
+  const [code, setCode] = useState("")
+  const [awaitingEmailCode, setAwaitingEmailCode] = useState(false)
+  const [formError, setFormError] = useState<string | null>(null)
+
+  const resetFlow = async () => {
+    await signUp?.reset()
+    setAwaitingEmailCode(false)
+    setCode("")
+    setFormError(null)
+  }
+
+  const finalizeSignUp = async () => {
+    if (!signUp) return
+    const { error } = await signUp.finalize({
+      navigate: async ({ session, decorateUrl }) => {
+        if (session?.currentTask) return
+        const url = decorateUrl("/dashboard")
+        if (url.startsWith("http")) {
+          window.location.href = url
+        } else {
+          router.push(url)
+        }
+      },
+    })
+    if (error) {
+      console.error(error)
+    }
+  }
+
+  const handleCredentialsSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setFormError(null)
+
+    if (!signUp) return
+    if (!fullName.trim()) {
+      setFormError("Enter your full name.")
+      return
+    }
+    if (!emailAddress.trim() || !password) {
+      setFormError("Enter email and password.")
+      return
+    }
+
+    const { firstName, lastName } = splitFullName(fullName)
+
+    const { error: signUpError } = await signUp.password({
+      emailAddress: emailAddress.trim(),
+      password,
+      firstName,
+      lastName,
+      unsafeMetadata,
+    })
+
+    if (signUpError) {
+      console.error(signUpError)
+      setFormError(firstClerkErrorMessage(signUpError) ?? "Could not start sign-up.")
+      return
+    }
+
+    const { error: sendError } = await signUp.verifications.sendEmailCode()
+    if (sendError) {
+      setFormError(firstClerkErrorMessage(sendError) ?? "Could not send verification email.")
+      return
+    }
+
+    if (
+      signUp.status === "missing_requirements" &&
+      signUp.unverifiedFields.includes("email_address") &&
+      signUp.missingFields.length === 0
+    ) {
+      setAwaitingEmailCode(true)
+      return
+    }
+
+    if (signUp.status === "complete") {
+      await finalizeSignUp()
+      return
+    }
+
+    setAwaitingEmailCode(true)
+  }
+
+  const handleVerifySubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setFormError(null)
+    if (!signUp) return
+
+    const { error } = await signUp.verifications.verifyEmailCode({ code })
+    if (error) {
+      console.error(error)
+      setFormError(firstClerkErrorMessage(error) ?? "Invalid code.")
+      return
+    }
+
+    if (signUp.status === "complete") {
+      await finalizeSignUp()
+    } else if (signUp.status === "missing_requirements") {
+      router.push("/login/continue")
+    } else {
+      console.error("Sign-up attempt not complete. Status:", signUp.status)
+      setFormError("Sign-up incomplete.")
+    }
+  }
+
+  if (awaitingEmailCode) {
+    return (
+      <div className="flex flex-col gap-4">
+        <h2 className="font-heading text-xl tracking-tight">Verify your email</h2>
+        <p className="text-sm text-muted-foreground">
+          We sent a code to {emailAddress.trim()}. Enter it below to finish creating your account.
+        </p>
+        <form onSubmit={handleVerifySubmit} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="signup-code" className="text-sm font-medium">
+              Verification code
+            </label>
+            <input
+              id="signup-code"
+              name="code"
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              value={code}
+              onChange={(ev) => setCode(ev.target.value)}
+              className="h-11 rounded-lg border border-border bg-background px-3 text-foreground outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
+            />
+            {errors.fields.code ? (
+              <p className="text-sm text-destructive">{errors.fields.code.message}</p>
+            ) : null}
+          </div>
+          {formError ? <p className="text-sm text-destructive">{formError}</p> : null}
+          <button
+            type="submit"
+            disabled={fetchStatus === "fetching"}
+            className="h-11 rounded-full bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+          >
+            Verify
+          </button>
+        </form>
+        <div className="flex flex-wrap gap-3 text-sm">
+          <button
+            type="button"
+            className="text-primary hover:underline"
+            onClick={() => void signUp?.verifications.sendEmailCode()}
+          >
+            Resend code
+          </button>
+          <button type="button" className="text-muted-foreground hover:text-foreground" onClick={resetFlow}>
+            Start over
+          </button>
+        </div>
+        <div id="clerk-captcha" />
+      </div>
+    )
+  }
+
+  return (
+    <form onSubmit={handleCredentialsSubmit} className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="fullName" className="text-sm font-medium">
+          Full name
+        </label>
+        <input
+          id="fullName"
+          name="fullName"
+          type="text"
+          autoComplete="name"
+          value={fullName}
+          onChange={(ev) => setFullName(ev.target.value)}
+          required
+          className="h-11 rounded-lg border border-border bg-background px-3 text-foreground outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
+        />
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="signup-email" className="text-sm font-medium">
+          Email
+        </label>
+        <input
+          id="signup-email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          value={emailAddress}
+          onChange={(ev) => setEmailAddress(ev.target.value)}
+          required
+          className="h-11 rounded-lg border border-border bg-background px-3 text-foreground outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
+        />
+        {errors.fields.emailAddress ? (
+          <p className="text-sm text-destructive">{errors.fields.emailAddress.message}</p>
+        ) : null}
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="signup-password" className="text-sm font-medium">
+          Password
+        </label>
+        <input
+          id="signup-password"
+          name="password"
+          type="password"
+          autoComplete="new-password"
+          value={password}
+          onChange={(ev) => setPassword(ev.target.value)}
+          required
+          className="h-11 rounded-lg border border-border bg-background px-3 text-foreground outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
+        />
+        {errors.fields.password ? (
+          <p className="text-sm text-destructive">{errors.fields.password.message}</p>
+        ) : null}
+      </div>
+      {formError ? <p className="text-sm text-destructive">{formError}</p> : null}
+      <button
+        type="submit"
+        disabled={fetchStatus === "fetching"}
+        className="h-11 rounded-full bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+      >
+        Continue
+      </button>
+      <div id="clerk-captcha" />
+    </form>
+  )
+}
