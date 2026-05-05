@@ -8,6 +8,9 @@
  * @module
  */
 
+import type * as cases_actions from "../cases/actions.js";
+import type * as cases_aiSchema from "../cases/aiSchema.js";
+import type * as cases_mutations from "../cases/mutations.js";
 import type * as http from "../http.js";
 import type * as users_mutations from "../users/mutations.js";
 import type * as users_queries from "../users/queries.js";
@@ -19,6 +22,9 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "cases/actions": typeof cases_actions;
+  "cases/aiSchema": typeof cases_aiSchema;
+  "cases/mutations": typeof cases_mutations;
   http: typeof http;
   "users/mutations": typeof users_mutations;
   "users/queries": typeof users_queries;

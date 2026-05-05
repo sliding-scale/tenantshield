@@ -53,4 +53,18 @@ export default defineSchema({
     filterFields: ["userId"], // Guarantees a user can only search their own cases
   }),
 
+  caseEmbeddings: defineTable({
+    caseId: v.id("cases"),
+    userId: v.string(),
+    chunkType: v.string(),
+    chunkText: v.string(),
+    embedding: v.array(v.float64()),
+  })
+    .index("by_case_id", ["caseId"])
+    .vectorIndex("by_user_case_chunk_embedding", {
+      vectorField: "embedding",
+      dimensions: 768,
+      filterFields: ["userId", "caseId"],
+    }),
+
 })
