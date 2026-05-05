@@ -1,0 +1,38 @@
+---
+description: Prefer shadcn/ui; add from registry; otherwise inline UI—no extra wrapper components; theme from globals.css
+globs: "**/*.{tsx,css}"
+alwaysApply: false
+---
+
+# UI: shadcn/ui + brand theme
+
+## Component strategy (order)
+
+1. **Reuse** existing shadcn primitives under `@/components/ui` (see `components.json` aliases).
+2. **If missing** and it exists in the shadcn registry, add it with the CLI: `pnpm dlx shadcn@latest add <component>` (or `npx shadcn@latest add <component>`), aligned with `components.json` and `app/globals.css`.
+3. **If there is no shadcn component** (nothing to `add`) or a one-off is enough: **implement the UI inline** in the same file (or page/feature file) with React + Tailwind + theme tokens. **Do not** create new shared components under `components/` for small, single-use markup—avoid unnecessary abstraction and extra files.
+
+When something is reused **many times** across routes or grows real state/behavior, then extract a component—but default to inline for simple, one-off UI.
+
+## Brand theme — `app/globals.css` is source of truth
+
+- **Do not** introduce one-off hex/HSL or random Tailwind palette colors for product UI.
+- **Do** use semantic tokens wired to CSS variables: e.g. `bg-background`, `text-foreground`, `bg-card`, `text-card-foreground`, `border-border`, `bg-primary`, `text-primary-foreground`, `bg-secondary`, `text-secondary-foreground`, `text-muted-foreground`, `ring-ring`, radii like `rounded-lg` / `rounded-xl` that map to `--radius`, typography like `font-heading` where appropriate.
+- Light/dark: respect `.dark` and existing variables in `:root` / `.dark` — extend the theme **in `globals.css`** when new tokens are needed, then consume via utilities or `@theme inline` mappings already there.
+
+## Examples
+
+```tsx
+// ✅ No shadcn primitive: keep markup in the page/feature file
+<section className="rounded-2xl border border-border bg-accent/80 px-4 py-4">...</section>
+
+// ✅ Use shadcn + theme tokens
+import { Button } from "@/components/ui/button"
+;<Button variant="default">Save</Button>
+<div className="rounded-xl border border-border bg-card p-6 text-card-foreground">
+
+// ❌ Avoid ad-hoc colors
+<div className="bg-[#1a1a1a] text-gray-200">
+```
+
+When composing new patterns, mirror shadcn’s Radix + `cn()` patterns and `class-variance-authority` variants already used in `@/components/ui`.

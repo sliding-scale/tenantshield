@@ -5,12 +5,19 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { firstClerkErrorCode, firstClerkErrorMessage } from "@/lib/auth/clerk-errors"
+import { ForgotPasswordForm } from "@/components/auth/forgot-password-form"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 
+const authFieldClass =
+  "h-12 rounded-full border-border bg-popover px-5 text-base shadow-sm placeholder:text-muted-foreground md:text-sm"
 type Props = {
   signUpHref: string
+  forgotOpen: boolean
+  setForgotOpen: (open: boolean) => void
 }
 
-export function SignInForm({ signUpHref }: Props) {
+export function SignInForm({ signUpHref, forgotOpen, setForgotOpen }: Props) {
   const { signIn, errors, fetchStatus } = useSignIn()
   const router = useRouter()
 
@@ -126,19 +133,40 @@ export function SignInForm({ signUpHref }: Props) {
     }
   }
 
+  const openForgot = async () => {
+    setFormError(null)
+    setShowNoAccountHint(false)
+    await signIn?.reset()
+    setForgotOpen(true)
+  }
+
+  if (forgotOpen) {
+    return (
+      <ForgotPasswordForm
+        initialEmail={emailAddress}
+        onBack={() => {
+          void signIn?.reset()
+          setForgotOpen(false)
+        }}
+      />
+    )
+  }
+
   if (needsClientTrustCode) {
     return (
-      <div className="flex flex-col gap-4">
-        <h2 className="font-heading text-xl tracking-tight">Confirm it’s you</h2>
-        <p className="text-sm text-muted-foreground">
-          Enter the code we sent to your email to finish signing in.
-        </p>
+      <div className="flex flex-col gap-5">
+        <div>
+          <h2 className="font-heading text-2xl font-semibold tracking-tight">Confirm it&apos;s you</h2>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            Enter the code we sent to your email to finish signing in.
+          </p>
+        </div>
         <form onSubmit={handleVerifyMfa} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="code" className="text-sm font-medium">
+            <label htmlFor="code" className="sr-only">
               Verification code
             </label>
-            <input
+            <Input
               id="code"
               name="code"
               type="text"
@@ -146,44 +174,49 @@ export function SignInForm({ signUpHref }: Props) {
               autoComplete="one-time-code"
               value={code}
               onChange={(ev) => setCode(ev.target.value)}
-              className="h-11 rounded-lg border border-border bg-background px-3 text-foreground outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
+              placeholder="Verification code"
+              className={authFieldClass}
             />
             {errors.fields.code ? (
               <p className="text-sm text-destructive">{errors.fields.code.message}</p>
             ) : null}
           </div>
           {formError ? <p className="text-sm text-destructive">{formError}</p> : null}
-          <button
+          <Button
             type="submit"
+            variant="cta"
             disabled={fetchStatus === "fetching"}
-            className="h-11 rounded-full bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+            className="h-12 w-full rounded-full text-base font-semibold"
           >
             Verify
-          </button>
+          </Button>
         </form>
-        <div className="flex flex-wrap gap-3 text-sm">
+        <div className="flex flex-wrap gap-4 text-sm">
           <button
             type="button"
-            className="text-primary hover:underline"
+            className="font-medium text-foreground underline underline-offset-4 hover:text-foreground/80"
             onClick={() => void signIn?.mfa.sendEmailCode()}
           >
             Resend code
           </button>
-          <button type="button" className="text-muted-foreground hover:text-foreground" onClick={resetFlow}>
+          <button
+            type="button"
+            className="text-muted-foreground hover:text-foreground"
+            onClick={resetFlow}
+          >
             Start over
           </button>
         </div>
       </div>
     )
   }
-
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="email" className="text-sm font-medium">
+        <label htmlFor="email" className="sr-only">
           Email
         </label>
-        <input
+        <Input
           id="email"
           name="email"
           type="email"
@@ -191,17 +224,18 @@ export function SignInForm({ signUpHref }: Props) {
           value={emailAddress}
           onChange={(ev) => setEmailAddress(ev.target.value)}
           required
-          className="h-11 rounded-lg border border-border bg-background px-3 text-foreground outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
+          placeholder="Email"
+          className={authFieldClass}
         />
         {errors.fields.identifier ? (
           <p className="text-sm text-destructive">{errors.fields.identifier.message}</p>
         ) : null}
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="password" className="text-sm font-medium">
+        <label htmlFor="password" className="sr-only">
           Password
         </label>
-        <input
+        <Input
           id="password"
           name="password"
           type="password"
@@ -209,29 +243,46 @@ export function SignInForm({ signUpHref }: Props) {
           value={password}
           onChange={(ev) => setPassword(ev.target.value)}
           required
-          className="h-11 rounded-lg border border-border bg-background px-3 text-foreground outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
+          placeholder="Password"
+          className={authFieldClass}
         />
         {errors.fields.password ? (
           <p className="text-sm text-destructive">{errors.fields.password.message}</p>
         ) : null}
+        <div className="flex flex-row items-center justify-between gap-3 pt-0.5">
+          <button
+            type="button"
+            onClick={() => void openForgot()}
+            className="text-sm font-medium text-foreground underline underline-offset-4 hover:text-foreground/80"
+          >
+            Forgot password?
+          </button>
+          <Link
+            href={signUpHref}
+            className="shrink-0 text-sm font-semibold text-foreground underline underline-offset-4 hover:text-foreground/80"
+          >
+            Create account
+          </Link>
+        </div>
       </div>
       {showNoAccountHint ? (
         <p className="text-sm text-muted-foreground">
           No account found for this email.{" "}
-          <Link href={signUpHref} className="font-medium text-primary hover:underline">
+          <Link href={signUpHref} className="font-semibold text-foreground underline underline-offset-4">
             Sign up
           </Link>{" "}
           to create one.
         </p>
       ) : null}
       {formError ? <p className="text-sm text-destructive">{formError}</p> : null}
-      <button
+      <Button
         type="submit"
+        variant="cta"
         disabled={fetchStatus === "fetching"}
-        className="h-11 rounded-full bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+        className="mt-1 h-12 w-full rounded-full text-base font-semibold"
       >
         Sign in
-      </button>
+      </Button>
     </form>
   )
 }

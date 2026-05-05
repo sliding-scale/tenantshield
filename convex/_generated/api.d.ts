@@ -12,6 +12,8 @@ import type * as cases_actions from "../cases/actions.js";
 import type * as cases_aiSchema from "../cases/aiSchema.js";
 import type * as cases_mutations from "../cases/mutations.js";
 import type * as http from "../http.js";
+import type * as onboarding_mutations from "../onboarding/mutations.js";
+import type * as onboarding_queries from "../onboarding/queries.js";
 import type * as users_mutations from "../users/mutations.js";
 import type * as users_queries from "../users/queries.js";
 
@@ -26,6 +28,8 @@ declare const fullApi: ApiFromModules<{
   "cases/aiSchema": typeof cases_aiSchema;
   "cases/mutations": typeof cases_mutations;
   http: typeof http;
+  "onboarding/mutations": typeof onboarding_mutations;
+  "onboarding/queries": typeof onboarding_queries;
   "users/mutations": typeof users_mutations;
   "users/queries": typeof users_queries;
 }>;

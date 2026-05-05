@@ -4,9 +4,24 @@ import AdminDashboardMain from "@/components/admin/dashboard-main"
 import TenantDashboardMain from "@/components/tenant/dashboard-main"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
 import NoAccessMessage from "@/components/shared/NoAccessMessage"
+import { useQuery } from "convex/react"
+import { api } from "@/convex/_generated/api"
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 
 export default function SharedDashboardPage() {
+  const router = useRouter()
   const { role, isLoading, convexUser, clerkUser } = useCurrentUser()
+  const onboardingStatus = useQuery(
+    api.onboarding.queries.onboardingStatus,
+    clerkUser ? {} : "skip",
+  )
+
+  useEffect(() => {
+    if (role === "tenant" && onboardingStatus?.shouldShowOnboarding) {
+      router.replace("/onboarding")
+    }
+  }, [role, onboardingStatus, router])
 
   if (isLoading) {
     return (
@@ -45,6 +60,24 @@ export default function SharedDashboardPage() {
   }
 
   if (role === "tenant") {
+    if (onboardingStatus === undefined) {
+      return (
+        <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 px-4">
+          <div
+            className="h-8 w-8 animate-spin rounded-full border-2 border-neutral-300 border-t-foreground dark:border-neutral-600"
+            aria-hidden
+          />
+          <p className="text-sm text-neutral-600 dark:text-neutral-400">
+            Checking onboarding…
+          </p>
+        </div>
+      )
+    }
+    if (onboardingStatus?.shouldShowOnboarding) {
+      return null
+    }
     return <TenantDashboardMain />
   }
+
+  return null
 }

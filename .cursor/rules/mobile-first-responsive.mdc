@@ -1,0 +1,38 @@
+---
+description: Mobile-first layout; responsive across breakpoints; usable on touch
+globs: "**/*.{tsx,css}"
+alwaysApply: false
+---
+
+# Mobile-first & responsive UI
+
+## Default stance
+
+- **Mobile first:** Base styles target the smallest viewport (narrow phone). Add complexity with **`sm:`**, **`md:`**, **`lg:`**, **`xl:`** (Tailwind defaults) — never rely only on `max-*` unless there is a specific exception.
+- **Fully responsive:** Layouts must work from ~320px wide up to large desktops — no horizontal scroll for main content, no clipped text or controls at small widths.
+- **Touch-friendly:** Interactive targets (buttons, links in toolbars, icon buttons) should be at least **~44×44px** (`min-h-11` / `min-w-11` or `size-11`) where practical; avoid tiny hit areas on mobile.
+
+## Layout & typography
+
+- Prefer **flex/grid** with **`w-full`**, **`max-w-*`**, and **`min-w-0`** on flex children that truncate or scroll so columns don’t overflow.
+- Use responsive spacing: **`px-4 sm:px-6`**, **`gap-4 sm:gap-6`**, **`text-base sm:text-lg`** as needed — don’t assume desktop padding on the base layer.
+- Long headings/hero text: allow **`leading-tight`**, **`break-words`**, or **`sm:*` size steps** so lines wrap cleanly on narrow screens.
+
+## Patterns
+
+```tsx
+// ✅ Mobile stack → row on larger screens
+<div className="flex flex-col gap-4 md:flex-row md:items-center">
+
+// ✅ Readable width on large screens only
+<div className="mx-auto w-full max-w-md md:max-w-lg">
+
+// ❌ Desktop-only assumptions without a small-screen base
+<div className="grid grid-cols-3 gap-8">  {/* add grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 */}
+```
+
+## `globals.css` & theme
+
+- Responsive rules still use **semantic tokens** from `app/globals.css` (see the shadcn/ui + theme rule) — responsiveness is about **layout and scale**, not new ad-hoc colors.
+
+When adding pages or features, **verify mentally (or in the browser)** at narrow width first, then `md` / `lg`.

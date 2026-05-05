@@ -46,3 +46,16 @@ export const deleteByClerkId = internalMutation({
     return existing._id
   },
 })
+
+export const clearOnboardingSkipByClerkId = internalMutation({
+  args: { clerkId: v.string() },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
+      .unique()
+    if (!existing) return null
+    await ctx.db.patch(existing._id, { onboardingSkippedAt: undefined })
+    return existing._id
+  },
+})
