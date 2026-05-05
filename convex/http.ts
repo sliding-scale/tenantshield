@@ -90,6 +90,21 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
         })
         break
       }
+      case "session.ended":
+      case "session.removed": {
+        const clerkId = (event.data as { user_id?: string })?.user_id
+        if (!clerkId) {
+          console.warn(`${event.type} webhook missing user_id`)
+          break
+        }
+        await ctx.runMutation(
+          internal.users.mutations.clearOnboardingSkipByClerkId,
+          {
+            clerkId,
+          },
+        )
+        break
+      }
       default:
         console.log("Ignored Clerk webhook event:", event.type)
     }

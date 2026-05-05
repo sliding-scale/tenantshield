@@ -1,13 +1,16 @@
 "use client"
 
 import { useClerk, useSignIn, useSignUp } from "@clerk/nextjs"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { Button } from "@/components/ui/button"
 
 const SSO_CALLBACK = "/sso-callback"
 const AFTER_AUTH = "/dashboard"
 
 type GoogleAuthButtonSignIn = {
   mode: "sign-in"
+  /** If set, OAuth starts as sign-up so Clerk receives `unsafeMetadata` for newly created users; `/sso-callback` still handles existing accounts. */
+  unsafeMetadata?: Record<string, unknown>
 }
 
 type GoogleAuthButtonSignUp = {
@@ -21,61 +24,140 @@ export function GoogleOAuthButton(props: GoogleAuthButtonSignIn | GoogleAuthButt
   const { signUp } = useSignUp()
   const [pending, setPending] = useState(false)
 
-  const onClick = async () => {
-    if (!clerk.loaded) return
+  useEffect(() => {
+    const clearPending = () => setPending(false)
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        clearPending()
+      }
+    }
 
-    if (props.mode === "sign-in") {
-      if (!signIn) return
-      setPending(true)
-      const { error } = await signIn.sso({
+    window.addEventListener("pageshow", clearPending)
+    window.addEventListener("focus", clearPending)
+    document.addEventListener("visibilitychange", onVisibility)
+    return () => {
+      window.removeEventListener("pageshow", clearPending)
+      window.removeEventListener("focus", clearPending)
+      document.removeEventListener("visibilitychange", onVisibility)
+    }
+  }, [])
+
+  const waitForAuthResources = async () => {
+    for (let i = 0; i < 8; i += 1) {
+      const hasSignIn = !!signIn
+      const hasSignUp = !!signUp
+      if (hasSignIn || hasSignUp) return true
+      await new Promise((resolve) => setTimeout(resolve, 125))
+    }
+    return !!signIn || !!signUp
+  }
+
+  const onClick = async () => {
+    if (!clerk.loaded || pending) return
+    setPending(true)
+    try {
+      const hasAuthResources = await waitForAuthResources()
+      if (!hasAuthResources) {
+        // Last-resort recovery for stale back/forward restores.
+        window.location.reload()
+        return
+      }
+
+      // Clear any leftover Clerk attempt state from prior failed credential / OAuth tries.
+      await Promise.allSettled([signIn?.reset(), signUp?.reset()])
+
+      if (props.mode === "sign-in") {
+        const metadata = props.unsafeMetadata
+        const hasMetadata =
+          metadata !== undefined && metadata !== null && Object.keys(metadata).length > 0
+
+        const trySignUpThenSignIn = async () => {
+          if (!signUp) {
+            if (!signIn) return
+            await clerk.signOut() // 🔥 CRITICAL
+            const { error: signInErr } = await signIn.sso({
+              strategy: "oauth_google",
+              redirectCallbackUrl: SSO_CALLBACK,
+              redirectUrl: AFTER_AUTH,
+            })
+            if (signInErr) console.error(signInErr)
+            return
+          }
+          await clerk.signOut() // 🔥 CRITICAL
+
+          const { error } = await signUp.sso({
+            strategy: "oauth_google",
+            redirectCallbackUrl: SSO_CALLBACK,
+            redirectUrl: AFTER_AUTH,
+            unsafeMetadata: metadata,
+          })
+
+          if (error) {
+            const code = "code" in error && typeof error.code === "string" ? error.code : ""
+            if (code === "form_identifier_exists" || code === "identifier_already_signed_up") {
+              if (!signIn) return
+              await clerk.signOut() // 🔥 CRITICAL
+              const { error: signInErr } = await signIn.sso({
+                strategy: "oauth_google",
+                redirectCallbackUrl: SSO_CALLBACK,
+                redirectUrl: AFTER_AUTH,
+              })
+              if (signInErr) {
+                console.error(signInErr)
+              }
+              return
+            }
+            console.error(error)
+          }
+        }
+
+        if (hasMetadata) {
+          await trySignUpThenSignIn()
+          return
+        }
+
+        if (!signIn) return
+        await clerk.signOut() // 🔥 CRITICAL
+        const { error } = await signIn.sso({
+          strategy: "oauth_google",
+          redirectCallbackUrl: SSO_CALLBACK,
+          redirectUrl: AFTER_AUTH,
+        })
+        if (error) {
+          console.error(error)
+        }
+        return
+      }
+
+      if (!signUp) return
+      await clerk.signOut() // 🔥 CRITICAL
+      const { error } = await signUp.sso({
         strategy: "oauth_google",
         redirectCallbackUrl: SSO_CALLBACK,
         redirectUrl: AFTER_AUTH,
+        unsafeMetadata: props.unsafeMetadata,
       })
-      setPending(false)
       if (error) {
         console.error(error)
-        return
       }
-      if (signIn.status === "needs_second_factor" || signIn.status === "needs_client_trust") {
-        return
-      }
-      if (signIn.status !== "complete") {
-        console.error("Sign-in attempt not complete:", signIn.status)
-      }
-      return
-    }
-
-    if (!signUp) return
-    setPending(true)
-    const { error } = await signUp.sso({
-      strategy: "oauth_google",
-      redirectCallbackUrl: SSO_CALLBACK,
-      redirectUrl: AFTER_AUTH,
-      unsafeMetadata: props.unsafeMetadata,
-    })
-    setPending(false)
-    if (error) {
-      console.error(error)
-      return
-    }
-    if (signUp.status !== "complete") {
-      console.error("Sign-up OAuth not complete:", signUp.status)
+    } finally {
+      setPending(false)
     }
   }
 
-  const disabled = !clerk.loaded || pending || (props.mode === "sign-in" ? !signIn : !signUp)
+  const disabled = !clerk.loaded || pending
 
   return (
-    <button
+    <Button
       type="button"
+      variant="outline"
       disabled={disabled}
-      onClick={onClick}
-      className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-border bg-card px-4 text-sm font-medium text-card-foreground shadow-sm transition-colors hover:bg-card/90 disabled:pointer-events-none disabled:opacity-50 sm:h-12 sm:text-base"
+      onClick={() => void onClick()}
+      className="h-12 w-full gap-2 rounded-full border-border bg-popover px-4 text-base font-medium text-foreground shadow-sm hover:bg-accent hover:text-accent-foreground sm:text-base"
     >
       <GoogleGlyph />
       {pending ? "Connecting…" : "Continue with Google"}
-    </button>
+    </Button>
   )
 }
 

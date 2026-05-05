@@ -11,6 +11,6 @@ export function splitFullName(fullName: string): { firstName: string; lastName: 
   const t = fullName.trim()
   if (!t) return { firstName: "", lastName: "" }
   const i = t.indexOf(" ")
-  if (i === -1) return { firstName: t, lastName: t }
+  if (i === -1) return { firstName: t, lastName: "" }
   return { firstName: t.slice(0, i), lastName: t.slice(i + 1).trim() || t.slice(0, i) }
 }

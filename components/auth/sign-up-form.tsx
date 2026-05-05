@@ -5,6 +5,11 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { firstClerkErrorMessage } from "@/lib/auth/clerk-errors"
 import { splitFullName } from "@/lib/auth/signup-metadata"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+
+const authFieldClass =
+  "h-12 rounded-full border-border bg-popover px-5 text-base shadow-sm placeholder:text-muted-foreground md:text-sm"
 
 type Props = {
   unsafeMetadata?: Record<string, unknown>
@@ -123,17 +128,19 @@ export function SignUpForm({ unsafeMetadata }: Props) {
 
   if (awaitingEmailCode) {
     return (
-      <div className="flex flex-col gap-4">
-        <h2 className="font-heading text-xl tracking-tight">Verify your email</h2>
-        <p className="text-sm text-muted-foreground">
-          We sent a code to {emailAddress.trim()}. Enter it below to finish creating your account.
-        </p>
+      <div className="flex flex-col gap-5">
+        <div>
+          <h2 className="font-heading text-2xl font-semibold tracking-tight">Verify your email</h2>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            We sent a code to {emailAddress.trim()}. Enter it below to finish creating your account.
+          </p>
+        </div>
         <form onSubmit={handleVerifySubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="signup-code" className="text-sm font-medium">
+            <label htmlFor="signup-code" className="sr-only">
               Verification code
             </label>
-            <input
+            <Input
               id="signup-code"
               name="code"
               type="text"
@@ -141,30 +148,36 @@ export function SignUpForm({ unsafeMetadata }: Props) {
               autoComplete="one-time-code"
               value={code}
               onChange={(ev) => setCode(ev.target.value)}
-              className="h-11 rounded-lg border border-border bg-background px-3 text-foreground outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
+              placeholder="Verification code"
+              className={authFieldClass}
             />
             {errors.fields.code ? (
               <p className="text-sm text-destructive">{errors.fields.code.message}</p>
             ) : null}
           </div>
           {formError ? <p className="text-sm text-destructive">{formError}</p> : null}
-          <button
+          <Button
             type="submit"
+            variant="cta"
             disabled={fetchStatus === "fetching"}
-            className="h-11 rounded-full bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+            className="h-12 w-full rounded-full text-base font-semibold"
           >
             Verify
-          </button>
+          </Button>
         </form>
-        <div className="flex flex-wrap gap-3 text-sm">
+        <div className="flex flex-wrap gap-4 text-sm">
           <button
             type="button"
-            className="text-primary hover:underline"
+            className="font-medium text-foreground underline underline-offset-4 hover:text-foreground/80"
             onClick={() => void signUp?.verifications.sendEmailCode()}
           >
             Resend code
           </button>
-          <button type="button" className="text-muted-foreground hover:text-foreground" onClick={resetFlow}>
+          <button
+            type="button"
+            className="text-muted-foreground hover:text-foreground"
+            onClick={resetFlow}
+          >
             Start over
           </button>
         </div>
@@ -176,10 +189,10 @@ export function SignUpForm({ unsafeMetadata }: Props) {
   return (
     <form onSubmit={handleCredentialsSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="fullName" className="text-sm font-medium">
+        <label htmlFor="fullName" className="sr-only">
           Full name
         </label>
-        <input
+        <Input
           id="fullName"
           name="fullName"
           type="text"
@@ -187,14 +200,15 @@ export function SignUpForm({ unsafeMetadata }: Props) {
           value={fullName}
           onChange={(ev) => setFullName(ev.target.value)}
           required
-          className="h-11 rounded-lg border border-border bg-background px-3 text-foreground outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
+          placeholder="Full name"
+          className={authFieldClass}
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="signup-email" className="text-sm font-medium">
+        <label htmlFor="signup-email" className="sr-only">
           Email
         </label>
-        <input
+        <Input
           id="signup-email"
           name="email"
           type="email"
@@ -202,17 +216,18 @@ export function SignUpForm({ unsafeMetadata }: Props) {
           value={emailAddress}
           onChange={(ev) => setEmailAddress(ev.target.value)}
           required
-          className="h-11 rounded-lg border border-border bg-background px-3 text-foreground outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
+          placeholder="Email"
+          className={authFieldClass}
         />
         {errors.fields.emailAddress ? (
           <p className="text-sm text-destructive">{errors.fields.emailAddress.message}</p>
         ) : null}
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="signup-password" className="text-sm font-medium">
+        <label htmlFor="signup-password" className="sr-only">
           Password
         </label>
-        <input
+        <Input
           id="signup-password"
           name="password"
           type="password"
@@ -220,20 +235,22 @@ export function SignUpForm({ unsafeMetadata }: Props) {
           value={password}
           onChange={(ev) => setPassword(ev.target.value)}
           required
-          className="h-11 rounded-lg border border-border bg-background px-3 text-foreground outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
+          placeholder="Password (6+ characters)"
+          className={authFieldClass}
         />
         {errors.fields.password ? (
           <p className="text-sm text-destructive">{errors.fields.password.message}</p>
         ) : null}
       </div>
       {formError ? <p className="text-sm text-destructive">{formError}</p> : null}
-      <button
+      <Button
         type="submit"
+        variant="cta"
         disabled={fetchStatus === "fetching"}
-        className="h-11 rounded-full bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+        className="mt-1 h-12 w-full rounded-full text-base font-semibold"
       >
-        Continue
-      </button>
+        Create My Shield
+      </Button>
       <div id="clerk-captcha" />
     </form>
   )
