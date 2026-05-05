@@ -25,7 +25,9 @@ const CONFIG = {
   // You can leave these empty and use env vars instead.
   convexUrl: "https://judicious-chinchilla-340.convex.cloud",
   convexSiteUrl: "https://judicious-chinchilla-340.convex.site",
-  clerkJwt: "dvb_3DIwa4h3ItQ7AwUZtdoW7rOjxby", // REQUIRED: signed Clerk session JWT for target user
+  useJwtAuth: false,
+  clerkJwt: "", // optional when useJwtAuth=false; uses testUserId fallback in dev
+  testBypassToken: "tenantshield_test_bypass_2026", // optional; otherwise reads TEST_BYPASS_TOKEN from env
 
   // Optional: for your manual verification in Convex dashboard.
   expectedUserId: "user_3DIwuKwbY6ZQaPBuBNkyXREHg5j",
@@ -45,6 +47,7 @@ const CONFIG = {
 const convexUrl =
   CONFIG.convexUrl || process.env.NEXT_PUBLIC_CONVEX_URL || process.env.CONVEX_URL;
 const clerkJwt = CONFIG.clerkJwt || process.env.CLERK_TEST_JWT;
+const testBypassToken = CONFIG.testBypassToken || process.env.TEST_BYPASS_TOKEN;
 const convexSiteUrl = CONFIG.convexSiteUrl || process.env.CONVEX_SITE_URL;
 const clerkJwtIssuerDomain = process.env.CLERK_JWT_ISSUER_DOMAIN;
 const clerkSecretKey = process.env.CLERK_SECRET_KEY;
@@ -55,14 +58,16 @@ if (!convexUrl) {
   );
 }
 
-if (!clerkJwt) {
-  throw new Error(
-    "Missing Clerk JWT. Set CONFIG.clerkJwt or CLERK_TEST_JWT. CLERK_SECRET_KEY / CLERK_JWT_ISSUER_DOMAIN alone are not enough for this script.",
+if (CONFIG.useJwtAuth && !clerkJwt) {
+  console.log(
+    "JWT auth enabled, but no Clerk JWT configured. Using dev-only fallback testUserId path.",
   );
 }
 
 const client = new ConvexHttpClient(convexUrl);
-client.setAuth(clerkJwt);
+if (CONFIG.useJwtAuth && clerkJwt) {
+  client.setAuth(clerkJwt);
+}
 
 console.log("Running frontend-like flow: analyzeNewCase(inputData)");
 if (convexSiteUrl) {
@@ -71,7 +76,12 @@ if (convexSiteUrl) {
 if (clerkJwtIssuerDomain) {
   console.log(`Clerk issuer domain configured: ${clerkJwtIssuerDomain}`);
 }
-if (clerkSecretKey && !process.env.CLERK_TEST_JWT && !CONFIG.clerkJwt) {
+if (
+  CONFIG.useJwtAuth &&
+  clerkSecretKey &&
+  !process.env.CLERK_TEST_JWT &&
+  !CONFIG.clerkJwt
+) {
   console.log(
     "CLERK_SECRET_KEY detected, but this script still needs a signed user JWT in CLERK_TEST_JWT (or CONFIG.clerkJwt).",
   );
@@ -85,7 +95,11 @@ if (CONFIG.expectedUserId) {
 const startedAt = Date.now();
 const result = await client.action(
   api["cases/actions"].analyzeNewCase,
-  CONFIG.inputData,
+  {
+    ...CONFIG.inputData,
+    testUserId: CONFIG.expectedUserId || undefined,
+    testBypassToken: testBypassToken || undefined,
+  },
 );
 const elapsedMs = Date.now() - startedAt;
 

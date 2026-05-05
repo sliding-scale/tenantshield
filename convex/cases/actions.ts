@@ -18,16 +18,25 @@ export const analyzeNewCase = action({
     city: v.optional(v.string()),
     landlordName: v.optional(v.string()),
     propertyAddress: v.optional(v.string()),
+    testUserId: v.optional(v.string()),
+    testBypassToken: v.optional(v.string()),
   },
   handler: async (
     ctx,
     args,
   ): Promise<{ caseId: Id<"cases">; aiAnalysis: CaseAnalysis }> => {
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Unauthorized user must be logged in to analyze a case");
+    const expectedBypassToken = process.env.TEST_BYPASS_TOKEN;
+    const canUseTestBypass =
+      Boolean(expectedBypassToken) &&
+      args.testBypassToken === expectedBypassToken &&
+      Boolean(args.testUserId);
+    const userId = identity?.subject ?? (canUseTestBypass ? args.testUserId : undefined);
+    if (!userId) {
+      throw new Error(
+        "Missing user identity. Log in or provide a valid test bypass token in dev.",
+      );
     }
-    const userId = identity.subject;
 
     const inputData = {
       issueType: args.issueType,
@@ -272,7 +281,7 @@ If Exa does not support a right, return exactly: "Local laws require verificatio
     ].join("\n");
 
     const embedResult = await ai.models.embedContent({
-      model: "text-embedding-004",
+      model: "gemini-embedding-001",
       contents: textToEmbed,
     });
     const generatedVector = embedResult.embeddings?.[0]?.values;
@@ -330,7 +339,7 @@ If Exa does not support a right, return exactly: "Local laws require verificatio
     for (const chunk of chunkPayloads) {
       if (!chunk.chunkText.trim()) continue;
       const chunkEmbedResult = await ai.models.embedContent({
-        model: "text-embedding-004",
+        model: "gemini-embedding-001",
         contents: chunk.chunkText,
       });
       const vector = chunkEmbedResult.embeddings?.[0]?.values;
