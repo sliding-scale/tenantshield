@@ -54,29 +54,27 @@ export const analyzeNewCase = action({
       apiKey: process.env.GEMINI_API_KEY as string,
     });
 
-    const queryRewriteResponse = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      config: {
-        systemInstruction: `You are a legal search query normalizer for a tenant-rights app.
+    const queryRewriteConfig = {
+      systemInstruction: `You are a legal search query normalizer for a tenant-rights app.
 Your job is to rewrite user input into a high-quality legal research query and a clearer normalized description.
 Never invent facts. Never provide legal conclusions. Preserve user intent and jurisdiction context.`,
-        responseMimeType: "application/json",
-        temperature: 0,
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            optimizedExaQuery: { type: Type.STRING },
-            normalizedDescription: { type: Type.STRING },
-          },
-          required: ["optimizedExaQuery", "normalizedDescription"],
+      responseMimeType: "application/json",
+      temperature: 0,
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          optimizedExaQuery: { type: Type.STRING },
+          normalizedDescription: { type: Type.STRING },
         },
+        required: ["optimizedExaQuery", "normalizedDescription"],
       },
-      contents: [
-        {
-          role: "user",
-          parts: [
-            {
-              text: `Rewrite this tenant case input for legal search quality.
+    };
+    const queryRewriteContents = [
+      {
+        role: "user" as const,
+        parts: [
+          {
+            text: `Rewrite this tenant case input for legal search quality.
 
 Return JSON with:
 1) optimizedExaQuery: high-quality query for U.S. tenant law research.
@@ -93,11 +91,25 @@ State: ${args.state}
 City: ${args.city ?? "N/A"}
 Landlord Name: ${args.landlordName ?? "N/A"}
 Property Address: ${args.propertyAddress ?? "N/A"}`,
-            },
-          ],
-        },
-      ],
-    });
+          },
+        ],
+      },
+    ];
+
+    let queryRewriteResponse;
+    try {
+      queryRewriteResponse = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        config: queryRewriteConfig,
+        contents: queryRewriteContents,
+      });
+    } catch {
+      queryRewriteResponse = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        config: queryRewriteConfig,
+        contents: queryRewriteContents,
+      });
+    }
     const rewriteRaw = queryRewriteResponse.text;
     if (!rewriteRaw) {
       throw new Error("Gemini query rewrite returned empty response");
@@ -282,6 +294,9 @@ If Exa does not support a right, return exactly: "Local laws require verificatio
 
     const embedResult = await ai.models.embedContent({
       model: "gemini-embedding-001",
+      config: {
+        outputDimensionality: 768,
+      },
       contents: textToEmbed,
     });
     const generatedVector = embedResult.embeddings?.[0]?.values;
@@ -340,6 +355,9 @@ If Exa does not support a right, return exactly: "Local laws require verificatio
       if (!chunk.chunkText.trim()) continue;
       const chunkEmbedResult = await ai.models.embedContent({
         model: "gemini-embedding-001",
+        config: {
+          outputDimensionality: 768,
+        },
         contents: chunk.chunkText,
       });
       const vector = chunkEmbedResult.embeddings?.[0]?.values;

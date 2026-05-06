@@ -95,4 +95,56 @@ export default defineSchema({
       filterFields: ["userId", "caseId"],
     }),
 
+    
+    //ye letters ka schema hai
+    letters: defineTable({
+      userId: v.string(),
+      
+      // The raw data from the frontend form
+      inputData: v.object({
+        letterType: v.string(),
+        state: v.string(),
+        fullName: v.string(),
+        landlordName: v.string(),
+        propertyAddress: v.string(),
+        description: v.string(),
+        amountAtStake: v.optional(v.string()),
+        deadlineDays: v.string(),
+      }),
+  
+      // The structured AI output (matching our aiSchema)
+      letterData: v.object({
+        metadata: v.any(),
+        header: v.any(),
+        salutation: v.string(),
+        paragraphs: v.array(v.any()),
+        signOff: v.string(),
+      }),
+  
+      // A concatenated version of the letter for easier embedding search
+      fullLetterText: v.string(),
+      embedding: v.array(v.float64()),
+    })
+    .vectorIndex("by_user_letter_embedding", {
+      vectorField: "embedding",
+      dimensions: 768,
+      filterFields: ["userId"],
+    }),
+
+  letterEmbeddings: defineTable({
+    letterId: v.id("letters"),
+    userId: v.string(),
+    chunkType: v.string(),
+    chunkText: v.string(),
+    embedding: v.array(v.float64()),
+  })
+    .index("by_letter_id", ["letterId"])
+    .vectorIndex("by_user_letter_chunk_embedding", {
+      vectorField: "embedding",
+      dimensions: 768,
+      filterFields: ["userId", "letterId"],
+    })
+
+
+
 })
