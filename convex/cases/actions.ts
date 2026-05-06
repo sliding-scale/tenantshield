@@ -54,6 +54,46 @@ export const analyzeNewCase = action({
       apiKey: process.env.GEMINI_API_KEY as string,
     });
 
+    const generateWithFallback = async (params: {
+      config: object;
+      contents: Array<{ role: "user"; parts: Array<{ text: string }> }>;
+    }) => {
+      const models = ["gemini-2.5-flash", "gemini-3-flash-preview", "gemini-2.5-pro"];
+      const maxRetries = 2;
+      let lastError: unknown;
+      for (const model of models) {
+        for (let attempt = 0; attempt <= maxRetries; attempt++) {
+          try {
+            const modelConfig =
+              model === "gemini-2.5-pro"
+                ? Object.fromEntries(
+                    Object.entries(params.config).filter(
+                      ([key]) => key !== "thinkingConfig",
+                    ),
+                  )
+                : params.config;
+            return await ai.models.generateContent({
+              model,
+              config: modelConfig,
+              contents: params.contents,
+            });
+          } catch (error) {
+            lastError = error;
+            const message = error instanceof Error ? error.message : String(error);
+            const isTransient =
+              /UNAVAILABLE|503|high demand|RESOURCE_EXHAUSTED/i.test(message);
+            const canRetry = isTransient && attempt < maxRetries;
+            if (canRetry) {
+              await new Promise((resolve) => setTimeout(resolve, 1200 * (attempt + 1)));
+              continue;
+            }
+            break;
+          }
+        }
+      }
+      throw lastError;
+    };
+
     const queryRewriteConfig = {
       systemInstruction: `You are a legal search query normalizer for a tenant-rights app.
 Your job is to rewrite user input into a high-quality legal research query and a clearer normalized description.
@@ -96,20 +136,10 @@ Property Address: ${args.propertyAddress ?? "N/A"}`,
       },
     ];
 
-    let queryRewriteResponse;
-    try {
-      queryRewriteResponse = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        config: queryRewriteConfig,
-        contents: queryRewriteContents,
-      });
-    } catch {
-      queryRewriteResponse = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        config: queryRewriteConfig,
-        contents: queryRewriteContents,
-      });
-    }
+    const queryRewriteResponse = await generateWithFallback({
+      config: queryRewriteConfig,
+      contents: queryRewriteContents,
+    });
     const rewriteRaw = queryRewriteResponse.text;
     if (!rewriteRaw) {
       throw new Error("Gemini query rewrite returned empty response");
@@ -238,8 +268,7 @@ If Exa does not support a right, return exactly: "Local laws require verificatio
       },
     };
 
-    const geminiResponse = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+    const geminiResponse = await generateWithFallback({
       config,
       contents: [
         {

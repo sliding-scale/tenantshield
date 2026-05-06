@@ -1,9 +1,13 @@
 import { action } from "../_generated/server";
+import type { Id } from "../_generated/dataModel";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { letterAnalysisSchema } from "./aiSchema";
 import Exa from "exa-js";
 import { GoogleGenAI, Type } from "@google/genai";
+import type { z } from "zod";
+
+type LetterAnalysis = z.infer<typeof letterAnalysisSchema>;
 
 export const generateTenantLetter = action({
   args: {
@@ -18,7 +22,10 @@ export const generateTenantLetter = action({
     testUserId: v.optional(v.string()),
     testBypassToken: v.optional(v.string()),
   },
-  handler: async (ctx, args) => {
+  handler: async (
+    ctx,
+    args,
+  ): Promise<{ letterId: Id<"letters">; letterData: LetterAnalysis }> => {
     // ye auth check hai with dev bypass
     const identity = await ctx.auth.getUserIdentity();
     const expectedBypassToken = process.env.TEST_BYPASS_TOKEN;
@@ -35,6 +42,38 @@ export const generateTenantLetter = action({
 
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
     const exa = new Exa(process.env.EXA_API_KEY!);
+
+    const generateWithFallback = async (params: {
+      config: object;
+      contents: Array<{ role: "user"; parts: Array<{ text: string }> }>;
+    }) => {
+      const models = ["gemini-2.5-flash", "gemini-3-flash-preview", "gemini-2.5-pro"];
+      const maxRetries = 2;
+      let lastError: unknown;
+      for (const model of models) {
+        for (let attempt = 0; attempt <= maxRetries; attempt++) {
+          try {
+            return await ai.models.generateContent({
+              model,
+              config: params.config,
+              contents: params.contents,
+            });
+          } catch (error) {
+            lastError = error;
+            const message = error instanceof Error ? error.message : String(error);
+            const isTransient =
+              /UNAVAILABLE|503|high demand|RESOURCE_EXHAUSTED/i.test(message);
+            const canRetry = isTransient && attempt < maxRetries;
+            if (canRetry) {
+              await new Promise((resolve) => setTimeout(resolve, 1200 * (attempt + 1)));
+              continue;
+            }
+            break;
+          }
+        }
+      }
+      throw lastError;
+    };
 
     // ye letters ki input hain aur query normalize hogi
     const researchQueryConfig = {
@@ -66,20 +105,10 @@ Rules:
         ],
       },
     ];
-    let researchQueryResponse;
-    try {
-      researchQueryResponse = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        config: researchQueryConfig,
-        contents: researchQueryContents,
-      });
-    } catch {
-      researchQueryResponse = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        config: researchQueryConfig,
-        contents: researchQueryContents,
-      });
-    }
+    const researchQueryResponse = await generateWithFallback({
+      config: researchQueryConfig,
+      contents: researchQueryContents,
+    });
     if (!researchQueryResponse.text) {
       throw new Error("Gemini query response empty hai");
     }
@@ -156,10 +185,8 @@ OUTPUT REQUIREMENTS:
 5) Tone must be professional, firm, and non-abusive.
 6) Keep content practical and specific to the tenant's issue and jurisdiction.`;
 
-    const letterResponse = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      config: {
-        systemInstruction: `You are a legal-drafting assistant for tenant-rights demand letters.
+    const letterConfig = {
+      systemInstruction: `You are a legal-drafting assistant for tenant-rights demand letters.
 Your job is to draft a structured, professional demand letter grounded in provided legal research.
 
 Hard rules:
@@ -168,49 +195,50 @@ Hard rules:
 - If legal support is weak, use cautious phrasing and avoid overstated claims.
 - Maintain clear legal writing style: formal, concise, and actionable.
 - Output JSON only and strictly follow the response schema.`,
-        responseMimeType: "application/json",
-        // Using the schema we built in Step 1
-        responseSchema: {
-          type: Type.OBJECT,
-          required: ["metadata", "header", "salutation", "paragraphs", "signOff"],
-          properties: {
-            metadata: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.OBJECT,
+        required: ["metadata", "header", "salutation", "paragraphs", "signOff"],
+        properties: {
+          metadata: {
+            type: Type.OBJECT,
+            required: ["letterTitle", "recipientName", "senderName", "state"],
+            properties: {
+              letterTitle: { type: Type.STRING },
+              recipientName: { type: Type.STRING },
+              senderName: { type: Type.STRING },
+              state: { type: Type.STRING },
+            },
+          },
+          header: {
+            type: Type.OBJECT,
+            required: ["senderAddress", "landlordAddress", "date", "subjectLine"],
+            properties: {
+              senderAddress: { type: Type.STRING },
+              landlordAddress: { type: Type.STRING },
+              date: { type: Type.STRING },
+              subjectLine: { type: Type.STRING },
+            },
+          },
+          salutation: { type: Type.STRING },
+          paragraphs: {
+            type: Type.ARRAY,
+            items: {
               type: Type.OBJECT,
-              required: ["letterTitle", "recipientName", "senderName", "state"],
+              required: ["type", "content"],
               properties: {
-                letterTitle: { type: Type.STRING },
-                recipientName: { type: Type.STRING },
-                senderName: { type: Type.STRING },
-                state: { type: Type.STRING },
+                type: { type: Type.STRING },
+                content: { type: Type.STRING },
+                statutes_cited: { type: Type.ARRAY, items: { type: Type.STRING } },
               },
             },
-            header: {
-              type: Type.OBJECT,
-              required: ["senderAddress", "landlordAddress", "date", "subjectLine"],
-              properties: {
-                senderAddress: { type: Type.STRING },
-                landlordAddress: { type: Type.STRING },
-                date: { type: Type.STRING },
-                subjectLine: { type: Type.STRING },
-              },
-            },
-            salutation: { type: Type.STRING },
-            paragraphs: { 
-              type: Type.ARRAY, 
-              items: { 
-                type: Type.OBJECT, 
-                required: ["type", "content"],
-                properties: {
-                  type: { type: Type.STRING },
-                  content: { type: Type.STRING },
-                  statutes_cited: { type: Type.ARRAY, items: { type: Type.STRING } },
-                },
-              } 
-            },
-            signOff: { type: Type.STRING }
-          }
-        }
+          },
+          signOff: { type: Type.STRING },
+        },
       },
+    };
+    const letterResponse = await generateWithFallback({
+      config: letterConfig,
       contents: [{ role: "user", parts: [{ text: prompt }] }],
     });
     if (!letterResponse.text) {
@@ -249,13 +277,27 @@ Hard rules:
     }
 
     // ye letter DB mein save ho raha hai
-    const letterId = await ctx.runMutation((internal as any)["letters/mutations"].saveLetterToDB, {
-      userId,
-      inputData: args,
-      letterData: generatedData,
-      fullLetterText: fullText,
-      embedding,
-    });
+    const inputData = {
+      letterType: args.letterType,
+      state: args.state,
+      fullName: args.fullName,
+      landlordName: args.landlordName,
+      propertyAddress: args.propertyAddress,
+      description: args.description,
+      amountAtStake: args.amountAtStake,
+      deadlineDays: args.deadlineDays,
+    };
+
+    const letterId: Id<"letters"> = (await ctx.runMutation(
+      (internal as any)["letters/mutations"].saveLetterToDB,
+      {
+        userId,
+        inputData,
+        letterData: generatedData,
+        fullLetterText: fullText,
+        embedding,
+      },
+    )) as Id<"letters">;
 
     // ye letter chunks ban rahe hain retrieval ke liye
     const chunkPayloads = [

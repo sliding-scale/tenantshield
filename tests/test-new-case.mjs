@@ -34,12 +34,12 @@ const CONFIG = {
 
   inputData: {
     issueType: "Landlord harassment",
-    title: "Threats to force move-out",
+    shortTitle: "Threats to force move-out",
     description:
       "My landlord keeps threatening to shut off utilities and enter without notice if I don't move out this week.",
     state: "California",
     city: "Los Angeles",
-    landlord: "John Doe",
+    landlordName: "John Doe",
     propertyAddress: "123 Demo St, Los Angeles, CA",
   },
 };
