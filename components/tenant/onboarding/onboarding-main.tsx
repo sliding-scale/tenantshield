@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useMutation, useQuery } from "convex/react"
 import { api } from "@/convex/_generated/api"
@@ -20,12 +20,14 @@ export default function OnboardingMain() {
     clerkUser ? {} : "skip",
   )
   const saveResponse = useMutation(api.onboarding.mutations.saveResponse)
+  const finalizeOnboarding = useMutation(api.onboarding.mutations.finalizeOnboarding)
   const skipOnboarding = useMutation(api.onboarding.mutations.skip)
 
   const [currentIndex, setCurrentIndex] = useState(0)
   const [selectedByQuestion, setSelectedByQuestion] = useState<Record<string, OptionKey>>({})
   const [isSaving, setIsSaving] = useState(false)
   const [isSkipping, setIsSkipping] = useState(false)
+  const hasInitializedIndex = useRef(false)
 
   useEffect(() => {
     if (!clerkUser) return
@@ -45,8 +47,15 @@ export default function OnboardingMain() {
     }
     setSelectedByQuestion(selectedMap)
 
-    const firstUnanswered = questions.findIndex((question) => !selectedMap[question._id])
-    setCurrentIndex(firstUnanswered === -1 ? questions.length - 1 : firstUnanswered)
+    if (!hasInitializedIndex.current) {
+      const firstUnanswered = questions.findIndex((question) => !selectedMap[question._id])
+      setCurrentIndex(firstUnanswered === -1 ? questions.length - 1 : firstUnanswered)
+      hasInitializedIndex.current = true
+      return
+    }
+
+    // Keep the user on their in-progress step after data refreshes.
+    setCurrentIndex((prev) => Math.min(prev, questions.length - 1))
   }, [questions])
 
   useEffect(() => {
@@ -68,6 +77,7 @@ export default function OnboardingMain() {
   const totalQuestions = questions?.length ?? 0
   const progress = totalQuestions > 0 ? (currentIndex + 1) / totalQuestions : 0
   const canContinue = Boolean(currentQuestion && currentSelection && !isSaving && !isSkipping)
+  const canGoBack = currentIndex > 0
 
   const handleSelect = (optionKey: OptionKey) => {
     if (!currentQuestion) return
@@ -85,7 +95,8 @@ export default function OnboardingMain() {
       })
 
       if (currentIndex >= questions.length - 1) {
-        router.replace("/dashboard")
+        await finalizeOnboarding({})
+        router.replace("/onboarding/impact-score")
         return
       }
       setCurrentIndex((prev) => prev + 1)
@@ -117,19 +128,23 @@ export default function OnboardingMain() {
   }
 
   return (
-    <main className="flex min-h-[calc(100vh-4rem)] w-full flex-col">
+    <main className="flex min-h-[100dvh] w-full flex-col md:min-h-[calc(100vh-4rem)]">
       <div className="flex w-full items-center gap-3 px-4 pb-4 pt-5 sm:px-6 lg:gap-4 lg:px-10">
         <button
           type="button"
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border text-xl leading-none"
-          onClick={() => router.back()}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border text-xl leading-none disabled:cursor-not-allowed disabled:opacity-50"
+          onClick={() => {
+            if (!canGoBack) return
+            setCurrentIndex((prev) => Math.max(0, prev - 1))
+          }}
+          disabled={!canGoBack}
           aria-label="Go back"
         >
           ←
         </button>
-        <div className="h-2.5 min-w-0 flex-1 rounded-full bg-neutral-200 lg:h-3">
+        <div className="h-2.5 min-w-0 flex-1 rounded-full bg-accent lg:h-3">
           <div
-            className="h-full rounded-full bg-amber-500 transition-[width] duration-300 ease-out"
+            className="h-full rounded-full bg-primary transition-[width] duration-300 ease-out"
             style={{ width: `${Math.max(2, progress * 100)}%` }}
           />
         </div>
@@ -143,10 +158,10 @@ export default function OnboardingMain() {
         </button>
       </div>
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-6 sm:px-6 lg:mx-0 lg:max-w-6xl lg:px-10">
-      <p className="text-sm font-semibold tracking-[0.2em] text-amber-700">
+      <p className="text-sm font-semibold tracking-[0.2em] text-primary">
         QUESTION {currentIndex + 1} OF {totalQuestions}
       </p>
-      <h1 className="mt-3 font-heading text-4xl leading-tight text-foreground lg:text-5xl lg:whitespace-nowrap">
+      <h1 className="mt-3 font-heading text-4xl leading-tight text-foreground lg:text-5xl lg:whitespace-pre-wrap">
         {currentQuestion.title}
       </h1>
       {currentQuestion.description ? (
@@ -166,16 +181,16 @@ export default function OnboardingMain() {
               className={[
                 "flex min-h-16 items-center gap-3 rounded-2xl border px-4 text-left text-xl transition",
                 isSelected
-                  ? "border-black bg-black text-white"
-                  : "border-neutral-200 bg-white text-neutral-900",
+                  ? "border-cream-border bg-cream-surface text-ink-warm"
+                  : "border-border bg-background text-foreground",
               ].join(" ")}
             >
               <span
                 className={[
                   "inline-flex h-7 w-7 items-center justify-center rounded-full border",
                   isSelected
-                    ? "border-amber-500 bg-amber-500 text-black"
-                    : "border-neutral-300 bg-white",
+                    ? "border-foreground bg-foreground text-background"
+                    : "border-border bg-background",
                 ].join(" ")}
               >
                 {isSelected ? "✓" : ""}
@@ -191,7 +206,7 @@ export default function OnboardingMain() {
             type="button"
             onClick={handleContinue}
             disabled={!canContinue}
-            className="h-14 w-full rounded-2xl bg-black px-6 text-lg font-semibold text-white hover:bg-black/90 disabled:bg-neutral-300 disabled:text-neutral-100 lg:h-16 lg:text-xl"
+            className="h-14 w-full rounded-2xl border border-cream-border bg-cream-surface px-6 text-lg font-semibold text-ink-warm hover:bg-cream-surface-soft disabled:border-border disabled:bg-muted disabled:text-muted-foreground lg:h-16 lg:text-xl"
           >
             {currentIndex >= totalQuestions - 1 ? "See My Impact Score" : "Continue"}
           </Button>

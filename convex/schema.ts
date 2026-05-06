@@ -28,19 +28,27 @@ export default defineSchema({
     option2: v.string(),
     option3: v.string(),
     option4: v.string(),
-    isActive: v.boolean(),
   }).index("by_step", ["step"]),
 
   onboardingResponses: defineTable({
-    userId: v.id("users"),
+    clerkId: v.string(),
     questionId: v.id("onboardingQuestions"),
     selectedOption: OnboardingOptionKey,
   })
-    .index("by_user_id", ["userId"])
+    .index("by_clerk_id", ["clerkId"])
     .index("by_question_id", ["questionId"])
-    .index("by_user_and_question", ["userId", "questionId"]),
+    .index("by_clerk_and_question", ["clerkId", "questionId"]),
 
-
+  impactScores: defineTable({
+    userId: v.id("users"),
+    impactScore: v.number(),
+    impactLabel: v.union(
+      v.literal("Low impact"),
+      v.literal("Moderate impact"),
+      v.literal("Significant impact"),
+      v.literal("Critical situation"),
+    ),
+  }).index("by_user_id", ["userId"]),
 
   // i am adding schema for the new case table feature
   cases: defineTable({
@@ -74,6 +82,7 @@ export default defineSchema({
     embedding: v.array(v.float64()),
 
   })
+  .index("by_user_id", ["userId"])
   // CRITICAL: The Vector Index
   .vectorIndex("by_user_embedding", {
     vectorField: "embedding",

@@ -12,7 +12,7 @@ import { useEffect, useState } from "react"
 import { useSignIn, useSignUp } from "@clerk/nextjs"
 
 export default function LoginPage() {
-  const { isLoaded } = useAuth()
+  const { isLoaded, isSignedIn } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
   const type = searchParams.get("type")
@@ -34,6 +34,11 @@ export default function LoginPage() {
       window.removeEventListener("pageshow", handlePageShow)
     }
   }, [signIn, signUp])
+
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn) return
+    router.replace("/dashboard")
+  }, [isLoaded, isSignedIn, router])
 
   // if (!isLoaded) {
   //   return (
