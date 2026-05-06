@@ -12,7 +12,7 @@ export default function SsoCallbackPage() {
   const hasRun = useRef(false)
 
   const navigateToLogin = () => {
-    router.push("/login")
+    router.replace("/login")
   }
 
   const finalizeSignIn = async () => {
@@ -24,9 +24,9 @@ export default function SsoCallbackPage() {
         }
         const url = decorateUrl("/dashboard")
         if (url.startsWith("http")) {
-          window.location.href = url
+          window.location.replace(url)
         } else {
-          router.push(url)
+          router.replace(url)
         }
       },
     })
@@ -44,9 +44,9 @@ export default function SsoCallbackPage() {
         }
         const url = decorateUrl("/dashboard")
         if (url.startsWith("http")) {
-          window.location.href = url
+          window.location.replace(url)
         } else {
-          router.push(url)
+          router.replace(url)
         }
       },
     })
@@ -104,7 +104,7 @@ export default function SsoCallbackPage() {
           await finalizeSignUp()
           return
         }
-        router.push("/login/continue")
+        router.replace("/login/continue")
         return
       }
 
@@ -132,9 +132,9 @@ export default function SsoCallbackPage() {
               }
               const url = decorateUrl("/dashboard")
               if (url.startsWith("http")) {
-                window.location.href = url
+                window.location.replace(url)
               } else {
-                router.push(url)
+                router.replace(url)
               }
             },
           })

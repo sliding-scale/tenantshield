@@ -1,21 +1,12 @@
 "use client"
 
 import { Show, UserButton } from "@clerk/nextjs"
+import { Sparkles } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import useCurrentUser from "@/app/hooks/useCurrentUser"
-
-function isAuthPagePath(pathname: string | null) {
-  if (!pathname) return false
-  return (
-    pathname === "/login" ||
-    pathname.startsWith("/login/") ||
-    pathname === "/signup" ||
-    pathname.startsWith("/signup/") ||
-    pathname === "/sso-callback" ||
-    pathname.startsWith("/sso-callback/")
-  )
-}
+import { APP_NAV_ITEMS } from "@/lib/nav/items"
+import { cn } from "@/lib/utils"
+import { isAuthPagePath } from "@/lib/nav/visibility"
 
 export default function Navbar() {
   const pathname = usePathname()
@@ -23,7 +14,7 @@ export default function Navbar() {
     return null
   }
   return (
-    <header className="flex h-16 items-center justify-between gap-4 border-b border-border px-4 sm:gap-6 sm:px-6">
+    <header className="hidden h-16 items-center justify-between gap-4 border-b border-border px-4 sm:gap-6 sm:px-6 md:flex">
       <div className="flex min-w-0 flex-1 items-center gap-4 sm:gap-8">
         <Link
           href="/"
@@ -32,7 +23,25 @@ export default function Navbar() {
           TenantShield
         </Link>
         <Show when="signed-in">
-          {/* <SignedInNavLinks /> */}
+          <nav className="ml-1 hidden items-center gap-1 lg:flex">
+            {APP_NAV_ITEMS.map(({ href, label, matches }) => {
+              const active = matches(pathname ?? "")
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={cn(
+                    "rounded-full px-3 py-2 text-sm font-medium transition-colors",
+                    active
+                      ? "bg-accent text-foreground"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {label}
+                </Link>
+              )
+            })}
+          </nav>
         </Show>
       </div>
 
@@ -52,6 +61,10 @@ export default function Navbar() {
           </Link>
         </Show>
         <Show when="signed-in">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-400 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-black shadow-sm">
+            <Sparkles className="size-3.5" />
+            Pro
+          </span>
           <UserButton
             appearance={{
               elements: {

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { ClerkProvider } from '@clerk/nextjs'
 import { Geist_Mono, Inter, Playfair_Display } from 'next/font/google'
 import Navbar from '../components/shared/main-navbar'
+import MobileTabBar from '../components/shared/mobile-tab-bar'
 import './globals.css'
 import Providers from './providers'
 
@@ -39,6 +40,7 @@ export default function RootLayout({
           <Providers>
             <Navbar />
             {children}
+            <MobileTabBar />
           </Providers>
         </ClerkProvider>
       </body>

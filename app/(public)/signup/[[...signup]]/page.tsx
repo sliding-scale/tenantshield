@@ -3,18 +3,25 @@
 import { useAuth } from "@clerk/nextjs"
 import { ChevronLeft, Shield } from "lucide-react"
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { GoogleOAuthButton } from "@/components/auth/google-oauth-button"
 import { SignUpForm } from "@/components/auth/sign-up-form"
 import { signupMetadataFromType } from "@/lib/auth/signup-metadata"
 import { Button } from "@/components/ui/button"
+import { useEffect } from "react"
 
 export default function SignUpPage() {
-  const { isLoaded } = useAuth()
+  const { isLoaded, isSignedIn } = useAuth()
+  const router = useRouter()
   const searchParams = useSearchParams()
   const type = searchParams.get("type")
   const unsafeMetadata = signupMetadataFromType(type)
   const signInHref = type ? `/login?type=${encodeURIComponent(type)}` : "/login"
+
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn) return
+    router.replace("/dashboard")
+  }, [isLoaded, isSignedIn, router])
 
   // if (!isLoaded) {
   //   return (

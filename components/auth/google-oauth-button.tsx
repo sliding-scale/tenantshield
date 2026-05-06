@@ -74,7 +74,6 @@ export function GoogleOAuthButton(props: GoogleAuthButtonSignIn | GoogleAuthButt
         const trySignUpThenSignIn = async () => {
           if (!signUp) {
             if (!signIn) return
-            await clerk.signOut() // 🔥 CRITICAL
             const { error: signInErr } = await signIn.sso({
               strategy: "oauth_google",
               redirectCallbackUrl: SSO_CALLBACK,
@@ -83,7 +82,6 @@ export function GoogleOAuthButton(props: GoogleAuthButtonSignIn | GoogleAuthButt
             if (signInErr) console.error(signInErr)
             return
           }
-          await clerk.signOut() // 🔥 CRITICAL
 
           const { error } = await signUp.sso({
             strategy: "oauth_google",
@@ -96,7 +94,6 @@ export function GoogleOAuthButton(props: GoogleAuthButtonSignIn | GoogleAuthButt
             const code = "code" in error && typeof error.code === "string" ? error.code : ""
             if (code === "form_identifier_exists" || code === "identifier_already_signed_up") {
               if (!signIn) return
-              await clerk.signOut() // 🔥 CRITICAL
               const { error: signInErr } = await signIn.sso({
                 strategy: "oauth_google",
                 redirectCallbackUrl: SSO_CALLBACK,
@@ -117,7 +114,6 @@ export function GoogleOAuthButton(props: GoogleAuthButtonSignIn | GoogleAuthButt
         }
 
         if (!signIn) return
-        await clerk.signOut() // 🔥 CRITICAL
         const { error } = await signIn.sso({
           strategy: "oauth_google",
           redirectCallbackUrl: SSO_CALLBACK,
@@ -130,7 +126,6 @@ export function GoogleOAuthButton(props: GoogleAuthButtonSignIn | GoogleAuthButt
       }
 
       if (!signUp) return
-      await clerk.signOut() // 🔥 CRITICAL
       const { error } = await signUp.sso({
         strategy: "oauth_google",
         redirectCallbackUrl: SSO_CALLBACK,
