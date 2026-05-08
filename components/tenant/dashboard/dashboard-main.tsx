@@ -9,7 +9,9 @@ import {
   Sparkles,
   UserRound,
 } from "lucide-react"
+import { useQuery } from "convex/react"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
+import { api } from "@/convex/_generated/api"
 
 const quickActions = [
   {
@@ -44,11 +46,14 @@ const quickActions = [
 
 export default function TenantDashboardMain() {
   const { convexUser, clerkUser } = useCurrentUser()
+  const counts = useQuery(api.dashboard.queries.countsForCurrentUser)
   if (!convexUser || convexUser.role !== "tenant") {
     return <div>You are not authorized to access this page</div>
   }
 
   const userName = clerkUser?.firstName || convexUser.name || "there"
+  const protectionIndex = Math.round(counts?.protectionIndex ?? 0)
+  const protectionAngle = Math.max(0, Math.min(360, (protectionIndex / 100) * 360))
 
   return (
     <main className="min-h-[100dvh] bg-cream-page px-4 pb-24 pt-5 text-foreground md:min-h-[calc(100vh-4rem)] md:px-8 md:pb-10 md:pt-8 lg:px-10">
@@ -62,23 +67,30 @@ export default function TenantDashboardMain() {
         </section>
 
         <section>
-          <div className="rounded-[2rem] border border-cream-border bg-cream-surface p-5 text-ink-warm shadow-[0_16px_35px_-24px_rgba(50,38,18,0.45)] md:p-6 lg:p-6">
+          <div className="rounded-[2rem] border border-cream-border bg-cream-surface p-5 text-ink-warm shadow-[0_16px_35px_-24px_rgba(50,38,18,0.45)] md:p-7 lg:px-10 lg:py-8 xl:px-12 xl:py-9">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-300">
               Protection Index
             </p>
-            <div className="mt-4 grid grid-cols-[1fr_auto] items-end gap-4 sm:flex sm:flex-row sm:items-end sm:justify-between lg:items-center">
+            <div className="mt-4 grid grid-cols-[1fr_auto] items-start gap-4 sm:flex sm:flex-row sm:items-end sm:justify-between lg:items-center">
               <div className="min-w-0 max-w-[14.5rem] sm:max-w-[20rem] lg:max-w-[52rem]">
                 <h2 className="font-heading text-[1.3rem] font-semibold leading-[1.06] text-ink-warm sm:text-[2.2rem] lg:text-[2.8rem] lg:leading-[0.98]">
                   Your case strength across all active disputes.
                 </h2>
-                <div className="mt-4 flex gap-3">
-                  <StatPill value="6" label="Cases" />
-                  <StatPill value="9" label="Letters" />
+                <div className="col-span-2 mt-5 flex gap-3 sm:mt-4">
+                  <StatPill value={String(counts?.activeCases ?? 0)} label="Cases" />
+                  <StatPill value={String(counts?.letters ?? 0)} label="Letters" />
                 </div>
               </div>
-              <div className="grid size-[9.75rem] shrink-0 place-items-center self-center rounded-full bg-[conic-gradient(theme(colors.emerald.400)_0deg_332deg,theme(colors.zinc.100)_332deg_360deg)] sm:size-[14rem] lg:size-[16.5rem]">
-                <div className="grid size-[8.3rem] place-items-center rounded-full border border-cream-border bg-cream-surface sm:size-[12.1rem] lg:size-[14.25rem]">
-                  <span className="text-[0.95rem] font-semibold tracking-[0.22em] text-ink-warm-muted sm:text-[1.7rem]">STRONG</span>
+              <div
+                className="grid size-[8.5rem] shrink-0 place-items-center self-start rounded-full sm:size-[14rem] lg:size-[16.5rem]"
+                style={{
+                  background: `conic-gradient(from -90deg, var(--primary) 0deg ${protectionAngle}deg, var(--border) ${protectionAngle}deg 360deg)`,
+                }}
+              >
+                <div className="grid size-[7rem] place-items-center rounded-full border border-cream-border bg-cream-surface sm:size-[12.1rem] lg:size-[14.25rem]">
+                  <span className="font-heading text-2xl font-semibold text-ink-warm sm:text-5xl">
+                    {protectionIndex}
+                  </span>
                 </div>
               </div>
             </div>

@@ -1,4 +1,4 @@
-import { internalMutation } from "../_generated/server";
+import { internalMutation, mutation } from "../_generated/server";
 import { v } from "convex/values";
 
 export const saveCaseToDB = internalMutation({
@@ -26,8 +26,33 @@ export const saveCaseToDB = internalMutation({
     embedding: v.array(v.float64()),
   },
   handler: async (ctx, args) => {
-    const newCaseId = await ctx.db.insert("cases", args);
+    const newCaseId = await ctx.db.insert("cases", {
+      userId: args.userId,
+      caseStatus: "active",
+      inputData: args.inputData,
+      aiAnalysis: args.aiAnalysis,
+      embedding: args.embedding,
+    });
     return newCaseId;
+  },
+});
+
+export const setCaseStatusForCurrentUser = mutation({
+  args: {
+    caseId: v.id("cases"),
+    caseStatus: v.union(v.literal("active"), v.literal("archived")),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const row = await ctx.db.get(args.caseId);
+    if (!row || row.userId !== identity.subject) {
+      throw new Error("Case not found");
+    }
+
+    await ctx.db.patch(args.caseId, { caseStatus: args.caseStatus });
+    return null;
   },
 });
 

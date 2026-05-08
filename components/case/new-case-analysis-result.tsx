@@ -1,8 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import Link from "next/link"
+import { useEffect, useState, type ReactNode } from "react"
 import type { z } from "zod"
-import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import { caseAnalysisSchema } from "@/convex/cases/aiSchema"
 import { Button } from "@/components/ui/button"
 import { US_STATE_NAMES, type USStateAbbr } from "@/lib/constants/us-states"
@@ -24,6 +25,8 @@ type Props = {
   details: NewCaseDetailsSnapshot
   aiAnalysis: CaseAnalysis
   onBack: () => void
+  /** e.g. Archive / Restore — rendered top-right next to the title */
+  headerTrailing?: ReactNode
 }
 
 function CaseStrengthDonut({ score }: { score: number }) {
@@ -89,8 +92,8 @@ function AnalysisSections({ analysis }: { analysis: CaseAnalysis }) {
   )
 }
 
-export function NewCaseAnalysisResult({ details, aiAnalysis, onBack }: Props) {
-  const [detailsOpen, setDetailsOpen] = useState(false)
+export function NewCaseAnalysisResult({ details, aiAnalysis, onBack, headerTrailing }: Props) {
+  const [showFullDescription, setShowFullDescription] = useState(false)
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" })
@@ -102,21 +105,28 @@ export function NewCaseAnalysisResult({ details, aiAnalysis, onBack }: Props) {
       : details.state || "—"
 
   const metaLine = `${stateName.toUpperCase()} · ${details.issueType.toUpperCase()}`
+  const descriptionText = details.description?.trim() || ""
+  const descriptionWords = descriptionText ? descriptionText.split(/\s+/) : []
+  const isDescriptionLong = descriptionWords.length > 10
+  const collapsedDescription = isDescriptionLong ? `${descriptionWords.slice(0, 10).join(" ")}...` : descriptionText || "—"
+  const displayedDescription = showFullDescription ? descriptionText || "—" : collapsedDescription
 
   return (
     <div className="flex w-full flex-1 flex-col">
-      <header className="mb-6 flex shrink-0 items-center justify-between md:hidden">
+      <header className="mb-6 grid grid-cols-[2.75rem_1fr_auto] items-center gap-2 sm:gap-3">
         <Button
           type="button"
           variant="outline"
           onClick={onBack}
           className="h-11 w-11 rounded-full border-border bg-cream-surface-soft p-0 text-foreground"
-          aria-label="Back to edit case"
+          aria-label="Back to cases"
         >
           <ArrowLeft className="size-5" />
         </Button>
-        <h1 className="font-heading text-xl font-semibold text-foreground md:text-2xl">Case Detail</h1>
-        <span className="w-11" aria-hidden />
+        <h1 className="text-center font-heading text-xl font-semibold text-foreground sm:text-2xl">
+          Case Detail
+        </h1>
+        <div className="flex min-h-11 min-w-0 justify-end">{headerTrailing ?? <span className="w-11 shrink-0" aria-hidden />}</div>
       </header>
 
       <div className="space-y-6 md:space-y-8 lg:max-w-4xl lg:mx-auto w-full">
@@ -127,12 +137,52 @@ export function NewCaseAnalysisResult({ details, aiAnalysis, onBack }: Props) {
           </h2>
         </div>
 
-        <div className="rounded-3xl border border-cream-border bg-background px-5 py-8 shadow-sm md:px-8 md:py-10">
-          <div className="flex flex-col items-center">
-            <CaseStrengthDonut score={aiAnalysis.caseStrength} />
-            <p className="mt-6 max-w-xs text-center text-sm text-muted-foreground md:text-base">
-              Case strength, based on your state&apos;s law.
-            </p>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="rounded-3xl border border-cream-border bg-background px-5 py-8 shadow-sm md:px-8 md:py-10">
+            <div className="flex flex-col items-center">
+              <CaseStrengthDonut score={aiAnalysis.caseStrength} />
+              <p className="mt-6 max-w-xs text-center text-sm text-muted-foreground md:text-base">
+                Case strength, based on your state&apos;s law.
+              </p>
+            </div>
+          </div>
+          <div className="rounded-3xl border border-cream-border bg-background px-5 py-6 shadow-sm md:px-8">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-warm-muted">Case details</p>
+            <dl className="mt-4 space-y-3 text-sm md:text-base">
+              <div>
+                <dt className="text-xs font-semibold uppercase tracking-wider text-ink-warm-muted">Issue type</dt>
+                <dd className="mt-1 text-foreground">{details.issueType || "—"}</dd>
+              </div>
+              <div>
+                <dt className="text-xs font-semibold uppercase tracking-wider text-ink-warm-muted">Description</dt>
+                <dd className="mt-1 whitespace-pre-wrap text-foreground">{displayedDescription}</dd>
+                {isDescriptionLong ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowFullDescription((prev) => !prev)}
+                    className="mt-1 text-xs font-semibold text-primary hover:underline"
+                  >
+                    {showFullDescription ? "See less" : "See more"}
+                  </button>
+                ) : null}
+              </div>
+              <div>
+                <dt className="text-xs font-semibold uppercase tracking-wider text-ink-warm-muted">State</dt>
+                <dd className="mt-1 text-foreground">
+                  {details.state ? `${stateName} (${details.state})` : "—"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs font-semibold uppercase tracking-wider text-ink-warm-muted">Landlord</dt>
+                <dd className="mt-1 text-foreground">{details.landlord || "—"}</dd>
+              </div>
+              <div>
+                <dt className="text-xs font-semibold uppercase tracking-wider text-ink-warm-muted">
+                  Property address
+                </dt>
+                <dd className="mt-1 line-clamp-2 whitespace-pre-wrap text-foreground">{details.propertyAddress || "—"}</dd>
+              </div>
+            </dl>
           </div>
         </div>
 
@@ -144,56 +194,22 @@ export function NewCaseAnalysisResult({ details, aiAnalysis, onBack }: Props) {
         </div>
 
         <Button
-          type="button"
-          variant="outline"
-          onClick={() => setDetailsOpen((o) => !o)}
-          className="h-14 w-full rounded-2xl border-cream-border bg-cream-surface-deep text-lg font-semibold text-ink-warm shadow-sm hover:bg-cream-surface md:text-xl"
-          aria-expanded={detailsOpen}
+          asChild
+          className="h-14 w-full rounded-2xl bg-surface-strong px-6 text-lg font-semibold text-white hover:bg-surface-strong-hover md:text-xl"
         >
-          <span className="flex w-full items-center justify-center gap-2">
-            View case details
-            {detailsOpen ? <ChevronUp className="size-5" /> : <ChevronDown className="size-5" />}
-          </span>
+          <Link
+            href={{
+              pathname: "/write-letters",
+              query: {
+                issue: details.description || details.issueType || details.title,
+                state: details.state || "",
+                landlord: details.landlord || "",
+              },
+            }}
+          >
+            Generate a letter
+          </Link>
         </Button>
-
-        {detailsOpen ? (
-          <div className="rounded-3xl border border-cream-border bg-background px-5 py-6 shadow-sm md:px-8">
-            <dl className="space-y-4 text-base md:text-lg">
-              <div>
-                <dt className="text-xs font-semibold uppercase tracking-wider text-ink-warm-muted">Issue type</dt>
-                <dd className="mt-1 text-foreground">{details.issueType}</dd>
-              </div>
-              <div>
-                <dt className="text-xs font-semibold uppercase tracking-wider text-ink-warm-muted">Title</dt>
-                <dd className="mt-1 text-foreground">{details.title}</dd>
-              </div>
-              <div>
-                <dt className="text-xs font-semibold uppercase tracking-wider text-ink-warm-muted">Description</dt>
-                <dd className="mt-1 whitespace-pre-wrap text-foreground">{details.description}</dd>
-              </div>
-              <div>
-                <dt className="text-xs font-semibold uppercase tracking-wider text-ink-warm-muted">State</dt>
-                <dd className="mt-1 text-foreground">
-                  {details.state ? `${stateName} (${details.state})` : "—"}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-xs font-semibold uppercase tracking-wider text-ink-warm-muted">City</dt>
-                <dd className="mt-1 text-foreground">{details.city || "—"}</dd>
-              </div>
-              <div>
-                <dt className="text-xs font-semibold uppercase tracking-wider text-ink-warm-muted">Landlord</dt>
-                <dd className="mt-1 text-foreground">{details.landlord || "—"}</dd>
-              </div>
-              <div>
-                <dt className="text-xs font-semibold uppercase tracking-wider text-ink-warm-muted">
-                  Property address
-                </dt>
-                <dd className="mt-1 whitespace-pre-wrap text-foreground">{details.propertyAddress || "—"}</dd>
-              </div>
-            </dl>
-          </div>
-        ) : null}
       </div>
     </div>
   )

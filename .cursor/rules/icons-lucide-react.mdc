@@ -1,0 +1,34 @@
+---
+description: Use lucide-react as the default icon library
+alwaysApply: true
+---
+
+# Icon Library Standard
+
+- Always use `lucide-react` for icons in React components by default.
+- Prefer importing icons directly from `lucide-react` (e.g. `import { Shield, FileText } from "lucide-react"`).
+- Do not introduce additional icon libraries (e.g. Heroicons, Font Awesome) unless there is a strong, documented reason.
+- If you need a custom icon:
+  - First check whether a close-enough lucide icon already exists.
+  - If not, implement it as a local SVG React component and keep it isolated to `components/icons` so the rest of the app still uses lucide icons.
+- When creating reusable UI components that take an `Icon` prop, type it to accept lucide icons (e.g. `Icon: typeof Shield`) or a generic `ComponentType<{ className?: string }>` but continue to pass lucide icons from call sites.
+
+## Example
+
+```tsx
+// ✅ Good: lucide-react
+import { Shield, FileText } from "lucide-react"
+
+export function Example() {
+  return (
+    <div className="flex gap-3">
+      <Shield className="size-5" />
+      <FileText className="size-5" />
+    </div>
+  )
+}
+
+// ❌ Avoid adding a second icon library for simple line icons
+// import { ShieldCheckIcon } from "@heroicons/react/24/outline"
+```
+
