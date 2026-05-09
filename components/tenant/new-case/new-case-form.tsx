@@ -233,7 +233,7 @@ export function NewCaseForm({
             type="button"
             disabled={!canSubmit}
             onClick={onSubmit}
-            className="mt-8 h-14 w-full rounded-2xl bg-surface-strong px-6 text-lg font-semibold text-white hover:bg-surface-strong-hover disabled:bg-muted disabled:text-muted-foreground md:mt-10 md:max-w-md md:text-xl lg:max-w-sm"
+            className="mt-8 h-14 mx-auto w-full rounded-2xl bg-surface-strong px-6 text-lg font-semibold text-white hover:bg-surface-strong-hover disabled:bg-muted disabled:text-muted-foreground md:mt-10 md:max-w-md md:text-xl lg:max-w-sm"
           >
             {isSubmitting ? "Analyzing..." : "Analyze My Case"}
           </Button>

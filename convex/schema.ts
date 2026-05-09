@@ -154,7 +154,21 @@ export default defineSchema({
       vectorField: "embedding",
       dimensions: 768,
       filterFields: ["userId", "letterId"],
+    }),
+    leases: defineTable({
+      userId: v.string(),
+      state: v.string(),
+      leaseText: v.string(),
+      pdfFile: v.optional(v.id("_storage")),
+      aiAnalysis: v.optional(v.any()),
+      embedding: v.optional(v.array(v.float64())),
     })
+      .index("by_user_id", ["userId"])
+      .vectorIndex("by_user_lease_embedding", {
+        vectorField: "embedding",
+        dimensions: 768,
+        filterFields: ["userId"],
+      }),
 
 
 

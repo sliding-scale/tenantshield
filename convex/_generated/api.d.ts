@@ -8,6 +8,9 @@
  * @module
  */
 
+import type * as analyzeLease_actions from "../analyzeLease/actions.js";
+import type * as analyzeLease_mutations from "../analyzeLease/mutations.js";
+import type * as analyzeLease_queries from "../analyzeLease/queries.js";
 import type * as cases_actions from "../cases/actions.js";
 import type * as cases_aiSchema from "../cases/aiSchema.js";
 import type * as cases_mutations from "../cases/mutations.js";
@@ -30,6 +33,9 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "analyzeLease/actions": typeof analyzeLease_actions;
+  "analyzeLease/mutations": typeof analyzeLease_mutations;
+  "analyzeLease/queries": typeof analyzeLease_queries;
   "cases/actions": typeof cases_actions;
   "cases/aiSchema": typeof cases_aiSchema;
   "cases/mutations": typeof cases_mutations;
