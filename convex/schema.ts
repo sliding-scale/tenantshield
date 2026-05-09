@@ -159,9 +159,9 @@ export default defineSchema({
   leases: defineTable({
     userId: v.string(),
     state: v.string(),
-    leaseText: v.string(), // The raw text passed directly from the frontend
+    leaseText: v.string(),
     pdfFile: v.optional(v.id("_storage")),
-    aiAnalysis: v.object({
+    aiAnalysis: v.optional(v.object({
       leaseReview: v.string(),
       documentSummary: v.string(),
       redFlags: v.array(
@@ -184,13 +184,15 @@ export default defineSchema({
       ),
       questionsToAsk: v.array(v.string()),
       overallRecommendation: v.string(),
+    })),
+    embedding: v.optional(v.array(v.float64())),
+  })
+    .index("by_user_id", ["userId"])
+    .vectorIndex("by_user_lease_embedding", {
+      vectorField: "embedding",
+      dimensions: 768,
+      filterFields: ["userId"],
     }),
-    embedding: v.array(v.float64()),
-  }).vectorIndex("by_user_lease_embedding", {
-    vectorField: "embedding",
-    dimensions: 768,
-    filterFields: ["userId"],
-  }),
 
   leaseEmbeddings: defineTable({
     leaseId: v.id("leases"),

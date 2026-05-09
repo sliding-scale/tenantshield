@@ -38,6 +38,43 @@ export const saveLeaseToDB = internalMutation({
   },
 });
 
+export const patchLeaseAnalysis = internalMutation({
+  args: {
+    leaseId: v.id("leases"),
+    aiAnalysis: v.object({
+      leaseReview: v.string(),
+      documentSummary: v.string(),
+      redFlags: v.array(
+        v.object({
+          quote: v.string(),
+          problem: v.string(),
+        }),
+      ),
+      missingClauses: v.array(
+        v.object({
+          clauseName: v.string(),
+          explanation: v.string(),
+        }),
+      ),
+      tenantFriendlyClauses: v.array(
+        v.object({
+          quote: v.string(),
+          explanation: v.string(),
+        }),
+      ),
+      questionsToAsk: v.array(v.string()),
+      overallRecommendation: v.string(),
+    }),
+    embedding: v.array(v.float64()),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.leaseId, {
+      aiAnalysis: args.aiAnalysis,
+      embedding: args.embedding,
+    });
+  },
+});
+
 export const saveLeaseEmbeddingsToDB = internalMutation({
   args: {
     leaseId: v.id("leases"),
