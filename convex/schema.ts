@@ -152,8 +152,55 @@ export default defineSchema({
       vectorField: "embedding",
       dimensions: 768,
       filterFields: ["userId", "letterId"],
-    })
+    }),
 
+  leases: defineTable({
+    userId: v.string(),
+    state: v.string(),
+    leaseText: v.string(), // The raw text passed directly from the frontend
+    aiAnalysis: v.object({
+      leaseReview: v.string(),
+      documentSummary: v.string(),
+      redFlags: v.array(
+        v.object({
+          quote: v.string(),
+          problem: v.string(),
+        }),
+      ),
+      missingClauses: v.array(
+        v.object({
+          clauseName: v.string(),
+          explanation: v.string(),
+        }),
+      ),
+      tenantFriendlyClauses: v.array(
+        v.object({
+          quote: v.string(),
+          explanation: v.string(),
+        }),
+      ),
+      questionsToAsk: v.array(v.string()),
+      overallRecommendation: v.string(),
+    }),
+    embedding: v.array(v.float64()),
+  }).vectorIndex("by_user_lease_embedding", {
+    vectorField: "embedding",
+    dimensions: 768,
+    filterFields: ["userId"],
+  }),
 
+  leaseEmbeddings: defineTable({
+    leaseId: v.id("leases"),
+    userId: v.string(),
+    chunkType: v.string(),
+    chunkText: v.string(),
+    embedding: v.array(v.float64()),
+  })
+    .index("by_lease_id", ["leaseId"])
+    .vectorIndex("by_user_lease_chunk_embedding", {
+      vectorField: "embedding",
+      dimensions: 768,
+      filterFields: ["userId", "leaseId"],
+    }),
 
 })
