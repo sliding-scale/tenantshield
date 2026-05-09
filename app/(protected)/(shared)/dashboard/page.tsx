@@ -1,7 +1,7 @@
 "use client"
 
 import AdminDashboardMain from "@/components/admin/dashboard-main"
-import TenantDashboardMain from "@/components/tenant/dashboard-main"
+import TenantDashboardMain from "@/components/tenant/dashboard/dashboard-main"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
 import NoAccessMessage from "@/components/shared/NoAccessMessage"
 import { useQuery } from "convex/react"

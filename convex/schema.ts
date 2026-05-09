@@ -53,7 +53,8 @@ export default defineSchema({
   // i am adding schema for the new case table feature
   cases: defineTable({
     userId: v.string(), // ye clerk id se match ke liye
-
+    // New inserts always set "active"; optional only for legacy rows before this field existed.
+    caseStatus: v.optional(v.union(v.literal("active"), v.literal("archived"))),
     //ye frontend se ayega is mein save hoga
     inputData:v.object({
       issueType: v.string(),
@@ -134,6 +135,7 @@ export default defineSchema({
       fullLetterText: v.string(),
       embedding: v.array(v.float64()),
     })
+    .index("by_user_id", ["userId"])
     .vectorIndex("by_user_letter_embedding", {
       vectorField: "embedding",
       dimensions: 768,
@@ -158,6 +160,7 @@ export default defineSchema({
     userId: v.string(),
     state: v.string(),
     leaseText: v.string(), // The raw text passed directly from the frontend
+    pdfFile: v.optional(v.id("_storage")),
     aiAnalysis: v.object({
       leaseReview: v.string(),
       documentSummary: v.string(),

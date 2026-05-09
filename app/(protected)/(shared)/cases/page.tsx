@@ -1,63 +1,193 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
-import { useQuery } from "convex/react"
-import { FileText } from "lucide-react"
+import { useMutation, useQuery } from "convex/react"
+import { ChevronLeft, ChevronRight, FileText } from "lucide-react"
+import type { Id } from "@/convex/_generated/dataModel"
 import { api } from "@/convex/_generated/api"
+import { Button } from "@/components/ui/button"
 import { caseStrengthLabel } from "@/lib/case/caseStrengthLabel"
 
 export default function CasesPage() {
-  const cases = useQuery(api.cases.queries.listForCurrentUser)
+  const [bucket, setBucket] = useState<"active" | "archived">("active")
+  const [page, setPage] = useState(0)
+  const [busyId, setBusyId] = useState<Id<"cases"> | null>(null)
+  const setCaseStatus = useMutation(api.cases.mutations.setCaseStatusForCurrentUser)
 
+  useEffect(() => {
+    setPage(0)
+  }, [bucket])
+
+  const data = useQuery(api.cases.queries.listCasesPaged, { status: bucket, page })
+
+  useEffect(() => {
+    if (!data || data.totalPages === 0) return
+    if (page > data.totalPages - 1) setPage(data.totalPages - 1)
+  }, [data, page])
+
+  const cases = data?.items ?? []
+  const totalPages = data?.totalPages ?? 0
+  const canPrev = totalPages > 0 && page > 0
+  const canNext = totalPages > 0 && page < totalPages - 1
   return (
     <main className="min-h-[100dvh] bg-cream-page px-4 py-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10">
       <div className="mx-auto w-full max-w-6xl">
-        <header className="mb-6 md:mb-8">
-          <h1 className="font-heading text-3xl font-semibold text-foreground md:text-4xl">Cases</h1>
-          <p className="mt-2 text-ink-warm-muted">Review your analyzed cases and open full AI responses.</p>
+        <header className="mb-6 flex flex-col gap-4 md:mb-8 md:flex-row md:items-start md:justify-between">
+          <div>
+            <h1 className="font-heading text-3xl font-semibold text-foreground md:text-4xl">Cases</h1>
+            <p className="mt-2 text-ink-warm-muted">
+              {bucket === "active"
+                ? "Your active cases. Use Archive below a card or on the case detail screen when you’re done with it."
+                : "Archived cases stay here for reference. Restore from the row above a card or on the case detail page."}
+            </p>
+          </div>
+
+          <div
+            className="flex shrink-0 rounded-2xl border border-cream-border bg-cream-surface p-1 shadow-sm"
+            role="tablist"
+            aria-label="Case list filter"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={bucket === "active"}
+              onClick={() => setBucket("active")}
+              className={[
+                "rounded-xl px-4 py-2.5 text-sm font-semibold transition md:px-5 md:text-base",
+                bucket === "active"
+                  ? "bg-cream-surface-deep text-ink-warm shadow-sm"
+                  : "text-muted-foreground hover:text-foreground",
+              ].join(" ")}
+            >
+              Active
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={bucket === "archived"}
+              onClick={() => setBucket("archived")}
+              className={[
+                "rounded-xl px-4 py-2.5 text-sm font-semibold transition md:px-5 md:text-base",
+                bucket === "archived"
+                  ? "bg-cream-surface-deep text-ink-warm shadow-sm"
+                  : "text-muted-foreground hover:text-foreground",
+              ].join(" ")}
+            >
+              Archived
+            </button>
+          </div>
         </header>
 
-        {cases === undefined ? (
+        {data === undefined ? (
           <p className="text-muted-foreground">Loading cases...</p>
         ) : cases.length === 0 ? (
           <div className="rounded-3xl border border-cream-border bg-cream-surface p-8 text-center">
-            <p className="font-heading text-2xl text-ink-warm">No cases yet</p>
-            <p className="mt-2 text-ink-warm-muted">Create a case from New Case to see it listed here.</p>
+            <p className="font-heading text-2xl text-ink-warm">
+              {bucket === "active" ? "No active cases" : "No archived cases"}
+            </p>
+            <p className="mt-2 text-ink-warm-muted">
+              {bucket === "active"
+                ? "Create a case from New Case to see it listed here."
+                : "Archive a case from the list or detail page to see it here."}
+            </p>
+            {bucket === "active" ? null : (
+              <Button
+                type="button"
+                variant="outline"
+                className="mt-6 rounded-xl border-cream-border bg-background"
+                onClick={() => setBucket("active")}
+              >
+                Back to active cases
+              </Button>
+            )}
           </div>
         ) : (
-          <div className="grid gap-4 md:gap-5">
-            {cases.map((item) => (
-              <Link
-                key={item._id}
-                href={`/cases/${item._id}`}
-                className="block rounded-3xl border border-cream-border bg-cream-surface p-5 transition hover:bg-cream-surface-soft md:p-6"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-                      {item.inputData.state} · {item.inputData.issueType}
-                    </p>
-                    <h2 className="mt-2 truncate font-heading text-2xl font-semibold text-ink-warm md:text-3xl">
-                      {item.inputData.shortTitle}
-                    </h2>
-                    <p className="mt-2 line-clamp-2 text-sm text-ink-warm-muted md:text-base">
-                      {item.aiAnalysis.summary}
-                    </p>
-                  </div>
-                  <div className="shrink-0 rounded-2xl border border-cream-border bg-background px-4 py-3 text-right">
-                    <p className="font-heading text-3xl text-ink-warm">{Math.round(item.aiAnalysis.caseStrength)}</p>
-                    <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-                      {caseStrengthLabel(item.aiAnalysis.caseStrength)}
-                    </p>
-                  </div>
+          <>
+            <div className="grid gap-4 md:gap-5">
+              {cases.map((item) => (
+                <div key={item._id} className="space-y-2">
+                  {/* <div className="flex justify-end px-0.5">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      disabled={busyId === item._id}
+                      onClick={() => void toggleArchiveForCase(item._id)}
+                      className="h-9 rounded-lg px-3 text-sm font-semibold text-ink-warm hover:bg-cream-surface-deep hover:text-ink-warm md:h-10 md:px-4 md:text-base"
+                    >
+                      {busyId === item._id
+                        ? "…"
+                        : bucket === "active"
+                          ? "Archive case"
+                          : "Restore to active"}
+                    </Button>
+                  </div> */}
+                  <Link
+                    href={`/cases/${item._id}`}
+                    className="block rounded-3xl border border-cream-border bg-cream-surface p-5 transition hover:bg-cream-surface-soft md:p-6"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+                          {item.inputData.state} · {item.inputData.issueType}
+                        </p>
+                        <h2 className="mt-2 truncate font-heading text-2xl font-semibold text-ink-warm md:text-3xl">
+                          {item.inputData.shortTitle}
+                        </h2>
+                        <p className="mt-2 line-clamp-2 text-sm text-ink-warm-muted md:text-base">
+                          {item.aiAnalysis.summary}
+                        </p>
+                      </div>
+                      <div className="shrink-0 rounded-2xl border border-cream-border bg-background px-4 py-3 text-right">
+                        <p className="font-heading text-3xl text-ink-warm">
+                          {Math.round(item.aiAnalysis.caseStrength)}
+                        </p>
+                        <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+                          {caseStrengthLabel(item.aiAnalysis.caseStrength)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="mt-4 flex items-center gap-2 text-sm font-medium text-foreground">
+                      <FileText className="size-4" />
+                      View AI response
+                    </div>
+                  </Link>
                 </div>
-                <div className="mt-4 flex items-center gap-2 text-sm font-medium text-foreground">
-                  <FileText className="size-4" />
-                  View AI response
-                </div>
-              </Link>
-            ))}
-          </div>
+              ))}
+            </div>
+
+            <div className="mt-8 flex flex-wrap items-center justify-end gap-3">
+              {totalPages > 1 ? (
+                <p className="mr-auto text-sm text-muted-foreground md:text-base">
+                  Page {page + 1} of {totalPages}
+                </p>
+              ) : null}
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="h-11 w-11 rounded-xl border-cream-border bg-background"
+                  aria-label="Previous page"
+                  disabled={!canPrev}
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                >
+                  <ChevronLeft className="size-5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="h-11 w-11 rounded-xl border-cream-border bg-background"
+                  aria-label="Next page"
+                  disabled={!canNext}
+                  onClick={() => setPage((p) => p + 1)}
+                >
+                  <ChevronRight className="size-5" />
+                </Button>
+              </div>
+            </div>
+          </>
         )}
       </div>
     </main>

@@ -260,8 +260,7 @@ Hard rules:
       generatedData.header.subjectLine,
       generatedData.salutation,
       ...generatedData.paragraphs.map(p => p.content),
-      generatedData.signOff,
-      generatedData.metadata.senderName
+      generatedData.signOff
     ].join("\n\n");
 
     const embedResult = await ai.models.embedContent({

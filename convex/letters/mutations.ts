@@ -1,4 +1,4 @@
-import { internalMutation } from "../_generated/server";
+import { internalMutation, mutation } from "../_generated/server";
 import { v } from "convex/values";
 
 export const saveLetterToDB = internalMutation({
@@ -20,6 +20,26 @@ export const saveLetterToDB = internalMutation({
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("letters", args);
+  },
+});
+
+export const updateFullLetterTextForCurrentUser = mutation({
+  args: {
+    letterId: v.id("letters"),
+    fullLetterText: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+    const row = await ctx.db.get(args.letterId);
+    if (!row || row.userId !== identity.subject) {
+      throw new Error("Letter not found");
+    }
+    await ctx.db.patch(args.letterId, {
+      fullLetterText: args.fullLetterText,
+    });
   },
 });
 
