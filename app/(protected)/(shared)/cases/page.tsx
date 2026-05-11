@@ -6,6 +6,7 @@ import { useMutation, useQuery } from "convex/react"
 import { ChevronLeft, ChevronRight, FileText } from "lucide-react"
 import type { Id } from "@/convex/_generated/dataModel"
 import { api } from "@/convex/_generated/api"
+import { caseStrengthPillTone, ListRowPill } from "@/components/shared/list-row-pill"
 import { Button } from "@/components/ui/button"
 import { caseStrengthLabel } from "@/lib/case/caseStrengthLabel"
 
@@ -124,30 +125,24 @@ export default function CasesPage() {
                   </div> */}
                   <Link
                     href={`/cases/${item._id}`}
-                    className="block rounded-3xl border border-cream-border bg-cream-surface p-5 transition hover:bg-cream-surface-soft md:p-6"
+                    className="block rounded-3xl border border-cream-border bg-cream-surface p-4 transition hover:bg-cream-surface-soft sm:p-5 md:p-6"
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="min-w-0">
-                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-                          {item.inputData.state} · {item.inputData.issueType}
-                        </p>
-                        <h2 className="mt-2 truncate font-heading text-2xl font-semibold text-ink-warm md:text-3xl">
-                          {item.inputData.shortTitle}
-                        </h2>
-                        <p className="mt-2 line-clamp-2 text-sm text-ink-warm-muted md:text-base">
-                          {item.aiAnalysis.summary}
-                        </p>
-                      </div>
-                      <div className="shrink-0 rounded-2xl border border-cream-border bg-background px-4 py-3 text-right">
-                        <p className="font-heading text-3xl text-ink-warm">
-                          {Math.round(item.aiAnalysis.caseStrength)}
-                        </p>
-                        <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-                          {caseStrengthLabel(item.aiAnalysis.caseStrength)}
-                        </p>
-                      </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+                        {item.inputData.state} · {item.inputData.issueType}
+                      </p>
+                      <ListRowPill tone={caseStrengthPillTone(item.aiAnalysis.caseStrength)}>
+                        {Math.round(item.aiAnalysis.caseStrength)} ·{" "}
+                        {caseStrengthLabel(item.aiAnalysis.caseStrength)}
+                      </ListRowPill>
                     </div>
-                    <div className="mt-4 flex items-center gap-2 text-sm font-medium text-foreground">
+                    <h2 className="mt-1.5 truncate font-heading text-xl font-semibold text-ink-warm sm:text-2xl md:text-3xl">
+                      {item.inputData.shortTitle}
+                    </h2>
+                    <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-ink-warm-muted md:text-base">
+                      {item.aiAnalysis.summary}
+                    </p>
+                    <div className="mt-3 flex items-center gap-2 text-sm font-medium text-foreground md:mt-4">
                       <FileText className="size-4" />
                       View AI response
                     </div>

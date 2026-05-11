@@ -27,6 +27,10 @@ import type * as letters_mutations from "../letters/mutations.js";
 import type * as letters_queries from "../letters/queries.js";
 import type * as onboarding_mutations from "../onboarding/mutations.js";
 import type * as onboarding_queries from "../onboarding/queries.js";
+import type * as stateLaws_actions from "../stateLaws/actions.js";
+import type * as stateLaws_aiSchema from "../stateLaws/aiSchema.js";
+import type * as stateLaws_mutations from "../stateLaws/mutations.js";
+import type * as stateLaws_queries from "../stateLaws/queries.js";
 import type * as users_mutations from "../users/mutations.js";
 import type * as users_queries from "../users/queries.js";
 
@@ -56,6 +60,10 @@ declare const fullApi: ApiFromModules<{
   "letters/queries": typeof letters_queries;
   "onboarding/mutations": typeof onboarding_mutations;
   "onboarding/queries": typeof onboarding_queries;
+  "stateLaws/actions": typeof stateLaws_actions;
+  "stateLaws/aiSchema": typeof stateLaws_aiSchema;
+  "stateLaws/mutations": typeof stateLaws_mutations;
+  "stateLaws/queries": typeof stateLaws_queries;
   "users/mutations": typeof users_mutations;
   "users/queries": typeof users_queries;
 }>;

@@ -1,25 +1,19 @@
 "use client"
 
-import { UserButton } from "@clerk/nextjs"
+import { ProfileHeaderSection } from "@/components/tenant/profile/profile-header-section"
+import { ProfilePlanSection } from "@/components/tenant/profile/profile-plan-section"
+import { ProfileResourcesSection } from "@/components/tenant/profile/profile-resources-section"
+import { ProfileSignOutRow } from "@/components/tenant/profile/profile-sign-out-row"
 
 export default function ProfilePage() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 md:px-6">
-      <h1 className="font-heading text-2xl font-semibold text-foreground md:text-3xl">Profile</h1>
-      <p className="mt-3 max-w-prose text-muted-foreground">
-        Manage your account and preferences. Use the avatar menu below on mobile, or open the user
-        menu in the header on desktop.
-      </p>
-      <div className="mt-8 flex items-center gap-4">
-        <UserButton
-          appearance={{
-            elements: {
-              avatarBox: "h-12 w-12",
-            },
-          }}
-        />
-        <span className="text-sm text-muted-foreground">Account menu</span>
+    <main className="min-h-[100dvh] bg-cream-page px-4 py-6 sm:px-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10 md:pt-8 lg:px-10 lg:py-12">
+      <div className="mx-auto w-full max-w-7xl">
+        <ProfileHeaderSection />
+        <ProfilePlanSection />
+        <ProfileResourcesSection />
+        <ProfileSignOutRow />
       </div>
-    </div>
+    </main>
   )
 }

@@ -1,14 +1,6 @@
 "use client"
 import Link from "next/link"
-import {
-  BriefcaseBusiness,
-  FileText,
-  Map,
-  MessageSquareShare,
-  PlusCircle,
-  Sparkles,
-  UserRound,
-} from "lucide-react"
+import { FileText, MessageSquareShare, PlusCircle, Sparkles, UserRound } from "lucide-react"
 import { useQuery } from "convex/react"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
 import { api } from "@/convex/_generated/api"
@@ -40,6 +32,13 @@ const quickActions = [
     subtitle: "Flag red-flag clauses",
     href: "/analyze-lease",
     Icon: MessageSquareShare,
+    featured: false,
+  },
+  {
+    title: "Profile",
+    subtitle: "Renter details & preferences",
+    href: "/profile",
+    Icon: UserRound,
     featured: false,
   },
 ]
@@ -101,13 +100,14 @@ export default function TenantDashboardMain() {
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
             Take Action
           </p>
-          <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-            {quickActions.map(({ title, subtitle, href, Icon, featured }) => (
+          <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-6 md:gap-4">
+            {quickActions.map(({ title, subtitle, href, Icon, featured }, index) => (
               <Link
                 key={title}
                 href={href}
                 className={[
                   "group rounded-3xl border p-4 transition",
+                  index < 3 ? "md:col-span-2" : "md:col-span-3",
                   featured
                     ? "border-surface-strong bg-surface-strong text-white hover:bg-surface-strong-hover"
                     : "border-border bg-white text-foreground hover:border-foreground/25 hover:shadow-sm",
@@ -136,19 +136,6 @@ export default function TenantDashboardMain() {
             ))}
           </div>
         </section>
-
-        <section className="mt-8 grid gap-4 md:grid-cols-2">
-          <InfoCard
-            Icon={Map}
-            title="Case map"
-            body="Track where each dispute is in its timeline and what to do next."
-          />
-          <InfoCard
-            Icon={UserRound}
-            title="Profile completion"
-            body="Finish your renter profile to unlock more accurate recommendations."
-          />
-        </section>
       </div>
     </main>
   )
@@ -163,22 +150,3 @@ function StatPill({ value, label }: { value: string; label: string }) {
   )
 }
 
-function InfoCard({
-  Icon,
-  title,
-  body,
-}: {
-  Icon: typeof BriefcaseBusiness
-  title: string
-  body: string
-}) {
-  return (
-    <div className="rounded-3xl border border-border bg-white p-5 shadow-sm md:p-6">
-      <div className="inline-flex p-1">
-        <Icon className="size-5 text-foreground" />
-      </div>
-      <h3 className="mt-3 font-heading text-3xl font-semibold leading-tight text-foreground">{title}</h3>
-      <p className="mt-2 text-sm text-muted-foreground md:text-base">{body}</p>
-    </div>
-  )
-}

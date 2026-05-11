@@ -37,7 +37,6 @@ export const analyzeNewCase = action({
         "Missing user identity. Log in or provide a valid test bypass token in dev.",
       );
     }
-
     const inputData = {
       issueType: args.issueType,
       shortTitle: args.shortTitle,

@@ -208,4 +208,26 @@ export default defineSchema({
       filterFields: ["userId", "leaseId"],
     }),
 
+  stateTenantLaws: defineTable({
+    stateCode: v.string(),
+    stateName: v.optional(v.string()),
+    updatedAt: v.optional(v.number()),
+    lawDetails: v.object({
+      headlineMetrics: v.object({
+        depositCap: v.string(),
+        gracePeriod: v.string(),
+        noticeToQuit: v.string(),
+      }),
+      depositReturnTimeline: v.string(),
+      repairAndHabitability: v.object({
+        landlordObligation: v.string(),
+        legalCitation: v.optional(v.string()),
+        repairAndDeductAvailable: v.optional(v.boolean()),
+      }),
+      evictionNotice: v.object({
+        nonpayment: v.string(),
+        otherBreach: v.string(),
+      }),
+    }),
+  }).index("by_state_code", ["stateCode"]),
 })
