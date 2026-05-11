@@ -1,22 +1,43 @@
 "use client"
 
 import { type ComponentType, type MutableRefObject } from "react"
-import { Banknote, FileWarning, Hammer, House, Search, Shield, X } from "lucide-react"
+import {
+  AlertTriangle,
+  CircleHelp,
+  FileText,
+  Gavel,
+  Scale,
+  Search,
+  Shield,
+  TrendingUp,
+  Wrench,
+  X,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { LETTER_TYPES, type LetterTypeIconKey, type LetterTypeValue } from "@/lib/constants/letter-types"
+import {
+  ISSUE_TYPES,
+  type IssueTypeIconKey,
+  type IssueTypeValue,
+} from "@/lib/constants/issue-types"
 import { US_STATE_NAMES, type USStateAbbr } from "@/lib/constants/us-states"
 
-const ICONS: Record<LetterTypeIconKey, ComponentType<{ className?: string }>> = {
-  banknote: Banknote,
-  hammer: Hammer,
-  house: House,
+const ISSUE_TYPE_ICONS: Record<
+  IssueTypeIconKey,
+  ComponentType<{ className?: string }>
+> = {
+  gavel: Gavel,
+  wrench: Wrench,
+  "alert-triangle": AlertTriangle,
+  "trending-up": TrendingUp,
+  "file-text": FileText,
   shield: Shield,
-  "file-warning": FileWarning,
+  scale: Scale,
+  "circle-help": CircleHelp,
 }
 
 type NewLetterFormProps = {
-  letterType: LetterTypeValue
-  setLetterType: (value: LetterTypeValue) => void
+  letterType: IssueTypeValue
+  setLetterType: (value: IssueTypeValue) => void
   state: string
   setState: (value: string) => void
   stateSearch: string
@@ -101,12 +122,12 @@ export function NewLetterForm({
 
           <div className="mt-8 md:mt-10 lg:mt-12">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-warm-muted md:text-sm">
-              Letter Type
+              Issue type
             </p>
-            <div className="mt-4 grid gap-2.5 md:gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {LETTER_TYPES.map((type) => {
+            <div className="mt-4 grid gap-2.5 md:gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+              {ISSUE_TYPES.map((type) => {
                 const active = letterType === type.value
-                const Icon = ICONS[type.icon]
+                const Icon = ISSUE_TYPE_ICONS[type.iconKey]
                 return (
                   <button
                     key={type.value}
@@ -119,10 +140,12 @@ export function NewLetterForm({
                         : "border-border bg-background text-foreground hover:bg-accent",
                     ].join(" ")}
                   >
-                    <Icon className="size-4" />
-                    <div className="flex flex-col items-start">
-                      <span>{type.title}</span>
-                      <span className="text-xs text-ink-warm-muted md:text-sm">{type.subtitle}</span>
+                    <Icon className="size-4 shrink-0" />
+                    <div className="flex min-w-0 flex-col items-start text-left">
+                      <span className="leading-tight">{type.value}</span>
+                      <span className="mt-0.5 text-xs leading-snug text-ink-warm-muted md:text-sm">
+                        {type.subtitle}
+                      </span>
                     </div>
                   </button>
                 )

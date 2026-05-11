@@ -1,20 +1,38 @@
 "use client"
 
-import { useMemo, type MutableRefObject } from "react"
-import { AlertTriangle, CircleHelp, FileText, Gavel, Search, Shield, TrendingUp, Wrench, X } from "lucide-react"
+import { useMemo, type ComponentType, type MutableRefObject } from "react"
+import {
+  AlertTriangle,
+  CircleHelp,
+  FileText,
+  Gavel,
+  Scale,
+  Search,
+  Shield,
+  TrendingUp,
+  Wrench,
+  X,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
+import {
+  ISSUE_TYPES,
+  type IssueTypeIconKey,
+} from "@/lib/constants/issue-types"
 import { US_STATE_NAMES, type USStateAbbr } from "@/lib/constants/us-states"
 
-const ISSUE_TYPES = [
-  { label: "Security Deposit", Icon: Gavel },
-  { label: "Repairs / Habitability", Icon: Wrench },
-  { label: "Eviction Notice", Icon: AlertTriangle },
-  { label: "Rent Increase", Icon: TrendingUp },
-  { label: "Lease Dispute", Icon: FileText },
-  { label: "Landlord Harassment", Icon: Shield },
-  { label: "Discrimination", Icon: AlertTriangle },
-  { label: "Other", Icon: CircleHelp },
-] as const
+const ISSUE_TYPE_ICONS: Record<
+  IssueTypeIconKey,
+  ComponentType<{ className?: string }>
+> = {
+  gavel: Gavel,
+  wrench: Wrench,
+  "alert-triangle": AlertTriangle,
+  "trending-up": TrendingUp,
+  "file-text": FileText,
+  shield: Shield,
+  scale: Scale,
+  "circle-help": CircleHelp,
+}
 
 type NewCaseFormProps = {
   issueType: string
@@ -107,13 +125,14 @@ export function NewCaseForm({
               Issue Type
             </p>
             <div className="mt-4 flex flex-wrap gap-2.5 md:gap-3 lg:max-w-5xl">
-              {ISSUE_TYPES.map(({ label, Icon }) => {
-                const active = issueType === label
+              {ISSUE_TYPES.map(({ value, iconKey }) => {
+                const Icon = ISSUE_TYPE_ICONS[iconKey]
+                const active = issueType === value
                 return (
                   <button
-                    key={label}
+                    key={value}
                     type="button"
-                    onClick={() => setIssueType(label)}
+                    onClick={() => setIssueType(value)}
                     className={[
                       "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 py-2.5 text-base font-medium transition md:text-lg",
                       active
@@ -122,7 +141,7 @@ export function NewCaseForm({
                     ].join(" ")}
                   >
                     <Icon className="size-4" />
-                    {label}
+                    {value}
                   </button>
                 )
               })}

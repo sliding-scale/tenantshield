@@ -11,6 +11,7 @@ import {
 } from "@/components/case/new-case-analysis-result"
 import { NewCaseForm } from "@/components/tenant/new-case/new-case-form"
 import { NewCaseResultView } from "@/components/tenant/new-case/new-case-result-view"
+import { DEFAULT_ISSUE_TYPE } from "@/lib/constants/issue-types"
 import { filterUSStates, type USStateAbbr } from "@/lib/constants/us-states"
 
 export default function NewCasePage() {
@@ -18,7 +19,7 @@ export default function NewCasePage() {
   const analyzeCase = useAction(api.cases.actions.analyzeNewCase)
   const stateChipRefs = useRef<Map<string, HTMLButtonElement>>(new Map())
 
-  const [issueType, setIssueType] = useState<string>("Security Deposit")
+  const [issueType, setIssueType] = useState<string>(DEFAULT_ISSUE_TYPE)
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [state, setState] = useState<string>("")

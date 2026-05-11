@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useAction } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
-import { type LetterTypeValue, LETTER_TYPES } from "@/lib/constants/letter-types"
+import { DEFAULT_ISSUE_TYPE, type IssueTypeValue } from "@/lib/constants/issue-types"
 import { filterUSStates, US_STATE_NAMES, type USStateAbbr } from "@/lib/constants/us-states"
 import { LetterResultView, type LetterData } from "../../../../components/tenant/write-letter/letter-result-view"
 import { NewLetterForm } from "../../../../components/tenant/write-letter/new-letter-form"
@@ -16,7 +16,7 @@ export default function WriteLettersPage() {
   const { clerkUser } = useCurrentUser()
   const generateLetter = useAction(api.letters.actions.generateTenantLetter)
   const stateChipRefs = useRef<Map<string, HTMLButtonElement>>(new Map())
-  const [letterType, setLetterType] = useState<LetterTypeValue>(LETTER_TYPES[0].value)
+  const [letterType, setLetterType] = useState<IssueTypeValue>(DEFAULT_ISSUE_TYPE)
   const [state, setState] = useState<string>("")
   const [stateSearch, setStateSearch] = useState("")
   const [fullName, setFullName] = useState("")

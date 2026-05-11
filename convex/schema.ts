@@ -207,7 +207,6 @@ export default defineSchema({
       dimensions: 768,
       filterFields: ["userId", "leaseId"],
     }),
-
   stateTenantLaws: defineTable({
     stateCode: v.string(),
     stateName: v.optional(v.string()),

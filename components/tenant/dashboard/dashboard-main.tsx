@@ -1,6 +1,6 @@
 "use client"
 import Link from "next/link"
-import { FileText, MessageSquareShare, PlusCircle, Sparkles, UserRound } from "lucide-react"
+import { FileText, MessageSquareShare, PlusCircle, Sparkles, Star, UserRound } from "lucide-react"
 import { useQuery } from "convex/react"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
 import { api } from "@/convex/_generated/api"
@@ -39,6 +39,13 @@ const quickActions = [
     subtitle: "Renter details & preferences",
     href: "/profile",
     Icon: UserRound,
+    featured: false,
+  },
+  {
+    title: "Give Rating",
+    subtitle: "Share your experience with a Landlord/Property",
+    href: "/ratings",
+    Icon: Star,
     featured: false,
   },
 ]
@@ -107,7 +114,7 @@ export default function TenantDashboardMain() {
                 href={href}
                 className={[
                   "group rounded-3xl border p-4 transition",
-                  index < 3 ? "md:col-span-2" : "md:col-span-3",
+                  "md:col-span-2",
                   featured
                     ? "border-surface-strong bg-surface-strong text-white hover:bg-surface-strong-hover"
                     : "border-border bg-white text-foreground hover:border-foreground/25 hover:shadow-sm",
