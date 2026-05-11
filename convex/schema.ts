@@ -230,4 +230,18 @@ export default defineSchema({
       }),
     }),
   }).index("by_state_code", ["stateCode"]),
+
+  // ========== Chat History ==========
+  chatMessages: defineTable({
+    userId: v.string(),
+    role: v.union(v.literal("user"), v.literal("assistant")),
+    content: v.string(),
+    // Optional tool call metadata for assistant messages
+    toolCalls: v.optional(v.array(v.object({
+      toolName: v.string(),
+      args: v.any(),
+      result: v.optional(v.string()),
+    }))),
+  })
+    .index("by_user_id", ["userId"]),
 })
