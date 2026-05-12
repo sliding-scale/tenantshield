@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useQuery } from "convex/react"
-import { ChevronLeft, ChevronRight, FileText } from "lucide-react"
+import { ChevronLeft, ChevronRight, FileText, Plus } from "lucide-react"
 import { api } from "@/convex/_generated/api"
 import { ListRowPill } from "@/components/shared/list-row-pill"
 import { Button } from "@/components/ui/button"
@@ -25,11 +25,23 @@ export default function LettersPage() {
   return (
     <main className="min-h-[100dvh] bg-cream-page px-4 py-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10">
       <div className="mx-auto w-full max-w-6xl">
-        <header className="mb-6 md:mb-8">
-          <h1 className="font-heading text-3xl font-semibold text-foreground md:text-4xl">Letters</h1>
-          <p className="mt-2 text-ink-warm-muted">
-            Your generated demand letters. Open, copy, print, and deliver as needed.
-          </p>
+        <header className="mb-6 flex flex-col gap-4 md:mb-8 md:flex-row md:items-start md:justify-between">
+          <div>
+            <h1 className="font-heading text-3xl font-semibold text-foreground md:text-4xl">Letters</h1>
+            <p className="mt-2 text-ink-warm-muted">
+              Your generated demand letters. Open, copy, print, and deliver as needed.
+            </p>
+          </div>
+          <Button
+            size="sm"
+            className="h-10 w-full gap-1.5 rounded-xl border-0 bg-surface-strong px-4 text-sm font-semibold text-white shadow-sm hover:bg-surface-strong-hover sm:w-auto"
+            asChild
+          >
+            <Link href="/write-letters">
+              <Plus className="size-4" aria-hidden />
+              Create letter
+            </Link>
+          </Button>
         </header>
 
         {data === undefined ? (

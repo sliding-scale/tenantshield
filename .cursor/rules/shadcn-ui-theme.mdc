@@ -1,38 +1,58 @@
 ---
-description: Prefer shadcn/ui; add from registry; otherwise inline UI—no extra wrapper components; theme from globals.css
+description: shadcn/ui + TenantShield theme — cream surfaces, semantic tokens from globals.css only
 globs: "**/*.{tsx,css}"
 alwaysApply: false
 ---
 
-# UI: shadcn/ui + brand theme
+# UI: shadcn/ui + TenantShield theme
 
 ## Component strategy (order)
 
-1. **Reuse** existing shadcn primitives under `@/components/ui` (see `components.json` aliases).
-2. **If missing** and it exists in the shadcn registry, add it with the CLI: `pnpm dlx shadcn@latest add <component>` (or `npx shadcn@latest add <component>`), aligned with `components.json` and `app/globals.css`.
-3. **If there is no shadcn component** (nothing to `add`) or a one-off is enough: **implement the UI inline** in the same file (or page/feature file) with React + Tailwind + theme tokens. **Do not** create new shared components under `components/` for small, single-use markup—avoid unnecessary abstraction and extra files.
+1. **Reuse** primitives under `@/components/ui` (see `components.json`).
+2. **If missing** from the shadcn registry: `pnpm dlx shadcn@latest add <component>`.
+3. **One-off UI**: implement inline in the page/feature with React + Tailwind + **theme tokens**. Do not add shared components for tiny markup.
 
-When something is reused **many times** across routes or grows real state/behavior, then extract a component—but default to inline for simple, one-off UI.
+Extract a component only when reused heavily or state grows.
 
-## Brand theme — `app/globals.css` is source of truth
+## `app/globals.css` is the single source of truth
 
-- **Do not** introduce one-off hex/HSL or random Tailwind palette colors for product UI.
-- **Do** use semantic tokens wired to CSS variables: e.g. `bg-background`, `text-foreground`, `bg-card`, `text-card-foreground`, `border-border`, `bg-primary`, `text-primary-foreground`, `bg-secondary`, `text-secondary-foreground`, `text-muted-foreground`, `ring-ring`, radii like `rounded-lg` / `rounded-xl` that map to `--radius`, typography like `font-heading` where appropriate.
-- Light/dark: respect `.dark` and existing variables in `:root` / `.dark` — extend the theme **in `globals.css`** when new tokens are needed, then consume via utilities or `@theme inline` mappings already there.
+- **No** ad-hoc hex/HSL or raw palette utilities (`bg-zinc-900`, `text-amber-300`) for product UI.
+- **Do** use tokens exposed via `@theme inline` and `:root` / `.dark`.
+
+### Tenant-facing “cream” layer (ratings, profile rows, warm marketing)
+
+Use these for warm pages and cards on cream backgrounds:
+
+- `bg-cream-page` — page canvas
+- `bg-cream-surface`, `bg-cream-surface-soft`, `bg-cream-surface-deep` — cards / fills
+- `border-cream-border` — borders on cream UI
+- `text-ink-warm`, `text-ink-warm-muted` — body copy on cream
+- `bg-surface-strong`, `hover:bg-surface-strong-hover`, `text-white` — **primary dark CTAs** on cream (matches selected filter chips, high contrast)
+
+### shadcn / forms layer (auth, inputs, default app chrome)
+
+Still use standard semantic tokens:
+
+- Surfaces: `bg-background`, `bg-popover`, `bg-card`, `text-foreground`, `text-card-foreground`, `border-border`, `bg-accent`
+- Actions: `bg-primary`, `text-primary-foreground`, `bg-secondary`, `text-secondary-foreground`
+- Feedback: `text-destructive`, `border-destructive`, `text-warning`, `bg-warning`
+- Focus: `ring-ring`, `border-input`
+
+Light/dark: extend **only** in `globals.css` (`:root` / `.dark` + `@theme inline` when adding a new `--color-*`). Do not add parallel color systems in TS or random CSS files.
 
 ## Examples
 
 ```tsx
-// ✅ No shadcn primitive: keep markup in the page/feature file
-<section className="rounded-2xl border border-border bg-accent/80 px-4 py-4">...</section>
+// ✅ Cream page + dark CTA (ratings, similar flows)
+<Button className="bg-surface-strong text-white hover:bg-surface-strong-hover">Give a rating</Button>
+<section className="rounded-2xl border border-cream-border bg-cream-surface/40 p-4">…</section>
 
-// ✅ Use shadcn + theme tokens
-import { Button } from "@/components/ui/button"
-;<Button variant="default">Save</Button>
-<div className="rounded-xl border border-border bg-card p-6 text-card-foreground">
+// ✅ Auth / forms (shadcn + defaults)
+<Input className="border-border bg-popover" />
+<Button variant="default">Save</Button>
 
-// ❌ Avoid ad-hoc colors
-<div className="bg-[#1a1a1a] text-gray-200">
+// ❌ Avoid
+<div className="bg-[#f5f0e8] text-[#1a1a1a]" />
 ```
 
-When composing new patterns, mirror shadcn’s Radix + `cn()` patterns and `class-variance-authority` variants already used in `@/components/ui`.
+Match existing patterns: Radix + `cn()` + `class-variance-authority` in `@/components/ui`.

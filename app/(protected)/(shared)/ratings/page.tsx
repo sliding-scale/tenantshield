@@ -1,119 +1,88 @@
 "use client"
 
-import { useMemo, useState } from "react"
-import Image from "next/image"
-import { MapPin, Search, Star } from "lucide-react"
-import { RATING_FILTER_TAGS, type IssueTypeValue, type RatingFilterTag } from "@/lib/constants/issue-types"
+import { useEffect, useMemo, useRef, useState } from "react"
+import Link from "next/link"
+import { Loader2, MapPin, Plus, Search, Star } from "lucide-react"
+import { usePaginatedQuery } from "convex/react"
+import { api } from "@/convex/_generated/api"
+import { Button } from "@/components/ui/button"
+import {
+  RATING_FILTER_TAGS,
+  type IssueTypeValue,
+  type RatingFilterTag,
+} from "@/lib/constants/issue-types"
+import { PropertyCardImage } from "@/components/tenant/rating/property-card-image"
 
-type PropertyRating = {
-  id: string
-  name: string
-  location: string
-  overallRating: number
-  depositFairness: number
-  repairSpeed: number
-  responsiveness: number
-  tags: IssueTypeValue[]
-}
-
-const PROPERTIES: PropertyRating[] = [
-  {
-    id: "p1",
-    name: "1240 Oak Street, Apt 3B",
-    location: "Little Rock, AR",
-    overallRating: 3.8,
-    depositFairness: 3.0,
-    repairSpeed: 2.8,
-    responsiveness: 3.6,
-    tags: ["Security Deposit", "Repairs / Habitability"],
-  },
-  {
-    id: "p2",
-    name: "88 Pine Avenue",
-    location: "Fayetteville, AR",
-    overallRating: 4.5,
-    depositFairness: 4.8,
-    repairSpeed: 4.2,
-    responsiveness: 4.6,
-    tags: ["Other"],
-  },
-  {
-    id: "p3",
-    name: "22 Riverside Dr, Unit 5",
-    location: "Jonesboro, AR",
-    overallRating: 2.1,
-    depositFairness: 1.5,
-    repairSpeed: 2.0,
-    responsiveness: 2.4,
-    tags: ["Eviction Notice", "Lease Dispute"],
-  },
-  {
-    id: "p4",
-    name: "500 Elm Court",
-    location: "Conway, AR",
-    overallRating: 4.1,
-    depositFairness: 4.0,
-    repairSpeed: 3.8,
-    responsiveness: 4.5,
-    tags: ["Rent Increase"],
-  },
-  {
-    id: "p5",
-    name: "17 Maple Lane, Unit 2",
-    location: "Springdale, AR",
-    overallRating: 1.8,
-    depositFairness: 1.2,
-    repairSpeed: 1.6,
-    responsiveness: 2.0,
-    tags: ["Lease Dispute", "Security Deposit"],
-  },
-  {
-    id: "p6",
-    name: "330 Birch Blvd",
-    location: "Hot Springs, AR",
-    overallRating: 3.3,
-    depositFairness: 3.5,
-    repairSpeed: 2.2,
-    responsiveness: 3.0,
-    tags: ["Repairs / Habitability"],
-  },
-]
-
-function ScoreRow({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="grid grid-cols-[1fr_auto] items-center gap-2">
-      <div className="min-w-0">
-        <p className="mb-0.5 text-[10px] font-medium uppercase tracking-wide text-ink-warm-muted">
-          {label}
-        </p>
-        <div className="h-1 w-full rounded-full bg-cream-surface-deep">
-          <div
-            className="h-1 rounded-full bg-primary"
-            style={{ width: `${Math.max(0, Math.min(100, (value / 5) * 100))}%` }}
-          />
-        </div>
-      </div>
-      <p className="w-6 text-right text-xs font-semibold text-ink-warm">{value.toFixed(1)}</p>
-    </div>
-  )
-}
+const PAGE_SIZE = 15
+/** Delay Convex search until typing pauses — avoids a query per keystroke. */
+const SEARCH_DEBOUNCE_MS = 500
 
 export default function RatingsPage() {
   const [selectedTag, setSelectedTag] = useState<RatingFilterTag>("All Properties")
-  const [search, setSearch] = useState("")
+  const [searchInput, setSearchInput] = useState("")
+  const [debouncedSearch, setDebouncedSearch] = useState("")
+  const sentinelRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      setDebouncedSearch(searchInput)
+    }, SEARCH_DEBOUNCE_MS)
+    return () => window.clearTimeout(id)
+  }, [searchInput])
+
+  const { results, status, loadMore } = usePaginatedQuery(
+    api.properties.queries.searchByName,
+    { query: debouncedSearch },
+    { initialNumItems: PAGE_SIZE },
+  )
+
+  const loadingFirstPage = status === "LoadingFirstPage"
+  const loadingMore = status === "LoadingMore"
+  const canLoadMore = status === "CanLoadMore"
+  const exhausted = status === "Exhausted"
+
+  useEffect(() => {
+    const node = sentinelRef.current
+    if (!node || !canLoadMore) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries
+        if (entry?.isIntersecting) {
+          loadMore(PAGE_SIZE)
+        }
+      },
+      { root: null, rootMargin: "280px", threshold: 0 },
+    )
+
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [canLoadMore, loadMore, debouncedSearch])
 
   const filteredProperties = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase()
-    return PROPERTIES.filter((property) => {
+    return results.filter((property) => {
       const matchesTag =
-        selectedTag === "All Properties" ? true : property.tags.includes(selectedTag)
-      const matchesSearch =
-        normalizedSearch.length === 0
+        selectedTag === "All Properties"
           ? true
-          : `${property.name} ${property.location}`.toLowerCase().includes(normalizedSearch)
-      return matchesTag && matchesSearch
+          : property.tags.includes(selectedTag as IssueTypeValue)
+      return matchesTag
     })
-  }, [selectedTag, search])
+  }, [results, selectedTag])
+
+  const trimmedDebounced = debouncedSearch.trim()
+  const serverHasRows = results.length > 0
+  const hasCards = filteredProperties.length > 0
+
+  const showEmptySearch =
+    !loadingFirstPage && trimmedDebounced.length > 0 && results.length === 0 && exhausted
+  const showEmptyAll =
+    !loadingFirstPage && trimmedDebounced.length === 0 && results.length === 0 && exhausted
+  const showEmptyFilter =
+    !loadingFirstPage && serverHasRows && !hasCards && selectedTag !== "All Properties"
+
+  const createHref = trimmedDebounced
+    ? `/ratings/create?name=${encodeURIComponent(trimmedDebounced)}`
+    : "/ratings/create"
 
   return (
     <main className="min-h-[100dvh] bg-cream-page px-4 py-5 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-8">
@@ -131,13 +100,13 @@ export default function RatingsPage() {
           </p>
         </header>
 
-        <section className="rounded-2xl border border-cream-border  p-3 md:p-4">
+        <section className="rounded-2xl border border-cream-border bg-cream-surface/40 p-3 md:p-4">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-ink-warm-muted" />
             <input
               type="text"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              value={searchInput}
+              onChange={(event) => setSearchInput(event.target.value)}
               placeholder="Search by address, city, or property name..."
               className="h-9 w-full rounded-xl border border-cream-border bg-background pl-9 pr-3 text-xs text-foreground placeholder:text-ink-warm-muted focus:border-primary focus:outline-none md:text-sm"
             />
@@ -165,61 +134,149 @@ export default function RatingsPage() {
           })}
         </section>
 
-        <section className="mt-4 md:mt-5">
-          {filteredProperties.length === 0 ? (
-            <div className="rounded-2xl border border-cream-border bg-cream-surface p-8 text-center md:p-10">
-              <p className="font-heading text-xl text-ink-warm md:text-2xl">No properties found</p>
-              <p className="mt-2 text-sm text-ink-warm-muted">Try another search or filter tag.</p>
-            </div>
-          ) : (
+        {showEmptySearch ? (
+          <section className="mt-4 rounded-2xl border border-cream-border bg-cream-surface p-6 text-center md:p-8">
+            <p className="font-heading text-xl text-ink-warm md:text-2xl">
+              No such property found
+            </p>
+            <p className="mt-2 text-sm text-ink-warm-muted">
+              We couldn&apos;t find a property matching{" "}
+              <span className="font-semibold text-ink-warm">&ldquo;{trimmedDebounced}&rdquo;</span>.
+              Add it now so other tenants can find it too.
+            </p>
+            <Button
+              size="sm"
+              className="mt-5 h-10 gap-1.5 rounded-full border-0 bg-surface-strong px-4 text-sm font-semibold text-white shadow-md hover:bg-surface-strong-hover"
+              asChild
+            >
+              <Link href={createHref}>
+                <Plus className="size-4" />
+                Create property
+              </Link>
+            </Button>
+          </section>
+        ) : null}
+
+        {showEmptyAll ? (
+          <section className="mt-4 rounded-2xl border border-cream-border bg-cream-surface p-6 text-center md:p-8">
+            <p className="font-heading text-xl text-ink-warm md:text-2xl">
+              No properties yet
+            </p>
+            <p className="mt-2 text-sm text-ink-warm-muted">
+              Be the first to add a property and start the rating history.
+            </p>
+            <Button
+              size="sm"
+              className="mt-5 h-10 gap-1.5 rounded-full border-0 bg-surface-strong px-4 text-sm font-semibold text-white shadow-md hover:bg-surface-strong-hover"
+              asChild
+            >
+              <Link href="/ratings/create">
+                <Plus className="size-4" />
+                Create property
+              </Link>
+            </Button>
+          </section>
+        ) : null}
+
+        {showEmptyFilter ? (
+          <section className="mt-4 rounded-2xl border border-cream-border bg-cream-surface p-8 text-center md:p-10">
+            <p className="font-heading text-xl text-ink-warm md:text-2xl">No properties found</p>
+            <p className="mt-2 text-sm text-ink-warm-muted">
+              No listings match this issue tag in what&apos;s loaded so far. Try &ldquo;All
+              Properties&rdquo;, load more below, or pick another filter.
+            </p>
+          </section>
+        ) : null}
+
+        {loadingFirstPage ? (
+          <section className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4 xl:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-[22rem] animate-pulse rounded-2xl border border-cream-border bg-cream-surface/60"
+              />
+            ))}
+          </section>
+        ) : null}
+
+        {hasCards ? (
+          <section className="mt-4 md:mt-5">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4 xl:grid-cols-4">
               {filteredProperties.map((property) => (
-                <article
-                  key={property.id}
-                  className="overflow-hidden rounded-2xl border border-cream-border bg-cream-surface shadow-sm"
+                <Link
+                  key={property._id}
+                  href={`/ratings/${property._id}`}
+                  className="group block overflow-hidden rounded-2xl border border-cream-border bg-cream-surface shadow-sm outline-none transition hover:border-primary/40 hover:shadow-md focus-visible:ring-2 focus-visible:ring-primary/50"
                 >
-                  <div className="relative h-[7.5rem] w-full border-b border-cream-border bg-cream-surface-soft sm:h-28">
-                    <Image
-                      src="/placeholderhouse.png"
-                      alt={`Placeholder for ${property.name}`}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                  <article className="flex flex-col">
+                    <PropertyCardImage
+                      imageUrl={property.imageUrl}
+                      propertyId={property._id}
                     />
-                  </div>
 
-                  <div className="p-3 sm:p-3.5">
-                  <div className="mb-3 flex items-start justify-between gap-2">
-                    <div className="min-w-0 flex-1">
-                      <h2 className="line-clamp-2 font-heading text-sm font-semibold leading-snug text-ink-warm md:text-[0.9375rem]">
-                        {property.name}
-                      </h2>
-                      <p className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-ink-warm-muted md:text-xs">
-                        <MapPin className="size-3 shrink-0" />
-                        {property.location}
-                      </p>
+                    <div className="p-3 sm:p-3.5">
+                      <div className="mb-3 flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <h2 className="line-clamp-2 font-heading text-sm font-semibold leading-snug text-ink-warm group-hover:text-foreground md:text-[0.9375rem]">
+                            {property.name}
+                          </h2>
+                          <p className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-ink-warm-muted md:text-xs">
+                            <MapPin className="size-3 shrink-0" />
+                            {property.reviewCount === 0
+                              ? "No reviews yet"
+                              : `${property.reviewCount} review${property.reviewCount === 1 ? "" : "s"}`}
+                          </p>
+                        </div>
+                        <p className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-cream-surface-soft px-2 py-0.5 text-xs font-semibold text-ink-warm">
+                          <Star className="size-3 fill-primary text-primary" />
+                          {property.overallRating != null
+                            ? property.overallRating.toFixed(1)
+                            : "—"}
+                        </p>
+                      </div>
+                      {property.tags.length > 0 ? (
+                        <div className="mt-3 -mx-3 overflow-x-auto overscroll-x-contain px-3 pb-0.5 [scrollbar-width:thin] sm:-mx-3.5 sm:px-3.5">
+                          <div className="flex w-max flex-nowrap gap-1.5">
+                            {property.tags.map((tag) => (
+                              <span
+                                key={tag}
+                                className="shrink-0 whitespace-nowrap rounded-full border border-cream-border bg-cream-surface-soft px-2 py-0.5 text-[10px] font-medium text-ink-warm-muted md:text-xs"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      ) : null}
                     </div>
-                    <p className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-cream-surface-soft px-2 py-0.5 text-xs font-semibold text-ink-warm">
-                      <Star className="size-3 fill-primary text-primary" />
-                      {property.overallRating.toFixed(1)}
-                    </p>
-                  </div>
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {property.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="rounded-full border border-cream-border bg-cream-surface-soft px-2 py-0.5 text-[10px] font-medium text-ink-warm-muted md:text-xs"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  </div>
-                </article>
+                  </article>
+                </Link>
               ))}
             </div>
-          )}
-        </section>
+
+          </section>
+        ) : null}
+
+        {(canLoadMore || loadingMore) &&
+        !loadingFirstPage &&
+        !showEmptySearch &&
+        !showEmptyAll ? (
+          <div
+            ref={sentinelRef}
+            className="mt-6 flex min-h-14 items-center justify-center py-4"
+          >
+            {loadingMore ? (
+              <span className="inline-flex items-center gap-2 text-sm text-ink-warm-muted">
+                <Loader2 className="size-5 animate-spin text-primary" />
+                Loading more…
+              </span>
+            ) : (
+              <span className="text-[11px] text-ink-warm-muted md:text-xs">
+                Scroll for more properties
+              </span>
+            )}
+          </div>
+        ) : null}
       </div>
     </main>
   )

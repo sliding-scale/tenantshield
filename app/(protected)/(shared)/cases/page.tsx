@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useMutation, useQuery } from "convex/react"
-import { ChevronLeft, ChevronRight, FileText } from "lucide-react"
+import { ChevronLeft, ChevronRight, FileText, Plus } from "lucide-react"
 import type { Id } from "@/convex/_generated/dataModel"
 import { api } from "@/convex/_generated/api"
 import { caseStrengthPillTone, ListRowPill } from "@/components/shared/list-row-pill"
@@ -44,39 +44,51 @@ export default function CasesPage() {
             </p>
           </div>
 
-          <div
-            className="flex shrink-0 rounded-2xl border border-cream-border bg-cream-surface p-1 shadow-sm"
-            role="tablist"
-            aria-label="Case list filter"
-          >
-            <button
-              type="button"
-              role="tab"
-              aria-selected={bucket === "active"}
-              onClick={() => setBucket("active")}
-              className={[
-                "rounded-xl px-4 py-2.5 text-sm font-semibold transition md:px-5 md:text-base",
-                bucket === "active"
-                  ? "bg-cream-surface-deep text-ink-warm shadow-sm"
-                  : "text-muted-foreground hover:text-foreground",
-              ].join(" ")}
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+            <Button
+              size="sm"
+              className="h-10 w-full gap-1.5 rounded-xl border-0 bg-surface-strong px-4 text-sm font-semibold text-white shadow-sm hover:bg-surface-strong-hover sm:w-auto"
+              asChild
             >
-              Active
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={bucket === "archived"}
-              onClick={() => setBucket("archived")}
-              className={[
-                "rounded-xl px-4 py-2.5 text-sm font-semibold transition md:px-5 md:text-base",
-                bucket === "archived"
-                  ? "bg-cream-surface-deep text-ink-warm shadow-sm"
-                  : "text-muted-foreground hover:text-foreground",
-              ].join(" ")}
+              <Link href="/newcase">
+                <Plus className="size-4" aria-hidden />
+                Create case
+              </Link>
+            </Button>
+            <div
+              className="flex shrink-0 rounded-2xl border border-cream-border bg-cream-surface p-1 shadow-sm"
+              role="tablist"
+              aria-label="Case list filter"
             >
-              Archived
-            </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={bucket === "active"}
+                onClick={() => setBucket("active")}
+                className={[
+                  "rounded-xl px-4 py-2.5 text-sm font-semibold transition md:px-5 md:text-base",
+                  bucket === "active"
+                    ? "bg-cream-surface-deep text-ink-warm shadow-sm"
+                    : "text-muted-foreground hover:text-foreground",
+                ].join(" ")}
+              >
+                Active
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={bucket === "archived"}
+                onClick={() => setBucket("archived")}
+                className={[
+                  "rounded-xl px-4 py-2.5 text-sm font-semibold transition md:px-5 md:text-base",
+                  bucket === "archived"
+                    ? "bg-cream-surface-deep text-ink-warm shadow-sm"
+                    : "text-muted-foreground hover:text-foreground",
+                ].join(" ")}
+              >
+                Archived
+              </button>
+            </div>
           </div>
         </header>
 

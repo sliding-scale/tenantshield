@@ -229,4 +229,40 @@ export default defineSchema({
       }),
     }),
   }).index("by_state_code", ["stateCode"]),
+  properties: defineTable({
+    name: v.string(),
+    imageStorageId: v.id("_storage"),
+    createdByClerkId: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_clerk_id", ["createdByClerkId"])
+    .searchIndex("search_by_name", { searchField: "name" }),
+
+  ratings: defineTable({
+    propertyId: v.id("properties"),
+    clerkId: v.string(),
+    scores: v.object({
+      responsiveness: v.number(),
+      honesty: v.number(),
+      depositFairness: v.number(),
+      repairSpeed: v.number(),
+      overall: v.number(),
+    }),
+    landlordName: v.optional(v.string()),
+    experience: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_property_id", ["propertyId"])
+    .index("by_clerk_id", ["clerkId"])
+    .index("by_property_and_clerk", ["propertyId", "clerkId"]),
+
+  ratingsIssueType: defineTable({
+    issueType: v.string(),
+    clerkId: v.string(),
+    propertyId: v.id("properties"),
+    ratingId: v.id("ratings"),
+  })
+    .index("by_issue_type", ["issueType"])
+    .index("by_rating_id", ["ratingId"])
+    .index("by_property_id", ["propertyId"]),
 })

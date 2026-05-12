@@ -1,7 +1,7 @@
 "use client"
 
 import { useClerk, useSignIn, useSignUp } from "@clerk/nextjs"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 
 const SSO_CALLBACK = "/sso-callback"
@@ -24,123 +24,115 @@ export function GoogleOAuthButton(props: GoogleAuthButtonSignIn | GoogleAuthButt
   const { signUp } = useSignUp()
   const [pending, setPending] = useState(false)
 
-  useEffect(() => {
-    const clearPending = () => setPending(false)
-    const onVisibility = () => {
-      if (document.visibilityState === "visible") {
-        clearPending()
-      }
-    }
-
-    window.addEventListener("pageshow", clearPending)
-    window.addEventListener("focus", clearPending)
-    document.addEventListener("visibilitychange", onVisibility)
-    return () => {
-      window.removeEventListener("pageshow", clearPending)
-      window.removeEventListener("focus", clearPending)
-      document.removeEventListener("visibilitychange", onVisibility)
-    }
-  }, [])
-
-  const waitForAuthResources = async () => {
-    for (let i = 0; i < 8; i += 1) {
-      const hasSignIn = !!signIn
-      const hasSignUp = !!signUp
-      if (hasSignIn || hasSignUp) return true
-      await new Promise((resolve) => setTimeout(resolve, 125))
-    }
-    return !!signIn || !!signUp
-  }
-
   const onClick = async () => {
-    if (!clerk.loaded || pending) return
-    setPending(true)
-    try {
-      const hasAuthResources = await waitForAuthResources()
-      if (!hasAuthResources) {
-        // Last-resort recovery for stale back/forward restores.
-        window.location.reload()
-        return
-      }
+    if (!clerk.loaded) return
 
-      // Clear any leftover Clerk attempt state from prior failed credential / OAuth tries.
-      await Promise.allSettled([signIn?.reset(), signUp?.reset()])
+    if (props.mode === "sign-in") {
+      if (!signIn) return
+      // Clear any in-progress identifier/password attempt so OAuth doesn't inherit needs_identifier.
+      await signIn.reset()
 
-      if (props.mode === "sign-in") {
-        const metadata = props.unsafeMetadata
-        const hasMetadata =
-          metadata !== undefined && metadata !== null && Object.keys(metadata).length > 0
+      const metadata = props.unsafeMetadata
+      const hasMetadata =
+        metadata !== undefined && metadata !== null && Object.keys(metadata).length > 0
 
-        const trySignUpThenSignIn = async () => {
-          if (!signUp) {
+      // Helper to attempt sign-up, but fallback to sign-in if user exists
+      const trySignUpThenSignIn = async () => {
+        if (!signUp) return
+        setPending(true)
+        const { error } = await signUp.sso({
+          strategy: "oauth_google",
+          redirectCallbackUrl: SSO_CALLBACK,
+          redirectUrl: AFTER_AUTH,
+          unsafeMetadata: metadata,
+        })
+        setPending(false)
+
+        if (error) {
+          const code = "code" in error && typeof error.code === "string" ? error.code : ""
+          // Clerk may reject sign-up when the account already exists; fall back to sign-in.
+          if (code === "form_identifier_exists" || code === "identifier_already_signed_up") {
             if (!signIn) return
+            await signIn.reset()
+            setPending(true)
             const { error: signInErr } = await signIn.sso({
               strategy: "oauth_google",
               redirectCallbackUrl: SSO_CALLBACK,
               redirectUrl: AFTER_AUTH,
             })
-            if (signInErr) console.error(signInErr)
-            return
-          }
-
-          const { error } = await signUp.sso({
-            strategy: "oauth_google",
-            redirectCallbackUrl: SSO_CALLBACK,
-            redirectUrl: AFTER_AUTH,
-            unsafeMetadata: metadata,
-          })
-
-          if (error) {
-            const code = "code" in error && typeof error.code === "string" ? error.code : ""
-            if (code === "form_identifier_exists" || code === "identifier_already_signed_up") {
-              if (!signIn) return
-              const { error: signInErr } = await signIn.sso({
-                strategy: "oauth_google",
-                redirectCallbackUrl: SSO_CALLBACK,
-                redirectUrl: AFTER_AUTH,
-              })
-              if (signInErr) {
-                console.error(signInErr)
-              }
+            setPending(false)
+            if (signInErr) {
+              console.error(signInErr)
               return
             }
-            console.error(error)
+            if (
+              signIn.status !== "complete" &&
+              signIn.status !== "needs_second_factor" &&
+              signIn.status !== "needs_client_trust"
+            ) {
+              console.error("Sign-in (OAuth fallback) not complete:", signIn.status)
+            }
+            return
           }
-        }
-
-        if (hasMetadata) {
-          await trySignUpThenSignIn()
+          console.error(error)
           return
         }
-
-        if (!signIn) return
-        const { error } = await signIn.sso({
-          strategy: "oauth_google",
-          redirectCallbackUrl: SSO_CALLBACK,
-          redirectUrl: AFTER_AUTH,
-        })
-        if (error) {
-          console.error(error)
+        if (signUp.status !== "complete") {
+          console.error("Sign-in (OAuth via sign-up) not complete:", signUp.status)
         }
+      }
+
+      if (hasMetadata) {
+        await trySignUpThenSignIn()
         return
       }
 
-      if (!signUp) return
-      const { error } = await signUp.sso({
+      setPending(true)
+      const { error } = await signIn.sso({
         strategy: "oauth_google",
         redirectCallbackUrl: SSO_CALLBACK,
         redirectUrl: AFTER_AUTH,
-        unsafeMetadata: props.unsafeMetadata,
       })
+      setPending(false)
       if (error) {
         console.error(error)
+        return
       }
-    } finally {
-      setPending(false)
+      if (
+        signIn.status === "needs_second_factor" ||
+        signIn.status === "needs_client_trust"
+      ) {
+        return
+      }
+      if (signIn.status !== "complete") {
+        console.error("Sign-in attempt not complete:", signIn.status)
+      }
+      return
+    }
+
+    if (!signUp) return
+    await signUp.reset()
+    setPending(true)
+    const { error } = await signUp.sso({
+      strategy: "oauth_google",
+      redirectCallbackUrl: SSO_CALLBACK,
+      redirectUrl: AFTER_AUTH,
+      unsafeMetadata: props.unsafeMetadata,
+    })
+    setPending(false)
+    if (error) {
+      console.error(error)
+      return
+    }
+    if (signUp.status !== "complete") {
+      console.error("Sign-up OAuth not complete:", signUp.status)
     }
   }
 
-  const disabled = !clerk.loaded || pending
+  const needsSignIn = props.mode === "sign-in" && !(props.unsafeMetadata && Object.keys(props.unsafeMetadata).length > 0)
+  const needsSignUp = props.mode === "sign-up" || (props.mode === "sign-in" && !!props.unsafeMetadata && Object.keys(props.unsafeMetadata).length > 0)
+  const disabled =
+    !clerk.loaded || pending || (needsSignIn && !signIn) || (needsSignUp && !signUp)
 
   return (
     <Button
