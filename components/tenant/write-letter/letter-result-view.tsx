@@ -56,6 +56,8 @@ type LetterResultViewProps = {
   heroSubtitle?: string
   /** Show an "Edit letter" control under the subtitle (read mode). */
   onEditLetter?: () => void
+  /** Extra controls in the header row, before the copy icon (e.g. rate CTA). */
+  headerBeforeCopy?: ReactNode
 }
 
 export function LetterResultView({
@@ -72,6 +74,7 @@ export function LetterResultView({
   heroTitle,
   heroSubtitle,
   onEditLetter,
+  headerBeforeCopy,
 }: LetterResultViewProps) {
   const fullText = letterBodyOverride ?? buildFullLetterText(letterData)
   const metaLine = `${(stateName || letterData.metadata.state || "—").toUpperCase()} · TO ${(
@@ -85,7 +88,7 @@ export function LetterResultView({
   return (
     <main className="flex min-h-[100dvh] flex-col bg-cream-page pb-28 pt-5 md:min-h-[calc(100vh-4rem)] md:pb-10 md:pt-6 lg:pt-8">
       <div className="flex w-full flex-1 flex-col px-4 sm:px-6 md:px-10 lg:px-14 xl:px-16">
-        <header className="mb-5 grid grid-cols-[2.75rem_1fr_2.75rem] items-center gap-2 md:mb-8">
+        <header className="mb-5 grid grid-cols-[2.75rem_1fr_auto] items-center gap-2 md:mb-8">
           <Button
             type="button"
             variant="outline"
@@ -95,18 +98,21 @@ export function LetterResultView({
           >
             <ChevronLeft className="size-5" />
           </Button>
-          <h1 className="text-center font-heading text-xl font-semibold text-foreground sm:text-2xl">
+          <h1 className="min-w-0 text-center font-heading text-xl font-semibold text-foreground sm:text-2xl">
             {letterData.metadata.letterTitle || letterType}
           </h1>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCopy}
-            className="h-11 w-11 rounded-full border-border bg-cream-surface-soft p-0 text-foreground"
-            aria-label="Copy letter"
-          >
-            <Copy className="size-5" />
-          </Button>
+          <div className="flex min-w-0 items-center justify-end gap-2">
+            {headerBeforeCopy}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCopy}
+              className="h-11 w-11 shrink-0 rounded-full border-border bg-cream-surface-soft p-0 text-foreground"
+              aria-label="Copy letter"
+            >
+              <Copy className="size-5" />
+            </Button>
+          </div>
         </header>
 
         <div className="mx-auto w-full max-w-3xl">

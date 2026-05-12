@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { useMutation, useQuery } from "convex/react"
 import type { Id } from "@/convex/_generated/dataModel"
@@ -75,19 +76,28 @@ export default function CaseDetailsPage() {
           aiAnalysis={row.aiAnalysis}
           onBack={() => router.push("/cases")}
           headerTrailing={
-            <Button
-              type="button"
-              variant="outline"
-              disabled={statusBusy}
-              onClick={() => void toggleArchive()}
-              className="h-10 shrink-0 rounded-xl border-cream-border bg-cream-surface-deep px-3 text-sm font-semibold text-ink-warm hover:bg-cream-surface sm:h-11 sm:px-4 sm:text-base"
-            >
-              {statusBusy
-                ? "…"
-                : effectiveStatus === "active"
-                  ? "Archive"
-                  : "Restore"}
-            </Button>
+            <div className="flex max-w-[min(100vw-8rem,20rem)] flex-wrap items-center justify-end gap-2 sm:max-w-none">
+              <Button
+                size="sm"
+                className="h-10 shrink-0 rounded-xl border-0 bg-surface-strong px-3 text-xs font-semibold text-white shadow-sm hover:bg-surface-strong-hover sm:px-4 sm:text-sm"
+                asChild
+              >
+                <Link href="/ratings">Rate your experience</Link>
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={statusBusy}
+                onClick={() => void toggleArchive()}
+                className="h-10 shrink-0 rounded-xl border-cream-border bg-cream-surface-deep px-3 text-sm font-semibold text-ink-warm hover:bg-cream-surface sm:h-11 sm:px-4 sm:text-base"
+              >
+                {statusBusy
+                  ? "…"
+                  : effectiveStatus === "active"
+                    ? "Archive"
+                    : "Restore"}
+              </Button>
+            </div>
           }
         />
       </div>
