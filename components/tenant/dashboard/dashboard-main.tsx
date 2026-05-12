@@ -16,7 +16,7 @@ const quickActions = [
   {
     title: "Ask AI",
     subtitle: "Claude Sonnet 4.5",
-    href: "/ask-ai",
+    href: "/ask-Ai",
     Icon: Sparkles,
     featured: false,
   },
@@ -147,7 +147,6 @@ export default function TenantDashboardMain() {
     </main>
   )
 }
-
 function StatPill({ value, label }: { value: string; label: string }) {
   return (
     <div className="rounded-2xl border border-cream-border bg-cream-surface-soft px-4 py-3 text-center ring-1 ring-cream-border/50 sm:px-5 sm:py-4">

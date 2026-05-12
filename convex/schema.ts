@@ -229,6 +229,27 @@ export default defineSchema({
       }),
     }),
   }).index("by_state_code", ["stateCode"]),
+  // ========== Ask AI (threaded chat) ==========
+  chatConversations: defineTable({
+    userId: v.string(),
+    title: v.string(),
+    updatedAt: v.number(),
+    createdAt: v.number(),
+  }).index("by_user_updated", ["userId", "updatedAt"]),
+
+  chatMessages: defineTable({
+    userId: v.string(),
+    conversationId: v.optional(v.id("chatConversations")),
+    role: v.union(v.literal("user"), v.literal("assistant")),
+    content: v.string(),
+    toolCalls: v.optional(v.array(v.object({
+      toolName: v.string(),
+      args: v.any(),
+      result: v.optional(v.string()),
+    }))),
+  })
+    .index("by_user_id", ["userId"])
+    .index("by_conversation", ["conversationId"]),
   properties: defineTable({
     name: v.string(),
     imageStorageId: v.id("_storage"),

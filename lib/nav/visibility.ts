@@ -25,10 +25,13 @@ export function isOnboardingQuestionFlowPath(pathname: string | null) {
 
 export function isSharedPagePath(pathname: string | null) {
   if (!pathname) return false
-  return pathname.startsWith("/newcase") || 
-  pathname.startsWith("/ask-ai") ||
-   pathname.startsWith("/write-letters") ||
-    pathname.startsWith("/analyze-lease")
+  const p = pathname.toLowerCase()
+  return (
+    p.startsWith("/newcase") ||
+    p.startsWith("/ask-Ai") ||
+    p.startsWith("/write-letters") ||
+    p.startsWith("/analyze-lease")
+  )
 }
 
 export function shouldShowMobileTabBar(pathname: string | null, isSignedIn: boolean) {
