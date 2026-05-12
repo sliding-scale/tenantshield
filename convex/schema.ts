@@ -16,6 +16,7 @@ export default defineSchema({
     name: v.string(),
     role: Role,
     onboardingSkippedAt: v.optional(v.number()),
+    acceptedTerms: v.optional(v.boolean()),
   })
     .index("by_clerk_id", ["clerkId"])
     .index("by_email", ["email"]),

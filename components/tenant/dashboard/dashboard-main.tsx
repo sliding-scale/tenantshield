@@ -62,8 +62,9 @@ export default function TenantDashboardMain() {
   const protectionAngle = Math.max(0, Math.min(360, (protectionIndex / 100) * 360))
 
   return (
-    <main className="min-h-[100dvh] bg-cream-page px-4 pb-24 pt-5 text-foreground md:min-h-[calc(100vh-4rem)] md:px-8 md:pb-10 md:pt-8 lg:px-10">
-      <div className="mx-auto w-full max-w-7xl">
+    <>
+      <main className="min-h-[100dvh] bg-cream-page px-4 pb-24 pt-5 text-foreground md:min-h-[calc(100vh-4rem)] md:px-8 md:pb-10 md:pt-8 lg:px-10">
+        <div className="mx-auto w-full max-w-7xl">
         <section className="mb-6 flex items-center justify-between md:mb-8">
           <div>
             <h1 className="font-heading text-4xl font-semibold leading-tight md:text-xl md:font-medium md:text-muted-foreground">
@@ -145,6 +146,7 @@ export default function TenantDashboardMain() {
         </section>
       </div>
     </main>
+    </>
   )
 }
 function StatPill({ value, label }: { value: string; label: string }) {

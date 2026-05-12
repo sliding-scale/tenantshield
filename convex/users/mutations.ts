@@ -1,4 +1,4 @@
-import { internalMutation } from "../_generated/server"
+import { internalMutation, mutation } from "../_generated/server"
 import { v } from "convex/values"
 import { Role } from "../schema"
 
@@ -56,6 +56,24 @@ export const clearOnboardingSkipByClerkId = internalMutation({
       .unique()
     if (!existing) return null
     await ctx.db.patch(existing._id, { onboardingSkippedAt: undefined })
+    return existing._id
+  },
+})
+
+export const acceptTerms = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity()
+    if (!identity) throw new Error("Unauthenticated")
+
+    const existing = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique()
+    
+    if (!existing) throw new Error("User not found")
+    
+    await ctx.db.patch(existing._id, { acceptedTerms: true })
     return existing._id
   },
 })

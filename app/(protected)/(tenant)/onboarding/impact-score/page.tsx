@@ -7,6 +7,7 @@ import { useQuery } from "convex/react"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
 import { api } from "@/convex/_generated/api"
 import { Button } from "@/components/ui/button"
+import { TermsModal } from "@/components/tenant/terms-modal"
 
 const labelStyles: Record<string, string> = {
   "Low impact": "bg-emerald-600",
@@ -159,7 +160,7 @@ export default function ImpactScorePage() {
           asChild
           className="mt-8 h-14 w-full rounded-2xl bg-black px-6 text-base font-semibold text-white hover:bg-black/90"
         >
-          <Link href="/dashboard">Yes — Let&apos;s Do This</Link>
+          <Link href="/onboarding/trial">Yes — Let&apos;s Do This</Link>
         </Button>
       </div>
 
@@ -221,7 +222,7 @@ export default function ImpactScorePage() {
                   asChild
                   className="h-11 min-h-11 flex-1 rounded-xl px-6 text-sm font-semibold sm:h-12 sm:flex-none sm:px-8 sm:text-base"
                 >
-                  <Link href="/dashboard">Yes — Let&apos;s Do This</Link>
+                  <Link href="/onboarding/trial">Yes — Let&apos;s Do This</Link>
                 </Button>
                 {/* <Button
                   asChild
@@ -235,6 +236,7 @@ export default function ImpactScorePage() {
           </div>
         </div>
       </div>
+      <TermsModal />
     </main>
   )
 }
