@@ -8,6 +8,7 @@ async function embedQuery(query: string): Promise<number[]> {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY as string });
   const embedResult = await ai.models.embedContent({
     model: "gemini-embedding-001",
+    config: { outputDimensionality: 768 },
     contents: query,
   });
   const vector = embedResult.embeddings?.[0]?.values;

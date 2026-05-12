@@ -2,7 +2,7 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { UIMessage } from "ai";
 import type { Id } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
@@ -47,6 +47,8 @@ type ChatThreadProps = {
   conversationId: Id<"chatConversations">;
   /** Convex rows; undefined = still loading */
   storedMessages: ChatMessageDoc[] | undefined;
+  /** US state code selected by user in the state picker */
+  selectedStateCode: string | null;
 };
 
 /** First resolved snapshot per conversation for useChat initial messages (Convex sync must not reset the thread). */
@@ -55,6 +57,7 @@ const frozenInitialByConversationId = new Map<string, UIMessage[]>();
 export default function ChatThread({
   conversationId,
   storedMessages,
+  selectedStateCode,
 }: ChatThreadProps) {
   const initialMessages = useMemo(() => {
     const cached = frozenInitialByConversationId.get(conversationId);
@@ -83,6 +86,7 @@ export default function ChatThread({
       key={conversationId}
       conversationId={conversationId}
       initialMessages={initialMessages}
+      selectedStateCode={selectedStateCode}
     />
   );
 }
@@ -90,18 +94,19 @@ export default function ChatThread({
 function ChatThreadLoaded({
   conversationId,
   initialMessages,
+  selectedStateCode,
 }: {
   conversationId: Id<"chatConversations">;
   initialMessages: ReturnType<typeof chatMessagesToUIMessages>;
+  selectedStateCode: string | null;
 }) {
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
         api: "/api/chat",
         credentials: "same-origin",
-        body: { conversationId },
       }),
-    [conversationId],
+    [],
   );
 
   const { messages, sendMessage, status, stop, error, clearError } = useChat({
@@ -129,7 +134,12 @@ function ChatThreadLoaded({
     const text = draft.trim();
     if (!text || busy) return;
     setDraft("");
-    await sendMessage({ text });
+    await sendMessage(
+      { text },
+      {
+        body: { conversationId, selectedStateCode },
+      },
+    );
   }
 
   return (

@@ -134,6 +134,7 @@ export default function AskAiShell() {
           <ChatThread
             conversationId={activeConversationId}
             storedMessages={storedMessages}
+            selectedStateCode={selectedStateCode}
           />
         </section>
       </div>
