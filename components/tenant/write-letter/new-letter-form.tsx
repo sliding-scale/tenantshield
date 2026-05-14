@@ -61,6 +61,10 @@ type NewLetterFormProps = {
   setLandlordName: (value: string) => void
   propertyAddress: string
   setPropertyAddress: (value: string) => void
+  senderAddress: string
+  setSenderAddress: (value: string) => void
+  landlordAddress: string
+  setLandlordAddress: (value: string) => void
   description: string
   setDescription: (value: string) => void
   amountAtStake: string
@@ -92,6 +96,10 @@ export function NewLetterForm({
   setLandlordName,
   propertyAddress,
   setPropertyAddress,
+  senderAddress,
+  setSenderAddress,
+  landlordAddress,
+  setLandlordAddress,
   description,
   setDescription,
   amountAtStake,
@@ -267,8 +275,22 @@ export function NewLetterForm({
             <input
               value={propertyAddress}
               onChange={(e) => setPropertyAddress(e.target.value)}
-              placeholder="Property address"
+              placeholder="Rental property address"
               className="h-14 w-full rounded-3xl border border-border bg-background px-5 text-lg text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:h-16 md:text-xl lg:col-span-2"
+            />
+            <textarea
+              value={senderAddress}
+              onChange={(e) => setSenderAddress(e.target.value)}
+              placeholder="Your mailing address (appears exactly on the letter)"
+              rows={3}
+              className="min-h-[100px] w-full rounded-3xl border border-border bg-background px-5 py-3 text-lg text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:min-h-[120px] md:text-xl lg:col-span-2"
+            />
+            <textarea
+              value={landlordAddress}
+              onChange={(e) => setLandlordAddress(e.target.value)}
+              placeholder="Landlord mailing address (appears exactly on the letter)"
+              rows={3}
+              className="min-h-[100px] w-full rounded-3xl border border-border bg-background px-5 py-3 text-lg text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:min-h-[120px] md:text-xl lg:col-span-2"
             />
             <textarea
               value={description}

@@ -7,6 +7,8 @@ import {
   HelpCircle,
   ShieldCheck,
 } from "lucide-react"
+import { UpgradeToViewCta } from "@/components/shared/upgrade-to-view-cta"
+import { shouldBlurFreeLeaseAnalysis, type PlanId } from "@/lib/plans/plan-access"
 
 export type LeaseAnalysis = {
   leaseReview: string
@@ -21,17 +23,13 @@ export type LeaseAnalysis = {
 export function LeaseResultsView({
   analysis,
   headerTrailing,
+  createdUnderPlan,
 }: {
   analysis: LeaseAnalysis
   headerTrailing?: React.ReactNode
+  createdUnderPlan?: PlanId | null
 }) {
-  const verdict = analysis.overallRecommendation.split(" ")[0]?.toUpperCase() ?? ""
-  const verdictColor =
-    verdict === "GOOD"
-      ? "text-primary"
-      : verdict === "NEGOTIATE"
-        ? "text-warning"
-        : "text-destructive"
+  const blurAnalysis = shouldBlurFreeLeaseAnalysis(createdUnderPlan)
 
   return (
     <div className="flex flex-col gap-6 pb-6">
@@ -52,6 +50,37 @@ export function LeaseResultsView({
         </div>
       </section>
 
+      <div className={blurAnalysis ? "relative overflow-hidden rounded-3xl" : undefined}>
+        {blurAnalysis && (
+          <div className="pointer-events-none select-none blur-sm" aria-hidden>
+            <LeaseAnalysisSections analysis={analysis} />
+          </div>
+        )}
+        {!blurAnalysis && <LeaseAnalysisSections analysis={analysis} />}
+        {blurAnalysis && (
+          <UpgradeToViewCta
+            eyebrow="Lease analysis"
+            title="Upgrade to view this analysis"
+            description="See the full TenantShield lease breakdown, red flags, missing clauses, and questions to ask on a paid plan."
+            actionLabel="Upgrade to view it"
+          />
+        )}
+      </div>
+    </div>
+  )
+}
+
+function LeaseAnalysisSections({ analysis }: { analysis: LeaseAnalysis }) {
+  const verdict = analysis.overallRecommendation.split(" ")[0]?.toUpperCase() ?? ""
+  const verdictColor =
+    verdict === "GOOD"
+      ? "text-primary"
+      : verdict === "NEGOTIATE"
+        ? "text-warning"
+        : "text-destructive"
+
+  return (
+    <div className="flex flex-col gap-6">
       <section className="rounded-2xl border border-cream-border bg-cream-surface p-6 shadow-sm md:rounded-3xl md:p-10">
         <div className="flex items-start gap-3">
           <CheckCircle className={`mt-0.5 size-6 shrink-0 ${verdictColor}`} />

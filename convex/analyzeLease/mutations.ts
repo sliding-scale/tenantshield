@@ -1,15 +1,15 @@
-import { internalMutation, mutation } from "../_generated/server"
-import { v } from "convex/values"
-import { Plan } from "../schema"
+import { internalMutation, mutation } from "../_generated/server";
+import { v } from "convex/values";
+import { Plan } from "../schema";
 import { assertCanCreateLeaseAnalysis, incrementUsedLeaseAnalyses } from "../planUsage/helpers"
 
 export const generateUploadUrl = mutation({
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity()
-    if (!identity) throw new Error("Not authenticated")
-    return await ctx.storage.generateUploadUrl()
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    return await ctx.storage.generateUploadUrl();
   },
-})
+});
 
 export const saveLeaseToDB = internalMutation({
   args: {
@@ -27,8 +27,8 @@ export const saveLeaseToDB = internalMutation({
       state: args.state,
       leaseText: args.leaseText,
       pdfFile: args.pdfFile,
-    })
+    });
     await incrementUsedLeaseAnalyses(ctx, args.userId)
-    return leaseId
+    return leaseId;
   },
-})
+});

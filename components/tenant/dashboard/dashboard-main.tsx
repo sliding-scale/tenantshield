@@ -16,7 +16,7 @@ const quickActions = [
   {
     title: "Ask AI",
     subtitle: "Claude Sonnet 4.5",
-    href: "/ask-Ai",
+    href: "/ask-AI",
     Icon: Sparkles,
     featured: false,
   },

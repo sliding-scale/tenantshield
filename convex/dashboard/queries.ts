@@ -22,15 +22,22 @@ export const countsForCurrentUser = query({
         ? 0
         : activeRows.reduce((sum, row) => sum + row.aiAnalysis.caseStrength, 0) / activeCases
 
-    const letters = await ctx.db
-      .query("letters")
-      .withIndex("by_user_id", (q) => q.eq("userId", userId))
-      .collect()
+    const [letters, leases] = await Promise.all([
+      ctx.db
+        .query("letters")
+        .withIndex("by_user_id", (q) => q.eq("userId", userId))
+        .collect(),
+      ctx.db
+        .query("leases")
+        .withIndex("by_user_id", (q) => q.eq("userId", userId))
+        .collect(),
+    ])
 
     return {
       activeCases,
       totalCases: cases.length,
       letters: letters.length,
+      leases: leases.length,
       protectionIndex,
     }
   },

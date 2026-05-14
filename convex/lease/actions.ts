@@ -1,8 +1,9 @@
 import { action } from "../_generated/server";
-import type { Id } from "../_generated/dataModel";
+import type { Doc, Id } from "../_generated/dataModel";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { leaseAnalysisSchema } from "./aiSchema";
+import { ensureLeaseDocument } from "./validation";
 import type { z } from "zod";
 import Exa from "exa-js";
 import { GoogleGenAI, Type } from "@google/genai";
@@ -30,7 +31,11 @@ async function runLeaseAnalysisCore(
     config: object;
     contents: Array<{ role: "user"; parts: Array<{ text: string }> }>;
   }) => {
-    const models = ["gemini-2.5-flash", "gemini-3-flash-preview", "gemini-2.5-pro"];
+    const models = [
+      "gemini-2.5-flash",
+      "gemini-3-flash-preview",
+      "gemini-2.5-pro",
+    ];
     const maxRetries = 2;
     let lastError: unknown;
 
@@ -44,12 +49,15 @@ async function runLeaseAnalysisCore(
           });
         } catch (error) {
           lastError = error;
-          const message = error instanceof Error ? error.message : String(error);
+          const message =
+            error instanceof Error ? error.message : String(error);
           const isTransient =
             /UNAVAILABLE|503|high demand|RESOURCE_EXHAUSTED/i.test(message);
           const canRetry = isTransient && attempt < maxRetries;
           if (canRetry) {
-            await new Promise((resolve) => setTimeout(resolve, 1200 * (attempt + 1)));
+            await new Promise((resolve) =>
+              setTimeout(resolve, 1200 * (attempt + 1)),
+            );
             continue;
           }
           break;
@@ -285,17 +293,29 @@ Hard rules:
     {
       chunkType: "missing_clauses",
       chunkText: generatedData.missingClauses
-        .map((mc, i) => `${i + 1}. Clause: ${mc.clauseName}\nExplanation: ${mc.explanation}`)
+        .map(
+          (mc, i) =>
+            `${i + 1}. Clause: ${mc.clauseName}\nExplanation: ${mc.explanation}`,
+        )
         .join("\n\n"),
     },
     {
       chunkType: "tenant_friendly_clauses",
       chunkText: generatedData.tenantFriendlyClauses
-        .map((tf, i) => `${i + 1}. Quote: ${tf.quote}\nExplanation: ${tf.explanation}`)
+        .map(
+          (tf, i) =>
+            `${i + 1}. Quote: ${tf.quote}\nExplanation: ${tf.explanation}`,
+        )
         .join("\n\n"),
     },
-    { chunkType: "questions_to_ask", chunkText: generatedData.questionsToAsk.join("\n") },
-    { chunkType: "overall_recommendation", chunkText: generatedData.overallRecommendation },
+    {
+      chunkType: "questions_to_ask",
+      chunkText: generatedData.questionsToAsk.join("\n"),
+    },
+    {
+      chunkType: "overall_recommendation",
+      chunkText: generatedData.overallRecommendation,
+    },
   ];
 
   const chunkEmbeddings: AnalysisCoreResult["chunkEmbeddings"] = [];
@@ -334,7 +354,8 @@ export const analyzeLeaseDocument = action({
       Boolean(expectedBypassToken) &&
       args.testBypassToken === expectedBypassToken &&
       Boolean(args.testUserId);
-    const userId = identity?.subject ?? (canUseTestBypass ? args.testUserId : undefined);
+    const userId =
+      identity?.subject ?? (canUseTestBypass ? args.testUserId : undefined);
     if (!userId) {
       throw new Error(
         "Missing user identity. Log in or provide a valid test bypass token in dev.",
@@ -344,6 +365,8 @@ export const analyzeLeaseDocument = action({
       (internal as any)["users/queries"].getPlanByClerkId,
       { clerkId: userId },
     );
+
+    await ensureLeaseDocument(args.leaseText);
 
     const { generatedData, embedding, chunkEmbeddings } =
       await runLeaseAnalysisCore(args.state, args.leaseText);
@@ -400,5 +423,25 @@ export const analyzeLeaseById = action({
     );
 
     return { leaseId: args.leaseId, leaseData: generatedData };
+  },
+});
+
+export const getLeasePdfUrl = action({
+  args: { leaseId: v.id("leases") },
+  handler: async (ctx, args): Promise<string | null> => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    const lease: Doc<"leases"> | null = await ctx.runQuery(
+      (internal as any)["lease/queries"].getLeaseById,
+      { leaseId: args.leaseId },
+    );
+    if (!lease || lease.userId !== identity.subject)
+      throw new Error("Not authorized");
+    if (!lease.pdfFile) return null;
+    try {
+      return await ctx.storage.getUrl(lease.pdfFile);
+    } catch (e) {
+      return null;
+    }
   },
 });

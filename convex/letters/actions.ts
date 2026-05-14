@@ -2,12 +2,14 @@ import { action } from "../_generated/server";
 import type { Id } from "../_generated/dataModel";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
-import { letterAnalysisSchema } from "./aiSchema";
+import {
+  letterAiCoreSchema,
+  letterAnalysisSchema,
+  type LetterAnalysis,
+} from "./aiSchema";
+import { formatLetterHeaderDate } from "./formatLetterDate";
 import Exa from "exa-js";
 import { GoogleGenAI, Type } from "@google/genai";
-import type { z } from "zod";
-
-type LetterAnalysis = z.infer<typeof letterAnalysisSchema>;
 
 export const generateTenantLetter = action({
   args: {
@@ -16,6 +18,8 @@ export const generateTenantLetter = action({
     fullName: v.string(),
     landlordName: v.string(),
     propertyAddress: v.string(),
+    senderAddress: v.string(),
+    landlordAddress: v.string(),
     description: v.string(),
     amountAtStake: v.optional(v.string()),
     deadlineDays: v.string(),
@@ -170,8 +174,10 @@ TENANT LETTER CONTEXT:
 - Letter Type: ${args.letterType}
 - Jurisdiction: ${args.state}, USA
 - Sender Name: ${args.fullName}
+- Sender Mailing Address (system will place verbatim in letter header; use only for drafting context, do not echo as JSON header fields): ${args.senderAddress}
 - Recipient (Landlord) Name: ${args.landlordName}
-- Property Address: ${args.propertyAddress}
+- Landlord Mailing Address (system will place verbatim in letter header; drafting context only): ${args.landlordAddress}
+- Rental / Property Address: ${args.propertyAddress}
 - Core Issue: ${args.description}
 - Amount at Stake: ${args.amountAtStake ?? "unspecified"}
 - Response Deadline: ${args.deadlineDays} days
@@ -180,18 +186,19 @@ GROUNDED LEGAL RESEARCH (Exa JSON):
 ${JSON.stringify(exaResponse)}
 
 OUTPUT REQUIREMENTS:
-1) Metadata and header fields must be complete and coherent for a formal letter.
-2) Build paragraphs in this order and with these exact paragraph types:
+1) JSON field "header" must contain ONLY "subjectLine". Do not output date, senderAddress, or landlordAddress in JSON; the application inserts the current date and the exact tenant/landlord mailing addresses from the form.
+2) Metadata must be complete and coherent for a formal letter.
+3) Build paragraphs in this order and with these exact paragraph types:
    - introduction
    - statement_of_facts
    - legal_basis
    - demand
    - deadline_warning
    - closing
-3) For legal_basis and any legally grounded claims, include statutes_cited entries using article/section identifiers from research.
-4) Do not invent statutes, case law, deadlines, agencies, addresses, or facts not present in user input/research.
-5) Tone must be professional, firm, and non-abusive.
-6) Keep content practical and specific to the tenant's issue and jurisdiction.`;
+4) For legal_basis and any legally grounded claims, include statutes_cited entries using article/section identifiers from research.
+5) Do not invent statutes, case law, deadlines, agencies, or facts not present in user input/research.
+6) Tone must be professional, firm, and non-abusive.
+7) Keep content practical and specific to the tenant's issue and jurisdiction.`;
 
     const letterConfig = {
       systemInstruction: `You are a legal-drafting assistant for tenant-rights demand letters.
@@ -200,6 +207,7 @@ Your job is to draft a structured, professional demand letter grounded in provid
 Hard rules:
 - Use only user-provided facts and provided research context.
 - Never invent legal citations, statutes, deadlines, or factual details.
+- JSON "header" must include only "subjectLine"; never output letter date or mailing addresses in JSON.
 - If legal support is weak, use cautious phrasing and avoid overstated claims.
 - Maintain clear legal writing style: formal, concise, and actionable.
 - Output JSON only and strictly follow the response schema.`,
@@ -220,11 +228,8 @@ Hard rules:
           },
           header: {
             type: Type.OBJECT,
-            required: ["senderAddress", "landlordAddress", "date", "subjectLine"],
+            required: ["subjectLine"],
             properties: {
-              senderAddress: { type: Type.STRING },
-              landlordAddress: { type: Type.STRING },
-              date: { type: Type.STRING },
               subjectLine: { type: Type.STRING },
             },
           },
@@ -258,7 +263,16 @@ Hard rules:
     } catch {
       throw new Error("Gemini letter response JSON format mein nahi aaya");
     }
-    const generatedData = letterAnalysisSchema.parse(parsedLetter);
+    const core = letterAiCoreSchema.parse(parsedLetter);
+    const generatedData = letterAnalysisSchema.parse({
+      ...core,
+      header: {
+        date: formatLetterHeaderDate(new Date()),
+        senderAddress: args.senderAddress.trim(),
+        landlordAddress: args.landlordAddress.trim(),
+        subjectLine: core.header.subjectLine,
+      },
+    });
 
     // ye letter ka final text hai jo embed hoga
     const fullText = [
@@ -290,6 +304,8 @@ Hard rules:
       fullName: args.fullName,
       landlordName: args.landlordName,
       propertyAddress: args.propertyAddress,
+      senderAddress: args.senderAddress.trim(),
+      landlordAddress: args.landlordAddress.trim(),
       description: args.description,
       amountAtStake: args.amountAtStake,
       deadlineDays: args.deadlineDays,

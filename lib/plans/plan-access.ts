@@ -52,9 +52,27 @@ export function shouldBlurFreeLetterPreview(createdUnderPlan: PlanId | null | un
   return createdUnderPlan === "free"
 }
 
+export function shouldBlurFreeLeaseAnalysis(createdUnderPlan: PlanId | null | undefined) {
+  return createdUnderPlan === "free"
+}
+
 export function shouldPromptFreePlanUpgrade(
   userPlan: PlanId | null | undefined,
   generatedCount: number,
 ) {
   return resolvePlanId(userPlan) === "free" && generatedCount > 0
+}
+
+export function shouldPromptFreePlanChatUpgrade(
+  userPlan: PlanId | null | undefined,
+  conversationCount: number,
+) {
+  return resolvePlanId(userPlan) === "free" && conversationCount >= 1
+}
+
+export function hasReachedFreeChatMessageLimit(
+  userPlan: PlanId | null | undefined,
+  messageCount: number,
+) {
+  return resolvePlanId(userPlan) === "free" && messageCount >= 5
 }
