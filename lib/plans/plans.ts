@@ -49,6 +49,18 @@ export type PlanId = keyof typeof PLAN_LIMITS
 
 export type BillingPeriod = "monthly" | "yearly"
 
+export function getActiveCaseLimit(planId: PlanId, period: BillingPeriod) {
+  return PLAN_LIMITS[planId][period].activeCases
+}
+
+export function getLetterLimit(planId: PlanId, period: BillingPeriod) {
+  return PLAN_LIMITS[planId][period].letters
+}
+
+export function getLeaseAnalysisLimit(planId: PlanId, period: BillingPeriod) {
+  return PLAN_LIMITS[planId][period].leaseAnalyses
+}
+
 export type PricingPlan = {
   id: PlanId
   name: string

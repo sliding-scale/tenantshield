@@ -16,6 +16,9 @@ export const current = query({
     return {
       plan: planUsage.plan,
       planType: planUsage.planType,
+      usedActiveCases: planUsage.usedActiveCases,
+      usedLetters: planUsage.usedLetters,
+      usedLeaseAnalyses: planUsage.usedLeaseAnalyses,
     }
   },
 })

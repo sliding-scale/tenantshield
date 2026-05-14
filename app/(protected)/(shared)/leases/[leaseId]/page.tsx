@@ -138,7 +138,10 @@ export default function LeaseDetailPage() {
             </p>
           </div>
           <div className="mb-4 lg:hidden">{pdfCard}</div>
-          <LeaseResultsView analysis={lease.aiAnalysis as LeaseAnalysis} />
+          <LeaseResultsView
+            analysis={lease.aiAnalysis as LeaseAnalysis}
+            createdUnderPlan={lease.createdUnderPlan}
+          />
         </div>
 
         <aside className="hidden lg:block lg:w-72 lg:pl-6">

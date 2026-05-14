@@ -1,6 +1,11 @@
 import { internalMutation, mutation } from "../_generated/server";
 import { v } from "convex/values";
 import { Plan } from "../schema";
+import {
+  adjustUsedActiveCases,
+  assertCanActivateCase,
+  assertCanCreateCase,
+} from "../planUsage/helpers";
 
 export const saveCaseToDB = internalMutation({
   args: {
@@ -28,6 +33,8 @@ export const saveCaseToDB = internalMutation({
     embedding: v.array(v.float64()),
   },
   handler: async (ctx, args) => {
+    await assertCanCreateCase(ctx, args.userId);
+
     const newCaseId = await ctx.db.insert("cases", {
       userId: args.userId,
       caseStatus: "active",
@@ -36,6 +43,7 @@ export const saveCaseToDB = internalMutation({
       aiAnalysis: args.aiAnalysis,
       embedding: args.embedding,
     });
+    await adjustUsedActiveCases(ctx, args.userId, 1);
     return newCaseId;
   },
 });
@@ -54,7 +62,23 @@ export const setCaseStatusForCurrentUser = mutation({
       throw new Error("Case not found");
     }
 
+    const currentStatus = row.caseStatus ?? "active";
+    if (currentStatus === args.caseStatus) {
+      return null;
+    }
+
+    if (args.caseStatus === "active") {
+      await assertCanActivateCase(ctx, identity.subject, args.caseId);
+    }
+
     await ctx.db.patch(args.caseId, { caseStatus: args.caseStatus });
+
+    await adjustUsedActiveCases(
+      ctx,
+      identity.subject,
+      args.caseStatus === "active" ? 1 : -1,
+    );
+
     return null;
   },
 });

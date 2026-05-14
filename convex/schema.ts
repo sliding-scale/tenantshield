@@ -25,7 +25,8 @@ export default defineSchema({
     acceptedTerms: v.optional(v.boolean()),
   })
     .index("by_clerk_id", ["clerkId"])
-    .index("by_email", ["email"]),
+    .index("by_email", ["email"])
+    .searchIndex("search_by_name", { searchField: "name" }),
 
   planUsage: defineTable({
     clerkId: v.string(),
@@ -47,7 +48,6 @@ export default defineSchema({
     usedLetters: v.number(),
   })
     .index("by_clerk_id", ["clerkId"])
-
     .index("by_subscription_id", ["stripeSubscriptionId"]),
 
   onboardingQuestions: defineTable({
@@ -296,6 +296,8 @@ export default defineSchema({
     imageStorageId: v.id("_storage"),
     createdByClerkId: v.string(),
     createdAt: v.number(),
+    /** When false, property is hidden/disabled (admin). Omitted = enabled for legacy rows. */
+    enabled: v.optional(v.boolean()),
   })
     .index("by_clerk_id", ["createdByClerkId"])
     .searchIndex("search_by_name", { searchField: "name" }),

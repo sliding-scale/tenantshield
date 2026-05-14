@@ -7,10 +7,14 @@ import type { UIMessage } from "ai";
 import type { Id } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Loader2, SendHorizontal, Square } from "lucide-react";
-import { AssistantMarkdown } from "./assistant-markdown";
+import { Loader2, SendHorizontal, Square, Sparkles } from "lucide-react";
 import { chatMessagesToUIMessages } from "./map-documents-to-ui-messages";
 import type { ChatMessageDoc } from "./map-documents-to-ui-messages";
+import {
+  hasReachedFreeChatMessageLimit,
+  type PlanId,
+} from "@/lib/plans/plan-access";
+import Link from "next/link";
 
 /** Wait until this much assistant text exists before showing the assistant row (avoids empty bubble). */
 const MIN_ASSISTANT_CHARS = 8;
@@ -50,6 +54,7 @@ type ChatThreadProps = {
   storedMessages: ChatMessageDoc[] | undefined;
   /** US state code selected by user in the state picker */
   selectedStateCode: string | null;
+  plan: PlanId;
 };
 
 /** First resolved snapshot per conversation for useChat initial messages (Convex sync must not reset the thread). */
@@ -59,6 +64,7 @@ export default function ChatThread({
   conversationId,
   storedMessages,
   selectedStateCode,
+  plan,
 }: ChatThreadProps) {
   const initialMessages = useMemo(() => {
     const cached = frozenInitialByConversationId.get(conversationId);
@@ -88,6 +94,7 @@ export default function ChatThread({
       conversationId={conversationId}
       initialMessages={initialMessages}
       selectedStateCode={selectedStateCode}
+      plan={plan}
     />
   );
 }
@@ -96,10 +103,12 @@ function ChatThreadLoaded({
   conversationId,
   initialMessages,
   selectedStateCode,
+  plan,
 }: {
   conversationId: Id<"chatConversations">;
   initialMessages: ReturnType<typeof chatMessagesToUIMessages>;
   selectedStateCode: string | null;
+  plan: PlanId;
 }) {
   const transport = useMemo(
     () =>
@@ -118,7 +127,12 @@ function ChatThreadLoaded({
 
   const busy = status === "streaming" || status === "submitted";
   const [draft, setDraft] = useState("");
-  const scrollEndRef = useRef<HTMLDivElement>(null);
+
+  const userMessageCount = useMemo(
+    () => messages.filter((m) => m.role === "user").length,
+    [messages],
+  );
+  const isLimitReached = hasReachedFreeChatMessageLimit(plan, userMessageCount);
 
   const last = messages[messages.length - 1];
   const deferringAssistantBubble =
@@ -163,18 +177,24 @@ function ChatThreadLoaded({
                 Tenant Shield Assistant
               </h3>
               <p className="text-ink-warm-muted text-base leading-relaxed">
-                Ask about your lease, past cases, letters you&apos;ve drafted, or
-                tenant rights. Answers use your saved documents when available.
+                Ask about your lease, past cases, letters you&apos;ve drafted,
+                or tenant rights. Answers use your saved documents when
+                available.
               </p>
             </div>
           ) : (
             <ul className="mx-auto flex w-full max-w-3xl flex-col gap-5">
               {messages.map((m, idx) => {
-                if (shouldHideInProgressAssistantRow(m, idx, messages, status)) {
+                if (
+                  shouldHideInProgressAssistantRow(m, idx, messages, status)
+                ) {
                   return null;
                 }
                 const textParts = m.parts
-                  .filter((p): p is { type: "text"; text: string } => p.type === "text")
+                  .filter(
+                    (p): p is { type: "text"; text: string } =>
+                      p.type === "text",
+                  )
                   .map((p) => p.text);
                 const combinedText = textParts.join("\n\n");
                 return (
@@ -215,15 +235,47 @@ function ChatThreadLoaded({
                   Thinking…
                 </li>
               ) : null}
+              {isLimitReached && !busy && (
+                <li className="mt-4">
+                  <div className="rounded-3xl border border-primary/20 bg-primary/5 p-6 text-center shadow-sm">
+                    <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4">
+                      <Sparkles className="size-6" />
+                    </div>
+                    <h4 className="font-heading text-xl font-semibold text-ink-warm">
+                      Chat limit reached
+                    </h4>
+                    <p className="mt-2 text-ink-warm-muted text-sm leading-relaxed max-w-md mx-auto">
+                      You&apos;ve sent 5 messages in this conversation. Upgrade
+                      to a paid plan for unlimited AI guidance and deeper legal
+                      research.
+                    </p>
+                    <Button
+                      asChild
+                      className="mt-5 h-11 rounded-xl bg-surface-strong px-6 text-sm font-semibold text-white shadow-sm hover:bg-surface-strong-hover"
+                    >
+                      <Link href="/billing">Upgrade to continue</Link>
+                    </Button>
+                  </div>
+                </li>
+              )}
             </ul>
           )}
-          <div ref={scrollEndRef} className="h-px w-full shrink-0" aria-hidden />
+          <div
+            ref={scrollEndRef}
+            className="h-px w-full shrink-0"
+            aria-hidden
+          />
         </div>
 
         {error ? (
           <div className="border-destructive/30 bg-destructive/10 mx-auto mb-2 flex max-w-3xl flex-wrap items-center gap-3 rounded-xl border px-4 py-3 text-sm">
             <span className="text-destructive shrink">{error.message}</span>
-            <Button type="button" variant="outline" size="sm" onClick={() => clearError()}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => clearError()}
+            >
               Dismiss
             </Button>
           </div>
@@ -237,9 +289,11 @@ function ChatThreadLoaded({
             <textarea
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              placeholder="Message Tenant Shield…"
+              placeholder={
+                isLimitReached ? "Chat limit reached" : "Message Tenant Shield…"
+              }
               rows={1}
-              disabled={busy}
+              disabled={busy || isLimitReached}
               className={cn(
                 "border-input bg-background placeholder:text-muted-foreground focus-visible:ring-ring max-h-40 min-h-11 flex-1 resize-none rounded-xl border px-4 py-3 text-[15px] shadow-sm outline-none transition-[box-shadow] focus-visible:ring-3 disabled:opacity-60",
               )}
@@ -267,7 +321,7 @@ function ChatThreadLoaded({
                 type="submit"
                 size="icon-lg"
                 className="shrink-0 self-end"
-                disabled={!draft.trim()}
+                disabled={!draft.trim() || isLimitReached}
                 aria-label="Send message"
               >
                 <SendHorizontal className="size-4" />

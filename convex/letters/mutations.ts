@@ -1,6 +1,7 @@
 import { internalMutation, mutation } from "../_generated/server";
 import { v } from "convex/values";
 import { Plan } from "../schema";
+import { assertCanCreateLetter, incrementUsedLetters } from "../planUsage/helpers";
 
 export const saveLetterToDB = internalMutation({
   args: {
@@ -23,7 +24,10 @@ export const saveLetterToDB = internalMutation({
     embedding: v.array(v.float64()),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert("letters", args);
+    await assertCanCreateLetter(ctx, args.userId);
+    const letterId = await ctx.db.insert("letters", args);
+    await incrementUsedLetters(ctx, args.userId);
+    return letterId;
   },
 });
 

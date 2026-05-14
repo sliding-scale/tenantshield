@@ -11,9 +11,13 @@ import { Button } from "@/components/ui/button";
 import ChatSidebar, { ChatSidebarMobileToggle } from "./chat-sidebar";
 import ChatStatePicker from "./chat-state-picker";
 import ChatThread from "./chat-thread";
+import useCurrentUser from "@/app/hooks/useCurrentUser";
+import { resolvePlanId, shouldPromptFreePlanChatUpgrade } from "@/lib/plans/plan-access";
+import { PlanUpgradeDialog } from "@/components/tenant/free-plan-upgrade-dialog";
 
 export default function AskAiShell() {
   const { isLoaded, userId } = useAuth();
+  const { convexUser } = useCurrentUser();
   const createConversation = useMutation(api.chat.mutations.createConversation);
 
   const conversations = useQuery(
@@ -24,16 +28,17 @@ export default function AskAiShell() {
   const [pickedConversationId, setPickedConversationId] =
     useState<Id<"chatConversations"> | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
   /** Client-only; wire to chat API / system prompt later */
   const [selectedStateCode, setSelectedStateCode] = useState<string | null>(null);
   const creatingFirstConversationRef = useRef(false);
+
+  const plan = resolvePlanId(convexUser?.plan);
 
   const fallbackFirst =
     conversations && conversations.length > 0 ? conversations[0]._id : null;
 
   const activeConversationId = pickedConversationId ?? fallbackFirst ?? null;
-
-
 
   useEffect(() => {
     if (conversations === undefined || conversations.length > 0) return;
@@ -52,9 +57,13 @@ export default function AskAiShell() {
   );
 
   const handleNewChat = useCallback(async () => {
+    if (shouldPromptFreePlanChatUpgrade(plan, conversations?.length ?? 0)) {
+      setUpgradeDialogOpen(true);
+      return;
+    }
     const id = await createConversation({});
     setPickedConversationId(id);
-  }, [createConversation]);
+  }, [plan, conversations?.length, createConversation]);
 
   const handleSelect = useCallback((id: string) => {
     setPickedConversationId(id as Id<"chatConversations">);
@@ -135,9 +144,19 @@ export default function AskAiShell() {
             conversationId={activeConversationId}
             storedMessages={storedMessages}
             selectedStateCode={selectedStateCode}
+            plan={plan}
           />
         </section>
       </div>
+      <PlanUpgradeDialog
+        open={upgradeDialogOpen}
+        onOpenChange={setUpgradeDialogOpen}
+        title="Upgrade to start more chats"
+        description="Your free plan includes one AI chat conversation. Upgrade to Pro or Ultimate for unlimited chats and deeper legal guidance."
+        eyebrow="Free plan limit"
+        primaryActionLabel="View plans"
+        primaryActionHref="/billing"
+      />
     </div>
   );
 }

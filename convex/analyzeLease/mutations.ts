@@ -1,6 +1,7 @@
 import { internalMutation, mutation } from "../_generated/server";
 import { v } from "convex/values";
 import { Plan } from "../schema";
+import { assertCanCreateLeaseAnalysis, incrementUsedLeaseAnalyses } from "../planUsage/helpers"
 
 export const generateUploadUrl = mutation({
   handler: async (ctx) => {
@@ -19,6 +20,7 @@ export const saveLeaseToDB = internalMutation({
     pdfFile: v.optional(v.id("_storage")),
   },
   handler: async (ctx, args) => {
+    await assertCanCreateLeaseAnalysis(ctx, args.userId);
     const leaseId = await ctx.db.insert("leases", {
       userId: args.userId,
       createdUnderPlan: args.createdUnderPlan,
@@ -26,6 +28,7 @@ export const saveLeaseToDB = internalMutation({
       leaseText: args.leaseText,
       pdfFile: args.pdfFile,
     });
+    await incrementUsedLeaseAnalyses(ctx, args.userId)
     return leaseId;
   },
 });

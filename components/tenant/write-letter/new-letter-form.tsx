@@ -16,7 +16,7 @@ import {
 } from "lucide-react"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
 import { api } from "@/convex/_generated/api"
-import { FreePlanUpgradeDialog } from "@/components/tenant/free-plan-upgrade-dialog"
+import { PlanUpgradeDialog } from "@/components/tenant/free-plan-upgrade-dialog"
 import { Button } from "@/components/ui/button"
 import {
   ISSUE_TYPES,
@@ -24,7 +24,12 @@ import {
   type IssueTypeValue,
 } from "@/lib/constants/issue-types"
 import { US_STATE_NAMES, type USStateAbbr } from "@/lib/constants/us-states"
-import { shouldPromptFreePlanUpgrade } from "@/lib/plans/plan-access"
+import {
+  hasReachedLetterLimit,
+  resolvePlanId,
+  shouldPromptFreePlanUpgrade,
+} from "@/lib/plans/plan-access"
+import { getLetterLimit } from "@/lib/plans/plans"
 
 const ISSUE_TYPE_ICONS: Record<
   IssueTypeIconKey,
@@ -70,7 +75,7 @@ type NewLetterFormProps = {
   success: string | null
   canSubmit: boolean
   isSubmitting: boolean
-  onSubmit: () => void
+  onSubmit: () => void | Promise<void>
   onClose: () => void
   stateChipRefs: MutableRefObject<Map<string, HTMLButtonElement>>
 }
@@ -110,21 +115,34 @@ export function NewLetterForm({
   stateChipRefs,
 }: NewLetterFormProps) {
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false)
+  const [upgradeDialogMode, setUpgradeDialogMode] = useState<"free" | "limit">("free")
   const { convexUser } = useCurrentUser()
   const counts = useQuery(api.dashboard.queries.countsForCurrentUser, {})
+  const planUsage = useQuery(api.planUsage.queries.current, {})
+  const plan = resolvePlanId(convexUser?.plan)
+  const billingPeriod = planUsage?.planType ?? "monthly"
+  const generatedLetterCount = counts?.letters ?? 0
+  const usedLetters = planUsage?.usedLetters ?? 0
+  const letterLimit = getLetterLimit(plan, billingPeriod)
 
-  const handleSubmitClick = () => {
-    const generatedLetterCount = counts?.letters ?? 0
-    if (shouldPromptFreePlanUpgrade(convexUser?.plan, generatedLetterCount)) {
+  const handleSubmitClick = async () => {
+    if (shouldPromptFreePlanUpgrade(plan, generatedLetterCount)) {
+      setUpgradeDialogMode("free")
+      setUpgradeDialogOpen(true)
+      return
+    }
+
+    if (hasReachedLetterLimit(plan, billingPeriod, usedLetters)) {
+      setUpgradeDialogMode("limit")
       setUpgradeDialogOpen(true)
       return
     }
 
     setUpgradeDialogOpen(false)
-    onSubmit()
+    await onSubmit()
   }
 
-  return (
+  return (  
     <main className="flex min-h-[100dvh] flex-col bg-cream-page pb-28 pt-5 md:min-h-[calc(100vh-4rem)] md:pb-10 md:pt-6 lg:pt-8">
       <div className="flex w-full flex-1 flex-col px-4 sm:px-6 md:px-10 lg:px-14 xl:px-16">
         <header className="mb-5 flex shrink-0 items-center justify-between md:hidden">
@@ -301,18 +319,29 @@ export function NewLetterForm({
           <Button
             type="button"
             disabled={!canSubmit}
-            onClick={handleSubmitClick}
+            onClick={() => void handleSubmitClick()}
             className="mt-8 h-14 w-full rounded-2xl bg-surface-strong px-6 text-lg font-semibold text-white hover:bg-surface-strong-hover disabled:bg-muted disabled:text-muted-foreground md:mt-10 md:max-w-md md:text-xl lg:max-w-sm"
           >
             {isSubmitting ? "Generating..." : "Generate Letter"}
           </Button>
         </section>
       </div>
-      <FreePlanUpgradeDialog
+      <PlanUpgradeDialog
         open={upgradeDialogOpen}
         onOpenChange={setUpgradeDialogOpen}
-        title="Upgrade to generate more letters"
-        description="Your free plan includes one letter preview. Choose a plan to generate another letter."
+        eyebrow={upgradeDialogMode === "free" ? "Free plan limit" : "Letter limit"}
+        title={
+          upgradeDialogMode === "free"
+            ? "Upgrade to generate more letters"
+            : "Upgrade to write another letter"
+        }
+        description={
+          upgradeDialogMode === "free"
+            ? "Your free plan includes one letter preview. Choose a plan to write another letter."
+            : `Your current plan allows up to ${letterLimit} letters per ${billingPeriod === "yearly" ? "year" : "month"}. Upgrade on billing to write a new one.`
+        }
+        primaryActionLabel={upgradeDialogMode === "free" ? "View plans" : "Go to billing"}
+        primaryActionHref={upgradeDialogMode === "free" ? "/onboarding/plans" : "/billing"}
       />
     </main>
   )

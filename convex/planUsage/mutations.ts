@@ -93,3 +93,32 @@ export const selectPlanForCurrentUser = mutation({
     return await ctx.db.insert("planUsage", planUsageFields)
   },
 })
+
+export const cancelPlanForCurrentUser = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity()
+    if (!identity) throw new Error("Unauthenticated")
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique()
+    if (!user) throw new Error("User not found")
+
+    // Update user plan to free
+    await ctx.db.patch(user._id, { plan: "free" })
+
+    // Remove planUsage entry
+    const planUsage = await ctx.db
+      .query("planUsage")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .first()
+
+    if (planUsage) {
+      await ctx.db.delete(planUsage._id)
+    }
+
+    return { success: true }
+  },
+})

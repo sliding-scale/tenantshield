@@ -64,6 +64,15 @@ function formatLeaseCheckError(message: string): AnalyzeLeaseError {
     body: message,
   };
 }
+import { PlanUpgradeDialog } from "@/components/tenant/free-plan-upgrade-dialog"
+import useCurrentUser from "@/app/hooks/useCurrentUser"
+import {
+  hasReachedLeaseAnalysisLimit,
+  LEASE_ANALYSIS_LIMIT_REACHED,
+  resolvePlanId,
+  shouldPromptFreePlanUpgrade,
+} from "@/lib/plans/plan-access"
+import { getLeaseAnalysisLimit } from "@/lib/plans/plans"
 
 export default function AnalyzeLeasePage() {
   const generateUploadUrl = useMutation(
@@ -80,8 +89,17 @@ export default function AnalyzeLeasePage() {
   const [error, setError] = useState<AnalyzeLeaseError | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [leaseId, setLeaseId] = useState<Id<"leases"> | null>(null);
+  const [upgradeOpen, setUpgradeOpen] = useState(false)
+  const [upgradeMode, setUpgradeMode] = useState<"free" | "limit">("free")
   const fileInputRef = useRef<HTMLInputElement>(null);
   const stateChipRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+  const { convexUser } = useCurrentUser()
+  const counts = useQuery(api.dashboard.queries.countsForCurrentUser, {})
+  const planUsage = useQuery(api.planUsage.queries.current, {})
+  const plan = resolvePlanId(convexUser?.plan)
+  const billingPeriod = planUsage?.planType ?? "monthly"
+  const usedLeaseAnalyses = planUsage?.usedLeaseAnalyses ?? 0
+  const leaseAnalysisLimit = getLeaseAnalysisLimit(plan, billingPeriod)
 
   const lease = useQuery(
     api.lease.queries.getLeaseForCurrentUser,
@@ -157,6 +175,19 @@ export default function AnalyzeLeasePage() {
 
   const onSubmit = async () => {
     if (!canSubmit || !file) return;
+
+    if (shouldPromptFreePlanUpgrade(plan, counts?.leases ?? 0)) {
+      setUpgradeMode("free")
+      setUpgradeOpen(true)
+      return
+    }
+
+    if (hasReachedLeaseAnalysisLimit(plan, billingPeriod, usedLeaseAnalyses)) {
+      setUpgradeMode("limit")
+      setUpgradeOpen(true)
+      return
+    }
+
     setError(null);
     setIsSubmitting(true);
     try {
@@ -184,6 +215,10 @@ export default function AnalyzeLeasePage() {
 
       await analyzeLeaseById({ leaseId: newLeaseId });
     } catch (e) {
+      if (e instanceof Error && e.message === LEASE_ANALYSIS_LIMIT_REACHED) {
+        setUpgradeOpen(true)
+        return
+      }
       const raw =
         e instanceof Error ? e.message : String(e ?? "Failed to analyze lease");
       const unwrapped = unwrapConvexClientError(raw);
@@ -411,9 +446,29 @@ export default function AnalyzeLeasePage() {
             </p>
           </section>
         ) : (
-          <LeaseResultsView analysis={analysis as LeaseAnalysis} />
+          <LeaseResultsView
+            analysis={analysis as LeaseAnalysis}
+            createdUnderPlan={lease?.createdUnderPlan}
+          />
         )}
       </div>
+      <PlanUpgradeDialog
+        open={upgradeOpen}
+        onOpenChange={setUpgradeOpen}
+        eyebrow={upgradeMode === "free" ? "Free plan limit" : "Lease analysis limit"}
+        title={
+          upgradeMode === "free"
+            ? "Upgrade to analyze more leases"
+            : "Upgrade to analyze another lease"
+        }
+        description={
+          upgradeMode === "free"
+            ? "Your free plan includes one lease analysis. Choose a plan to analyze another lease."
+            : `Your current plan allows up to ${leaseAnalysisLimit} lease analyses per ${billingPeriod === "yearly" ? "year" : "month"}. Upgrade on billing to run a new one.`
+        }
+        primaryActionLabel={upgradeMode === "free" ? "View plans" : "Go to billing"}
+        primaryActionHref={upgradeMode === "free" ? "/onboarding/plans" : "/billing"}
+      />
     </main>
   );
 }
