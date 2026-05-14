@@ -1,153 +1,145 @@
-"use client"
+"use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { useAction, useMutation, useQuery } from "convex/react"
-import { api } from "@/convex/_generated/api"
-import type { Id } from "@/convex/_generated/dataModel"
-import {
-  Upload,
-  FileText,
-  X,
-  Search,
-  Loader2,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useAction, useMutation, useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
+import { Upload, FileText, X, Search, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   US_STATE_NAMES,
   filterUSStates,
   type USStateAbbr,
-} from "@/lib/constants/us-states"
+} from "@/lib/constants/us-states";
 import {
   LeaseResultsView,
   type LeaseAnalysis,
-} from "@/components/tenant/analyze-lease/lease-results-view"
+} from "@/components/tenant/analyze-lease/lease-results-view";
 
 export default function AnalyzeLeasePage() {
   const generateUploadUrl = useMutation(
     api.analyzeLease.mutations.generateUploadUrl,
-  )
-  const extractLeaseText = useAction(
-    api.analyzeLease.actions.extractLeaseText,
-  )
-  const analyzeLeaseById = useAction(api.lease.actions.analyzeLeaseById)
+  );
+  const extractLeaseText = useAction(api.analyzeLease.actions.extractLeaseText);
+  const analyzeLeaseById = useAction(api.lease.actions.analyzeLeaseById);
 
-  const [file, setFile] = useState<File | null>(null)
-  const [state, setState] = useState<string>("")
-  const [stateSearch, setStateSearch] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [isDragOver, setIsDragOver] = useState(false)
-  const [leaseId, setLeaseId] = useState<Id<"leases"> | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const stateChipRefs = useRef<Map<string, HTMLButtonElement>>(new Map())
+  const [file, setFile] = useState<File | null>(null);
+  const [state, setState] = useState<string>("");
+  const [stateSearch, setStateSearch] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [leaseId, setLeaseId] = useState<Id<"leases"> | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const stateChipRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
   const lease = useQuery(
     api.lease.queries.getLeaseForCurrentUser,
     leaseId ? { leaseId } : "skip",
-  )
+  );
 
   const filteredStates = useMemo(
     () => filterUSStates(stateSearch),
     [stateSearch],
-  )
+  );
 
   const chipsToShow = useMemo(() => {
-    if (!state) return filteredStates
-    const sel = state as USStateAbbr
-    if (filteredStates.includes(sel)) return filteredStates
-    return [sel, ...filteredStates]
-  }, [filteredStates, state])
+    if (!state) return filteredStates;
+    const sel = state as USStateAbbr;
+    if (filteredStates.includes(sel)) return filteredStates;
+    return [sel, ...filteredStates];
+  }, [filteredStates, state]);
 
   const selectionHiddenBySearch =
     Boolean(state) &&
     stateSearch.trim().length > 0 &&
-    !filteredStates.includes(state as USStateAbbr)
+    !filteredStates.includes(state as USStateAbbr);
 
   const selectedStateName = useMemo(
     () => (state ? US_STATE_NAMES[state as USStateAbbr] : ""),
     [state],
-  )
+  );
 
   useEffect(() => {
-    const el = stateChipRefs.current.get(state)
+    const el = stateChipRefs.current.get(state);
     el?.scrollIntoView({
       behavior: "smooth",
       inline: "center",
       block: "nearest",
-    })
-  }, [state])
+    });
+  }, [state]);
 
-  const canSubmit = Boolean(file && state && !isSubmitting && !isAnalyzing)
+  const canSubmit = Boolean(file && state && !isSubmitting && !isAnalyzing);
 
   const handleFile = useCallback((incoming: File | null) => {
-    setError(null)
+    setError(null);
     if (!incoming) {
-      setFile(null)
-      return
+      setFile(null);
+      return;
     }
-    const allowed = ["application/pdf", "text/plain"]
+    const allowed = ["application/pdf", "text/plain"];
     if (!allowed.includes(incoming.type)) {
-      setError("Please upload a PDF or text file.")
-      return
+      setError("Please upload a PDF or text file.");
+      return;
     }
     if (incoming.size > 20 * 1024 * 1024) {
-      setError("File must be under 20 MB.")
-      return
+      setError("File must be under 20 MB.");
+      return;
     }
-    setFile(incoming)
-  }, [])
+    setFile(incoming);
+  }, []);
 
   const onDrop = useCallback(
     (e: React.DragEvent) => {
-      e.preventDefault()
-      setIsDragOver(false)
-      const dropped = e.dataTransfer.files[0]
-      if (dropped) handleFile(dropped)
+      e.preventDefault();
+      setIsDragOver(false);
+      const dropped = e.dataTransfer.files[0];
+      if (dropped) handleFile(dropped);
     },
     [handleFile],
-  )
+  );
 
   const onSubmit = async () => {
-    if (!canSubmit || !file) return
-    setError(null)
-    setIsSubmitting(true)
+    if (!canSubmit || !file) return;
+    setError(null);
+    setIsSubmitting(true);
     try {
-      const uploadUrl = await generateUploadUrl()
+      const uploadUrl = await generateUploadUrl();
 
       const uploadRes = await fetch(uploadUrl, {
         method: "POST",
         headers: { "Content-Type": file.type },
         body: file,
-      })
-      if (!uploadRes.ok) throw new Error("File upload failed")
+      });
+      if (!uploadRes.ok) throw new Error("File upload failed");
 
       const { storageId } = (await uploadRes.json()) as {
-        storageId: string
-      }
+        storageId: string;
+      };
 
       const { leaseId: newLeaseId } = await extractLeaseText({
         storageId: storageId as any,
         state,
-      })
+      });
 
-      setLeaseId(newLeaseId)
-      setIsSubmitting(false)
-      setIsAnalyzing(true)
+      setLeaseId(newLeaseId);
+      setIsSubmitting(false);
+      setIsAnalyzing(true);
 
-      await analyzeLeaseById({ leaseId: newLeaseId })
+      await analyzeLeaseById({ leaseId: newLeaseId });
     } catch (e) {
       const message =
-        e instanceof Error ? e.message : "Failed to analyze lease"
-      setError(message)
+        e instanceof Error ? e.message : "Failed to analyze lease";
+      setError(message);
     } finally {
-      setIsSubmitting(false)
-      setIsAnalyzing(false)
+      setIsSubmitting(false);
+      setIsAnalyzing(false);
     }
-  }
+  };
 
-  const showUploadForm = !leaseId || error
-  const analysis = lease?.aiAnalysis
+  const showUploadForm = !leaseId || error;
+  const analysis = lease?.aiAnalysis;
 
   return (
     <main className="flex min-h-[100dvh] flex-col bg-cream-page pb-28 pt-5 md:min-h-[calc(100vh-4rem)] md:pb-10 md:pt-6 lg:pt-8">
@@ -158,8 +150,7 @@ export default function AnalyzeLeasePage() {
               AI &middot; Red Flag Detector
             </p>
             <h2 className="mt-3 max-w-5xl font-heading text-4xl font-semibold leading-[0.95] text-ink-warm text-balance sm:text-5xl md:text-6xl lg:text-7xl xl:max-w-6xl">
-              Upload your lease.{" "}
-              <br className="hidden sm:block" />
+              Upload your lease. <br className="hidden sm:block" />
               We&rsquo;ll find the traps.
             </h2>
             <p className="mt-4 max-w-3xl text-lg text-ink-warm-muted text-pretty sm:text-xl lg:max-w-4xl lg:text-2xl">
@@ -172,8 +163,8 @@ export default function AnalyzeLeasePage() {
               <div
                 onClick={() => fileInputRef.current?.click()}
                 onDragOver={(e) => {
-                  e.preventDefault()
-                  setIsDragOver(true)
+                  e.preventDefault();
+                  setIsDragOver(true);
                 }}
                 onDragLeave={() => setIsDragOver(false)}
                 onDrop={onDrop}
@@ -195,23 +186,26 @@ export default function AnalyzeLeasePage() {
                 />
 
                 {file ? (
-                  <div className="flex items-center gap-3">
-                    <FileText className="size-8 text-primary" />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-base font-semibold text-ink-warm md:text-lg">
+                  <div className="flex w-full min-w-0 max-w-full items-start gap-3 overflow-hidden pr-1 sm:items-center">
+                    <FileText className="mt-0.5 size-8 shrink-0 text-primary sm:mt-0" />
+                    <div className="min-w-0 flex-1 overflow-hidden text-left">
+                      <p
+                        className="w-full max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold leading-snug text-ink-warm sm:text-base md:text-lg"
+                        title={file.name}
+                      >
                         {file.name}
                       </p>
-                      <p className="text-sm text-ink-warm-muted">
+                      <p className="mt-0.5 text-xs text-ink-warm-muted sm:text-sm">
                         {(file.size / 1024).toFixed(0)} KB
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={(e) => {
-                        e.stopPropagation()
-                        setFile(null)
+                        e.stopPropagation();
+                        setFile(null);
                       }}
-                      className="flex size-8 items-center justify-center rounded-full text-ink-warm-muted transition-colors hover:bg-cream-surface-deep hover:text-ink-warm"
+                      className="flex size-8 shrink-0 items-center justify-center rounded-full text-ink-warm-muted transition-colors hover:bg-cream-surface-deep hover:text-ink-warm"
                       aria-label="Remove file"
                     >
                       <X className="size-4" />
@@ -268,7 +262,7 @@ export default function AnalyzeLeasePage() {
                   aria-label="Select state"
                 >
                   {chipsToShow.map((abbr) => {
-                    const active = state === abbr
+                    const active = state === abbr;
                     return (
                       <button
                         key={abbr}
@@ -276,8 +270,8 @@ export default function AnalyzeLeasePage() {
                         role="option"
                         aria-selected={active}
                         ref={(el) => {
-                          if (el) stateChipRefs.current.set(abbr, el)
-                          else stateChipRefs.current.delete(abbr)
+                          if (el) stateChipRefs.current.set(abbr, el);
+                          else stateChipRefs.current.delete(abbr);
                         }}
                         onClick={() => setState(abbr)}
                         title={US_STATE_NAMES[abbr]}
@@ -290,7 +284,7 @@ export default function AnalyzeLeasePage() {
                       >
                         {abbr}
                       </button>
-                    )
+                    );
                   })}
                 </div>
               </div>
@@ -338,8 +332,8 @@ export default function AnalyzeLeasePage() {
               Analyzing your lease…
             </p>
             <p className="mt-2 max-w-md text-center text-sm text-ink-warm-muted">
-              Our AI is reviewing every clause against {state || "your state"}&rsquo;s
-              tenant law. This usually takes 30–60 seconds.
+              Our AI is reviewing every clause against {state || "your state"}
+              &rsquo;s tenant law. This usually takes 30–60 seconds.
             </p>
           </section>
         ) : (
@@ -347,5 +341,5 @@ export default function AnalyzeLeasePage() {
         )}
       </div>
     </main>
-  )
+  );
 }

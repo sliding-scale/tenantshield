@@ -1,32 +1,32 @@
-import { action } from "../_generated/server"
-import { v } from "convex/values"
-import { internal } from "../_generated/api"
-import type { Id } from "../_generated/dataModel"
-import { initSync, WasmPdfDocument } from "pdf-oxide-wasm/web"
+import { action } from "../_generated/server";
+import { v } from "convex/values";
+import { internal } from "../_generated/api";
+import type { Id } from "../_generated/dataModel";
+import { initSync, WasmPdfDocument } from "pdf-oxide-wasm/web";
 
-const PDF_OXIDE_VERSION = "0.3.45"
-const WASM_URL = `https://cdn.jsdelivr.net/npm/pdf-oxide-wasm@${PDF_OXIDE_VERSION}/web/pdf_oxide_bg.wasm`
+const PDF_OXIDE_VERSION = "0.3.45";
+const WASM_URL = `https://cdn.jsdelivr.net/npm/pdf-oxide-wasm@${PDF_OXIDE_VERSION}/web/pdf_oxide_bg.wasm`;
 
-let wasmInitPromise: Promise<void> | null = null
+let wasmInitPromise: Promise<void> | null = null;
 
 async function ensureWasmReady() {
   if (!wasmInitPromise) {
     wasmInitPromise = (async () => {
-      const res = await fetch(WASM_URL)
+      const res = await fetch(WASM_URL);
       if (!res.ok) {
         throw new Error(
           `Failed to fetch pdf-oxide WASM (${res.status} ${res.statusText})`,
-        )
+        );
       }
-      const buffer = await res.arrayBuffer()
-      const wasmModule = await WebAssembly.compile(buffer)
-      initSync({ module: wasmModule })
+      const buffer = await res.arrayBuffer();
+      const wasmModule = await WebAssembly.compile(buffer);
+      initSync({ module: wasmModule });
     })().catch((err) => {
-      wasmInitPromise = null
-      throw err
-    })
+      wasmInitPromise = null;
+      throw err;
+    });
   }
-  return wasmInitPromise
+  return wasmInitPromise;
 }
 
 export const extractLeaseText = action({
@@ -38,36 +38,36 @@ export const extractLeaseText = action({
     ctx,
     args,
   ): Promise<{ leaseId: Id<"leases">; leaseText: string }> => {
-    const identity = await ctx.auth.getUserIdentity()
-    if (!identity) throw new Error("Not authenticated")
-    const userId = identity.subject
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    const userId = identity.subject;
 
-    const blob = await ctx.storage.get(args.storageId)
-    if (!blob) throw new Error("PDF file not found in storage")
+    const blob = await ctx.storage.get(args.storageId);
+    if (!blob) throw new Error("PDF file not found in storage");
 
-    const arrayBuffer = await blob.arrayBuffer()
-    const bytes = new Uint8Array(arrayBuffer)
+    const arrayBuffer = await blob.arrayBuffer();
+    const bytes = new Uint8Array(arrayBuffer);
 
-    await ensureWasmReady()
+    await ensureWasmReady();
 
-    const doc = new WasmPdfDocument(bytes)
-    let leaseText: string
+    const doc = new WasmPdfDocument(bytes);
+    let leaseText: string;
     try {
-      leaseText = doc.toMarkdownAll()
+      leaseText = doc.toMarkdownAll();
     } finally {
-      doc.free()
+      doc.free();
     }
 
     if (!leaseText.trim()) {
       throw new Error(
         "Could not extract any text from the PDF. The file may be scanned or image-based.",
-      )
+      );
     }
 
     const createdUnderPlan = await ctx.runQuery(
       (internal as any)["users/queries"].getPlanByClerkId,
       { clerkId: userId },
-    )
+    );
 
     const leaseId: Id<"leases"> = await ctx.runMutation(
       (internal as any)["analyzeLease/mutations"].saveLeaseToDB,
@@ -78,8 +78,8 @@ export const extractLeaseText = action({
         leaseText,
         pdfFile: args.storageId,
       },
-    )
+    );
 
-    return { leaseId, leaseText }
+    return { leaseId, leaseText };
   },
-})
+});
