@@ -25,6 +25,7 @@ export default defineSchema({
     acceptedTerms: v.optional(v.boolean()),
   })
     .index("by_clerk_id", ["clerkId"])
+<<<<<<< HEAD
     .index("by_email", ["email"]),
 
   planUsage: defineTable({
@@ -46,6 +47,35 @@ export default defineSchema({
     usedLeaseAnalyses: v.number(),
     usedLetters: v.number(),
   })
+=======
+    .index("by_email", ["email"])
+    .searchIndex("search_by_name", { searchField: "name" }),
+  
+    planUsage: defineTable({
+      clerkId: v.string(),
+      stripeCustomerId: v.optional(v.string()),
+      stripeSubscriptionId: v.optional(v.string()),
+      plan: Plan,
+      planType: v.union(
+        v.literal("monthly"),
+        v.literal("yearly")
+      ),
+      subscriptionStatus: v.union(
+        v.literal("active"),
+        v.literal("canceled"),
+        v.literal("past_due"),
+        v.literal("trialing")
+      ),
+      currentPeriodStart: v.number(),
+      currentPeriodEnd: v.number(),
+      // usage counters
+      usedActiveCases: v.number(),
+      usedLeaseAnalyses: v.number(),
+      usedLetters: v.number(),
+    
+    })
+    
+>>>>>>> d2985738b3b2fbfa4d833d0e94aa956d8faf1f24
     .index("by_clerk_id", ["clerkId"])
 
     .index("by_subscription_id", ["stripeSubscriptionId"]),
@@ -296,6 +326,8 @@ export default defineSchema({
     imageStorageId: v.id("_storage"),
     createdByClerkId: v.string(),
     createdAt: v.number(),
+    /** When false, property is hidden/disabled (admin). Omitted = enabled for legacy rows. */
+    enabled: v.optional(v.boolean()),
   })
     .index("by_clerk_id", ["createdByClerkId"])
     .searchIndex("search_by_name", { searchField: "name" }),
