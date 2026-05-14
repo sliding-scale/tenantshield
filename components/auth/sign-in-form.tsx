@@ -12,12 +12,20 @@ import { Input } from "@/components/ui/input"
 const authFieldClass =
   "h-12 rounded-full border-border bg-popover px-5 text-base shadow-sm placeholder:text-muted-foreground md:text-sm"
 type Props = {
-  signUpHref: string
+  /** When omitted, self-serve signup links are hidden (e.g. admin login). */
+  signUpHref?: string
   forgotOpen: boolean
   setForgotOpen: (open: boolean) => void
+  /** Post-sign-in path for `finalize` navigation. */
+  redirectTo?: string
 }
 
-export function SignInForm({ signUpHref, forgotOpen, setForgotOpen }: Props) {
+export function SignInForm({
+  signUpHref,
+  forgotOpen,
+  setForgotOpen,
+  redirectTo = "/dashboard",
+}: Props) {
   const { signIn, errors, fetchStatus } = useSignIn()
   const router = useRouter()
 
@@ -41,7 +49,7 @@ export function SignInForm({ signUpHref, forgotOpen, setForgotOpen }: Props) {
     const { error } = await signIn.finalize({
       navigate: async ({ session, decorateUrl }) => {
         if (session?.currentTask) return
-        const url = decorateUrl("/dashboard")
+        const url = decorateUrl(redirectTo)
         if (url.startsWith("http")) {
           window.location.href = url
         } else {
@@ -249,7 +257,13 @@ export function SignInForm({ signUpHref, forgotOpen, setForgotOpen }: Props) {
         {errors.fields.password ? (
           <p className="text-sm text-destructive">{errors.fields.password.message}</p>
         ) : null}
-        <div className="flex flex-row items-center justify-between gap-3 pt-0.5">
+        <div
+          className={
+            signUpHref
+              ? "flex flex-row items-center justify-between gap-3 pt-0.5"
+              : "flex flex-row items-center justify-end gap-3 pt-0.5"
+          }
+        >
           <button
             type="button"
             onClick={() => void openForgot()}
@@ -257,21 +271,29 @@ export function SignInForm({ signUpHref, forgotOpen, setForgotOpen }: Props) {
           >
             Forgot password?
           </button>
-          <Link
-            href={signUpHref}
-            className="shrink-0 text-sm font-semibold text-foreground underline underline-offset-4 hover:text-foreground/80"
-          >
-            Create account
-          </Link>
+          {signUpHref ? (
+            <Link
+              href={signUpHref}
+              className="shrink-0 text-sm font-semibold text-foreground underline underline-offset-4 hover:text-foreground/80"
+            >
+              Create account
+            </Link>
+          ) : null}
         </div>
       </div>
       {showNoAccountHint ? (
         <p className="text-sm text-muted-foreground">
-          No account found for this email.{" "}
-          <Link href={signUpHref} className="font-semibold text-foreground underline underline-offset-4">
-            Sign up
-          </Link>{" "}
-          to create one.
+          {signUpHref ? (
+            <>
+              No account found for this email.{" "}
+              <Link href={signUpHref} className="font-semibold text-foreground underline underline-offset-4">
+                Sign up
+              </Link>{" "}
+              to create one.
+            </>
+          ) : (
+            <>No admin account found for this email. If you need access, contact your organization.</>
+          )}
         </p>
       ) : null}
       {formError ? <p className="text-sm text-destructive">{formError}</p> : null}
