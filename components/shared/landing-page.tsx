@@ -270,7 +270,7 @@ export default function LandingPage() {
           {/* Mobile Touch Slider */}
           <div className="lg:hidden">
             <div
-              className="overflow-hidden"
+              className="overflow-x-hidden overflow-y-visible pt-4"
               onTouchStart={handleTouchStart}
               onTouchEnd={handleTouchEnd}
             >
@@ -429,7 +429,7 @@ export default function LandingPage() {
               <ul className="space-y-2 text-sm text-gray-600">
                 <li>
                   <a
-                    href="#"
+                    href="/terms-of-service"
                     className="transition-colors duration-200 hover:text-amber-600"
                   >
                     Terms of Service
@@ -437,31 +437,10 @@ export default function LandingPage() {
                 </li>
                 <li>
                   <a
-                    href="#"
+                    href="/privacy-policy"
                     className="transition-colors duration-200 hover:text-amber-600"
                   >
                     Privacy Policy
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="mb-4 font-bold text-gray-900">Resources</h4>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li>
-                  <a
-                    href="#"
-                    className="transition-colors duration-200 hover:text-amber-600"
-                  >
-                    State Disclosures
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="transition-colors duration-200 hover:text-amber-600"
-                  >
-                    Contact
                   </a>
                 </li>
               </ul>
