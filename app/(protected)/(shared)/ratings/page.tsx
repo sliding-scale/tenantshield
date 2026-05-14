@@ -80,8 +80,9 @@ export default function RatingsPage() {
   const showEmptyFilter =
     !loadingFirstPage && serverHasRows && !hasCards && selectedTag !== "All Properties"
 
-  const createHref = trimmedDebounced
-    ? `/ratings/create?name=${encodeURIComponent(trimmedDebounced)}`
+  const nameForCreate = searchInput.trim() || trimmedDebounced
+  const createHref = nameForCreate
+    ? `/ratings/create?name=${encodeURIComponent(nameForCreate)}`
     : "/ratings/create"
 
   return (
@@ -112,6 +113,21 @@ export default function RatingsPage() {
             />
           </div>
         </section>
+
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-9 w-full shrink-0 gap-1.5 rounded-xl border-cream-border bg-cream-surface text-xs font-semibold text-foreground hover:bg-cream-surface-soft sm:w-auto sm:text-sm"
+            asChild
+          >
+            <Link href={createHref}>
+              <Plus className="size-3.5 shrink-0 sm:size-4" aria-hidden />
+              Create property
+            </Link>
+          </Button>
+        </div>
 
         <section className="mt-3 flex flex-wrap gap-1.5 md:gap-2">
           {RATING_FILTER_TAGS.map((tag) => {

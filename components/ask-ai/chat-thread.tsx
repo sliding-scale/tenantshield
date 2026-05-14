@@ -2,12 +2,13 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { UIMessage } from "ai";
 import type { Id } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Loader2, SendHorizontal, Square } from "lucide-react";
+import { AssistantMarkdown } from "./assistant-markdown";
 import { chatMessagesToUIMessages } from "./map-documents-to-ui-messages";
 import type { ChatMessageDoc } from "./map-documents-to-ui-messages";
 
@@ -117,6 +118,7 @@ function ChatThreadLoaded({
 
   const busy = status === "streaming" || status === "submitted";
   const [draft, setDraft] = useState("");
+  const scrollEndRef = useRef<HTMLDivElement>(null);
 
   const last = messages[messages.length - 1];
   const deferringAssistantBubble =
@@ -128,6 +130,15 @@ function ChatThreadLoaded({
     (messages.length === 0 ||
       last?.role === "user" ||
       deferringAssistantBubble);
+
+  useEffect(() => {
+    const end = scrollEndRef.current;
+    if (!end) return;
+    const id = requestAnimationFrame(() => {
+      end.scrollIntoView({ block: "end", behavior: "auto" });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [messages, status, showThinkingRow]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -162,6 +173,10 @@ function ChatThreadLoaded({
                 if (shouldHideInProgressAssistantRow(m, idx, messages, status)) {
                   return null;
                 }
+                const textParts = m.parts
+                  .filter((p): p is { type: "text"; text: string } => p.type === "text")
+                  .map((p) => p.text);
+                const combinedText = textParts.join("\n\n");
                 return (
                   <li
                     key={m.id}
@@ -181,12 +196,14 @@ function ChatThreadLoaded({
                           : "border-cream-border mr-auto max-w-[min(100%,48rem)] border bg-background dark:bg-card/50",
                       )}
                     >
-                      {m.parts.map((part, i) =>
-                        part.type === "text" ? (
+                      {m.role === "assistant" ? (
+                        <AssistantMarkdown text={combinedText} />
+                      ) : (
+                        textParts.map((t, i) => (
                           <p key={i} className="whitespace-pre-wrap">
-                            {part.text}
+                            {t}
                           </p>
-                        ) : null,
+                        ))
                       )}
                     </div>
                   </li>
@@ -200,6 +217,7 @@ function ChatThreadLoaded({
               ) : null}
             </ul>
           )}
+          <div ref={scrollEndRef} className="h-px w-full shrink-0" aria-hidden />
         </div>
 
         {error ? (
