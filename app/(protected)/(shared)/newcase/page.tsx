@@ -13,6 +13,7 @@ import { NewCaseForm } from "@/components/tenant/new-case/new-case-form"
 import { NewCaseResultView } from "@/components/tenant/new-case/new-case-result-view"
 import { DEFAULT_ISSUE_TYPE } from "@/lib/constants/issue-types"
 import { filterUSStates, type USStateAbbr } from "@/lib/constants/us-states"
+import type { PlanId } from "@/lib/plans/plan-access"
 
 export default function NewCasePage() {
   const router = useRouter()
@@ -33,6 +34,7 @@ export default function NewCasePage() {
     caseId: Id<"cases">
     aiAnalysis: CaseAnalysis
     details: NewCaseDetailsSnapshot
+    createdUnderPlan?: PlanId | null
   } | null>(null)
 
   const filteredStates = useMemo(() => filterUSStates(stateSearch), [stateSearch])
@@ -84,6 +86,7 @@ export default function NewCasePage() {
         caseId: result.caseId,
         aiAnalysis: result.aiAnalysis,
         details,
+        createdUnderPlan: result.createdUnderPlan,
       })
     } catch (e) {
       const message = e instanceof Error ? e.message : "Failed to analyze case"

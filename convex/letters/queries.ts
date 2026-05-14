@@ -69,6 +69,7 @@ export const getByIdForCurrentUser = query({
       inputData: row.inputData,
       letterData: row.letterData,
       fullLetterText: row.fullLetterText,
+      createdUnderPlan: row.createdUnderPlan,
     }
   },
 })

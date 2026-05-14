@@ -1,5 +1,14 @@
 import type { LucideIcon } from "lucide-react"
-import { Briefcase, FileSearch, FileText, Shield, Sparkles, UserRound, Scale } from "lucide-react"
+import {
+  Briefcase,
+  CreditCard,
+  FileSearch,
+  FileText,
+  Shield,
+  Sparkles,
+  UserRound,
+  Scale,
+} from "lucide-react"
 
 export type AppNavItem = {
   href: string
@@ -45,6 +54,12 @@ export const APP_NAV_ITEMS: AppNavItem[] = [
     label: "Laws",
     Icon: Scale,
     matches: (pathname) => pathname.startsWith("/state-laws"),
+  },
+  {
+    href: "/billing",
+    label: "Billing",
+    Icon: CreditCard,
+    matches: (pathname) => pathname.startsWith("/billing"),
   },
   {
     href: "/profile",

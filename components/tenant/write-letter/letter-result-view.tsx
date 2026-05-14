@@ -3,6 +3,9 @@
 import type { ReactNode } from "react"
 import { Copy, ChevronLeft, Pencil } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { UpgradeToViewCta } from "@/components/shared/upgrade-to-view-cta"
+import { shouldBlurFreeLetterPreview, type PlanId } from "@/lib/plans/plan-access"
+import { cn } from "@/lib/utils"
 
 export type LetterData = {
   metadata: {
@@ -38,6 +41,7 @@ function buildFullLetterText(letterData: LetterData) {
 
 type LetterResultViewProps = {
   letterData: LetterData
+  createdUnderPlan?: PlanId | null
   letterType: string
   stateName: string
   landlordName: string
@@ -62,6 +66,7 @@ type LetterResultViewProps = {
 
 export function LetterResultView({
   letterData,
+  createdUnderPlan,
   letterType,
   stateName,
   landlordName,
@@ -76,6 +81,7 @@ export function LetterResultView({
   onEditLetter,
   headerBeforeCopy,
 }: LetterResultViewProps) {
+  const blurLetter = shouldBlurFreeLetterPreview(createdUnderPlan)
   const fullText = letterBodyOverride ?? buildFullLetterText(letterData)
   const metaLine = `${(stateName || letterData.metadata.state || "—").toUpperCase()} · TO ${(
     letterData.metadata.recipientName || landlordName || "—"
@@ -107,6 +113,7 @@ export function LetterResultView({
               type="button"
               variant="outline"
               onClick={onCopy}
+              disabled={blurLetter}
               className="h-11 w-11 shrink-0 rounded-full border-border bg-cream-surface-soft p-0 text-foreground"
               aria-label="Copy letter"
             >
@@ -138,12 +145,30 @@ export function LetterResultView({
             </div>
           ) : null}
 
-          <div className="mt-6 rounded-3xl border border-cream-border bg-background px-5 py-6 shadow-sm sm:px-7 sm:py-8">
+          <div
+            className={cn(
+              "mt-6 overflow-hidden rounded-3xl border border-cream-border bg-background px-5 py-6 shadow-sm sm:px-7 sm:py-8",
+              blurLetter && "relative min-h-[18rem]",
+            )}
+          >
             {letterContentSlot ?? (
-              <pre className="whitespace-pre-wrap break-words font-sans text-base leading-relaxed text-foreground">
+              <pre
+                className={cn(
+                  "whitespace-pre-wrap break-words font-sans text-base leading-relaxed text-foreground",
+                  blurLetter && "blur-sm select-none",
+                )}
+              >
                 {fullText}
               </pre>
             )}
+            {blurLetter ? (
+              <UpgradeToViewCta
+                eyebrow="Letter preview"
+                title="Upgrade to view this letter"
+                description="Unlock the full letter text, copy it, and export without the free-plan preview limit."
+                actionLabel="Upgrade to view it"
+              />
+            ) : null}
           </div>
 
           {!letterContentSlot ? (
@@ -169,6 +194,7 @@ export function LetterResultView({
             <Button
               type="button"
               onClick={onCopy}
+              disabled={blurLetter}
               className="h-14 w-full rounded-2xl bg-surface-strong px-6 text-lg font-semibold text-white hover:bg-surface-strong-hover"
             >
               {didCopy ? "Copied!" : "Copy full letter"}

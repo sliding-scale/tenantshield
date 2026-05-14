@@ -25,7 +25,11 @@ export const generateTenantLetter = action({
   handler: async (
     ctx,
     args,
-  ): Promise<{ letterId: Id<"letters">; letterData: LetterAnalysis }> => {
+  ): Promise<{
+    letterId: Id<"letters">;
+    letterData: LetterAnalysis;
+    createdUnderPlan: "free" | "pro" | "power";
+  }> => {
     // ye auth check hai with dev bypass
     const identity = await ctx.auth.getUserIdentity();
     const expectedBypassToken = process.env.TEST_BYPASS_TOKEN;
@@ -39,6 +43,10 @@ export const generateTenantLetter = action({
         "Missing user identity. Log in or provide a valid test bypass token in dev.",
       );
     }
+    const createdUnderPlan = await ctx.runQuery(
+      (internal as any)["users/queries"].getPlanByClerkId,
+      { clerkId: userId },
+    );
 
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
     const exa = new Exa(process.env.EXA_API_KEY!);
@@ -291,6 +299,7 @@ Hard rules:
       (internal as any)["letters/mutations"].saveLetterToDB,
       {
         userId,
+        createdUnderPlan,
         inputData,
         letterData: generatedData,
         fullLetterText: fullText,
@@ -368,6 +377,6 @@ Hard rules:
       },
     );
 
-    return { letterId, letterData: generatedData };
+    return { letterId, letterData: generatedData, createdUnderPlan };
   },
 });

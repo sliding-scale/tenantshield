@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   Check,
   MessageCircle,
@@ -9,71 +8,9 @@ import {
   Scale,
   TrendingUp,
 } from "lucide-react";
-
-const pricingPlans = [
-  {
-    name: "Basic Shield",
-    price: "Free",
-    period: "",
-    trial: "",
-    features: ["Basic AI chat", "1 Lease Review per year", "Limited insights"],
-    cta: "Get Started",
-  },
-  {
-    name: "Pro Shield",
-    price: "$9.99",
-    period: "/mo",
-    trial: "3-Day Free Trial",
-    features: [
-      "Unlimited AI chat",
-      "Write Letter feature",
-      "Full Case Reviews",
-      "Priority updates",
-    ],
-    cta: "Start Free Trial",
-    popular: true,
-  },
-  {
-    name: "Ultimate Shield",
-    price: "$29.99",
-    period: "/mo",
-    trial: "",
-    features: [
-      "Everything in Pro",
-      "1-on-1 human legal consultations",
-      "Advanced storage",
-      "Official letter mailing",
-    ],
-    cta: "Choose Ultimate",
-  },
-];
+import { PricingPlansSection } from "@/components/shared/pricing-plans-section";
 
 export default function LandingPage() {
-  const [currentPlan, setCurrentPlan] = useState(1);
-  const [touchStart, setTouchStart] = useState(0);
-  const [touchEnd, setTouchEnd] = useState(0);
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    setTouchEnd(e.changedTouches[0].clientX);
-    handleSwipe();
-  };
-
-  const handleSwipe = () => {
-    if (touchStart - touchEnd > 50) {
-      // Swiped left
-      setCurrentPlan((prev) => (prev + 1) % pricingPlans.length);
-    }
-    if (touchEnd - touchStart > 50) {
-      // Swiped right
-      setCurrentPlan(
-        (prev) => (prev - 1 + pricingPlans.length) % pricingPlans.length,
-      );
-    }
-  };
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
@@ -254,150 +191,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section id="pricing" className="px-4 py-20 sm:px-6 lg:px-8 bg-white">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-12 text-center">
-            <h2 className="mb-4 text-3xl font-bold tracking-tight text-gray-900">
-              Start Your Protection Today
-            </h2>
-            <p className="text-lg text-gray-600">
-              Choose the level of advocacy that fits your rental needs. Protect
-              yourself from unfair practices.
-            </p>
-          </div>
-
-          {/* Mobile Touch Slider */}
-          <div className="lg:hidden">
-            <div
-              className="overflow-hidden"
-              onTouchStart={handleTouchStart}
-              onTouchEnd={handleTouchEnd}
-            >
-              <div
-                className="flex transition-transform duration-300 ease-out"
-                style={{
-                  transform: `translateX(-${currentPlan * 100}%)`,
-                }}
-              >
-                {pricingPlans.map((plan, idx) => (
-                  <div key={idx} className="w-full flex-shrink-0 px-4">
-                    <div
-                      className={`rounded-xl border-2 ${plan.popular ? "border-amber-500 bg-white" : "border-gray-200 bg-white"} p-8 relative`}
-                    >
-                      {plan.popular && (
-                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-amber-500 px-3 py-1 text-xs font-bold text-white shadow-md">
-                          Most Popular
-                        </div>
-                      )}
-                      <h3 className="mb-2 text-xl font-bold text-gray-900">
-                        {plan.name}
-                      </h3>
-                      <div className="mb-6">
-                        <span className="text-3xl font-bold text-gray-900">
-                          {plan.price}
-                        </span>
-                        <span className="text-sm text-gray-600">
-                          {plan.period}
-                        </span>
-                        {plan.trial && (
-                          <p className="mt-2 text-xs text-gray-500 font-medium">
-                            {plan.trial}
-                          </p>
-                        )}
-                      </div>
-                      <ul className="mb-8 space-y-3">
-                        {plan.features.map((feature, fidx) => (
-                          <li key={fidx} className="flex items-center gap-2">
-                            <Check className="h-5 w-5 text-emerald-600 shrink-0" />
-                            <span className="text-sm text-gray-600">
-                              {feature}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                      <a
-                        href="/signup"
-                        className={`block w-full rounded-full px-4 py-3 text-sm font-bold transition-all duration-200 active:scale-95 text-center ${
-                          plan.popular
-                            ? "bg-amber-500 text-white hover:bg-amber-600 shadow-md hover:shadow-lg"
-                            : "border-2 border-gray-300 bg-white text-gray-700 hover:border-amber-500 hover:text-amber-600"
-                        }`}
-                      >
-                        {plan.cta}
-                      </a>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Slider Indicator Dots */}
-            <div className="flex justify-center gap-2 mt-6">
-              {pricingPlans.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setCurrentPlan(idx)}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    idx === currentPlan
-                      ? "w-8 bg-amber-500"
-                      : "w-2 bg-gray-300 hover:bg-gray-400"
-                  }`}
-                  aria-label={`Go to plan ${idx + 1}`}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Desktop Grid - All Plans Visible */}
-          <div className="hidden lg:grid gap-8 grid-cols-3">
-            {pricingPlans.map((plan, idx) => (
-              <div
-                key={idx}
-                className={`rounded-xl border-2 ${plan.popular ? "border-amber-500 bg-white relative" : "border-gray-200 bg-white"} p-8 transition-all duration-300 hover:shadow-lg ${plan.popular ? "hover:border-amber-500" : "hover:border-amber-200"}`}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-amber-500 px-3 py-1 text-xs font-bold text-white shadow-md">
-                    Most Popular
-                  </div>
-                )}
-                <h3 className="mb-2 text-xl font-bold text-gray-900">
-                  {plan.name}
-                </h3>
-                <div className="mb-6">
-                  <span className="text-3xl font-bold text-gray-900">
-                    {plan.price}
-                  </span>
-                  <span className="text-sm text-gray-600">{plan.period}</span>
-                  {plan.trial && (
-                    <p className="mt-2 text-xs text-gray-500 font-medium">
-                      {plan.trial}
-                    </p>
-                  )}
-                </div>
-                <ul className="mb-8 space-y-3">
-                  {plan.features.map((feature, fidx) => (
-                    <li key={fidx} className="flex items-center gap-2">
-                      <Check className="h-5 w-5 text-emerald-600 shrink-0" />
-                      <span className="text-sm text-gray-600">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <a
-                  href="/signup"
-                  className={`block w-full rounded-full px-4 py-3 text-sm font-bold transition-all duration-200 active:scale-95 text-center ${
-                    plan.popular
-                      ? "bg-amber-500 text-white hover:bg-amber-600 shadow-md hover:shadow-lg"
-                      : "border-2 border-gray-300 bg-white text-gray-700 hover:border-amber-500 hover:text-amber-600"
-                  }`}
-                >
-                  {plan.cta}
-                </a>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <PricingPlansSection className="bg-white" showBillingPeriodToggle />
 
       {/* Footer */}
       <footer className="border-t-2 border-gray-200 bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
@@ -412,6 +206,14 @@ export default function LandingPage() {
                     className="transition-colors duration-200 hover:text-amber-600"
                   >
                     Features
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/billing"
+                    className="transition-colors duration-200 hover:text-amber-600"
+                  >
+                    Billing
                   </a>
                 </li>
                 <li>

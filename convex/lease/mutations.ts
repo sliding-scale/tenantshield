@@ -1,10 +1,12 @@
 import type { Id } from "../_generated/dataModel";
 import { internalMutation } from "../_generated/server";
 import { v } from "convex/values";
+import { Plan } from "../schema";
 
 export const saveLeaseToDB = internalMutation({
   args: {
     userId: v.string(),
+    createdUnderPlan: Plan,
     state: v.string(),
     leaseText: v.string(),
     aiAnalysis: v.object({

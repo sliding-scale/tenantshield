@@ -4,12 +4,17 @@ import { Show, UserButton } from "@clerk/nextjs";
 import { Sparkles } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import useCurrentUser from "@/app/hooks/useCurrentUser";
 import { APP_NAV_ITEMS } from "@/lib/nav/items";
+import { planDisplayLabel } from "@/lib/plans/plan-access";
 import { cn } from "@/lib/utils";
 import { isAuthPagePath } from "@/lib/nav/visibility";
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { convexUser, isLoading } = useCurrentUser();
+  const planLabel = planDisplayLabel(convexUser?.plan);
+
   if (isAuthPagePath(pathname)) {
     return null;
   }
@@ -63,10 +68,12 @@ export default function Navbar() {
             </Link>
           </Show>
           <Show when="signed-in">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow-md">
-              <Sparkles className="size-3.5" />
-              Pro
-            </span>
+            {!isLoading ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow-md">
+                <Sparkles className="size-3.5" />
+                {planLabel}
+              </span>
+            ) : null}
             <UserButton
               appearance={{
                 elements: {

@@ -29,6 +29,7 @@ export const countsForCurrentUser = query({
 
     return {
       activeCases,
+      totalCases: cases.length,
       letters: letters.length,
       protectionIndex,
     }
