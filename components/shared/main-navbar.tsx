@@ -12,8 +12,9 @@ import { isAuthPagePath } from "@/lib/nav/visibility";
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { convexUser, isLoading } = useCurrentUser();
-  const planLabel = planDisplayLabel(convexUser?.plan);
+  const { convexUser, isLoading, role } = useCurrentUser();
+  const planLabel =
+    role === "admin" ? "Admin" : planDisplayLabel(convexUser?.plan);
 
   if (isAuthPagePath(pathname)) {
     return null;
@@ -31,23 +32,45 @@ export default function Navbar() {
           </Link>
           <Show when="signed-in">
             <nav className="ml-1 hidden items-center gap-1 lg:flex">
-              {APP_NAV_ITEMS.map(({ href, label, matches }) => {
-                const active = matches(pathname ?? "");
-                return (
-                  <Link
-                    key={href}
-                    href={href}
-                    className={cn(
-                      "rounded-full px-3 py-2 text-sm font-medium transition-all duration-200",
-                      active
-                        ? "bg-amber-100 text-amber-700"
-                        : "text-gray-600 hover:text-amber-600",
-                    )}
-                  >
-                    {label}
-                  </Link>
-                );
-              })}
+              {role === "admin"
+                ? [
+                    { href: "/admin/users", label: "Users" },
+                    { href: "/admin/properties", label: "Properties" },
+                  ].map(({ href, label }) => {
+                    const active =
+                      pathname === href || pathname.startsWith(`${href}/`);
+                    return (
+                      <Link
+                        key={href}
+                        href={href}
+                        className={cn(
+                          "rounded-full px-3 py-2 text-sm font-medium transition-all duration-200",
+                          active
+                            ? "bg-amber-100 text-amber-700"
+                            : "text-gray-600 hover:text-amber-600",
+                        )}
+                      >
+                        {label}
+                      </Link>
+                    );
+                  })
+                : APP_NAV_ITEMS.map(({ href, label, matches }) => {
+                    const active = matches(pathname ?? "");
+                    return (
+                      <Link
+                        key={href}
+                        href={href}
+                        className={cn(
+                          "rounded-full px-3 py-2 text-sm font-medium transition-all duration-200",
+                          active
+                            ? "bg-amber-100 text-amber-700"
+                            : "text-gray-600 hover:text-amber-600",
+                        )}
+                      >
+                        {label}
+                      </Link>
+                    );
+                  })}
             </nav>
           </Show>
         </div>

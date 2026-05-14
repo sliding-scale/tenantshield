@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, SendHorizontal, Square, Sparkles } from "lucide-react";
 import { chatMessagesToUIMessages } from "./map-documents-to-ui-messages";
 import type { ChatMessageDoc } from "./map-documents-to-ui-messages";
+import { AssistantMarkdown } from "./assistant-markdown";
 import {
   hasReachedFreeChatMessageLimit,
   type PlanId,
@@ -118,6 +119,8 @@ function ChatThreadLoaded({
       }),
     [],
   );
+
+  const scrollEndRef = useRef<HTMLDivElement>(null);
 
   const { messages, sendMessage, status, stop, error, clearError } = useChat({
     id: conversationId,

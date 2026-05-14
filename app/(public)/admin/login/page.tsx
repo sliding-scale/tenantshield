@@ -1,39 +1,45 @@
-"use client"
+"use client";
 
-import { useAuth } from "@clerk/nextjs"
-import { useSignIn } from "@clerk/nextjs"
-import { ChevronLeft, Shield } from "lucide-react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
-import { SignInForm } from "@/components/auth/sign-in-form"
-import { Button } from "@/components/ui/button"
+import { useAuth } from "@clerk/nextjs";
+import { useSignIn } from "@clerk/nextjs";
+import { ChevronLeft, Shield } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import useCurrentUser from "@/app/hooks/useCurrentUser";
+import { SignInForm } from "@/components/auth/sign-in-form";
+import { Button } from "@/components/ui/button";
 
 /**
  * Staff-only sign-in (Clerk custom UI, email + password only).
  * No self-serve signup, OAuth, or password reset — admins are provisioned in Clerk.
  */
 export default function AdminLoginPage() {
-  const { isLoaded, isSignedIn } = useAuth()
-  const router = useRouter()
-  const [forgotOpen, setForgotOpen] = useState(false)
+  const { isLoaded, isSignedIn } = useAuth();
+  const { role } = useCurrentUser();
+  const router = useRouter();
+  const [forgotOpen, setForgotOpen] = useState(false);
 
-  const { signIn } = useSignIn()
+  const { signIn } = useSignIn();
 
   useEffect(() => {
     const handlePageShow = () => {
-      void signIn?.reset()
-    }
-    window.addEventListener("pageshow", handlePageShow)
+      void signIn?.reset();
+    };
+    window.addEventListener("pageshow", handlePageShow);
     return () => {
-      window.removeEventListener("pageshow", handlePageShow)
-    }
-  }, [signIn])
+      window.removeEventListener("pageshow", handlePageShow);
+    };
+  }, [signIn]);
 
   useEffect(() => {
-    if (!isLoaded || !isSignedIn) return
-    router.replace("/dashboard")
-  }, [isLoaded, isSignedIn, router])
+    if (!isLoaded || !isSignedIn) return;
+    if (role === "admin") {
+      router.replace("/admin/users");
+    } else {
+      router.replace("/dashboard");
+    }
+  }, [isLoaded, isSignedIn, role, router]);
 
   return (
     <div className="relative flex min-h-screen flex-col bg-background text-foreground">
@@ -47,11 +53,18 @@ export default function AdminLoginPage() {
               asChild
             >
               <Link href="/" aria-label="Back to home">
-                <ChevronLeft className="size-5 text-foreground" strokeWidth={1.75} />
+                <ChevronLeft
+                  className="size-5 text-foreground"
+                  strokeWidth={1.75}
+                />
               </Link>
             </Button>
             <div className="flex items-center gap-2">
-              <Shield className="size-6 shrink-0 text-foreground" strokeWidth={1.5} aria-hidden />
+              <Shield
+                className="size-6 shrink-0 text-foreground"
+                strokeWidth={1.5}
+                aria-hidden
+              />
               <span className="font-heading text-lg font-semibold tracking-tight text-foreground">
                 TenantShield
               </span>
@@ -80,5 +93,5 @@ export default function AdminLoginPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
