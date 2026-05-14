@@ -28,6 +28,7 @@ export const create = mutation({
       imageStorageId: args.imageStorageId,
       createdByClerkId: identity.subject,
       createdAt: Date.now(),
+      enabled: true,
     })
   },
 })
