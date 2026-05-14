@@ -18,6 +18,8 @@ type Props = {
   setForgotOpen: (open: boolean) => void
   /** Post-sign-in path for `finalize` navigation. */
   redirectTo?: string
+  /** When false, forgot-password UI is hidden (e.g. admin email/password only). */
+  allowForgotPassword?: boolean
 }
 
 export function SignInForm({
@@ -25,6 +27,7 @@ export function SignInForm({
   forgotOpen,
   setForgotOpen,
   redirectTo = "/dashboard",
+  allowForgotPassword = true,
 }: Props) {
   const { signIn, errors, fetchStatus } = useSignIn()
   const router = useRouter()
@@ -148,7 +151,7 @@ export function SignInForm({
     setForgotOpen(true)
   }
 
-  if (forgotOpen) {
+  if (allowForgotPassword && forgotOpen) {
     return (
       <ForgotPasswordForm
         initialEmail={emailAddress}
@@ -257,29 +260,33 @@ export function SignInForm({
         {errors.fields.password ? (
           <p className="text-sm text-destructive">{errors.fields.password.message}</p>
         ) : null}
-        <div
-          className={
-            signUpHref
-              ? "flex flex-row items-center justify-between gap-3 pt-0.5"
-              : "flex flex-row items-center justify-end gap-3 pt-0.5"
-          }
-        >
-          <button
-            type="button"
-            onClick={() => void openForgot()}
-            className="text-sm font-medium text-foreground underline underline-offset-4 hover:text-foreground/80"
+        {signUpHref || allowForgotPassword ? (
+          <div
+            className={
+              signUpHref && allowForgotPassword
+                ? "flex flex-row items-center justify-between gap-3 pt-0.5"
+                : "flex flex-row items-center justify-end gap-3 pt-0.5"
+            }
           >
-            Forgot password?
-          </button>
-          {signUpHref ? (
-            <Link
-              href={signUpHref}
-              className="shrink-0 text-sm font-semibold text-foreground underline underline-offset-4 hover:text-foreground/80"
-            >
-              Create account
-            </Link>
-          ) : null}
-        </div>
+            {allowForgotPassword ? (
+              <button
+                type="button"
+                onClick={() => void openForgot()}
+                className="text-sm font-medium text-foreground underline underline-offset-4 hover:text-foreground/80"
+              >
+                Forgot password?
+              </button>
+            ) : null}
+            {signUpHref ? (
+              <Link
+                href={signUpHref}
+                className="shrink-0 text-sm font-semibold text-foreground underline underline-offset-4 hover:text-foreground/80"
+              >
+                Create account
+              </Link>
+            ) : null}
+          </div>
+        ) : null}
       </div>
       {showNoAccountHint ? (
         <p className="text-sm text-muted-foreground">

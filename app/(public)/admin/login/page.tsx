@@ -1,17 +1,17 @@
 "use client"
 
 import { useAuth } from "@clerk/nextjs"
-import { useSignIn, useSignUp } from "@clerk/nextjs"
+import { useSignIn } from "@clerk/nextjs"
 import { ChevronLeft, Shield } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { GoogleOAuthButton } from "@/components/auth/google-oauth-button"
 import { SignInForm } from "@/components/auth/sign-in-form"
 import { Button } from "@/components/ui/button"
 
 /**
- * Staff-only sign-in (Clerk custom UI). No self-serve signup — admins are provisioned in Clerk.
+ * Staff-only sign-in (Clerk custom UI, email + password only).
+ * No self-serve signup, OAuth, or password reset — admins are provisioned in Clerk.
  */
 export default function AdminLoginPage() {
   const { isLoaded, isSignedIn } = useAuth()
@@ -19,18 +19,16 @@ export default function AdminLoginPage() {
   const [forgotOpen, setForgotOpen] = useState(false)
 
   const { signIn } = useSignIn()
-  const { signUp } = useSignUp()
 
   useEffect(() => {
     const handlePageShow = () => {
       void signIn?.reset()
-      void signUp?.reset()
     }
     window.addEventListener("pageshow", handlePageShow)
     return () => {
       window.removeEventListener("pageshow", handlePageShow)
     }
-  }, [signIn, signUp])
+  }, [signIn])
 
   useEffect(() => {
     if (!isLoaded || !isSignedIn) return
@@ -68,23 +66,15 @@ export default function AdminLoginPage() {
               Admin sign in
             </h1>
             <p className="mt-3 text-base leading-relaxed text-muted-foreground">
-              Authorized staff only. Accounts are not created from this page.
+              Authorized staff only. Sign in with your work email and password.
             </p>
             <div className="mt-8 flex flex-col gap-6">
-              <SignInForm forgotOpen={forgotOpen} setForgotOpen={setForgotOpen} redirectTo="/dashboard" />
-              {!forgotOpen ? (
-                <>
-                  <div className="relative py-1" role="separator">
-                    <div className="absolute inset-0 flex items-center" aria-hidden>
-                      <span className="w-full border-t border-border" />
-                    </div>
-                    <div className="relative flex justify-center text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-                      <span className="bg-background px-3">Or</span>
-                    </div>
-                  </div>
-                  <GoogleOAuthButton mode="sign-in" />
-                </>
-              ) : null}
+              <SignInForm
+                forgotOpen={forgotOpen}
+                setForgotOpen={setForgotOpen}
+                redirectTo="/dashboard"
+                allowForgotPassword={false}
+              />
             </div>
           </main>
         </div>
