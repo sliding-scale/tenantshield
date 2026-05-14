@@ -35,6 +35,8 @@ const CONFIG = {
     fullName: "Ali Khan",
     landlordName: "John Doe",
     propertyAddress: "123 Demo St, Los Angeles, CA",
+    senderAddress: "456 Tenant Way\nOakland, CA 94607",
+    landlordAddress: "789 Landlord Rd\nBerkeley, CA 94704",
     description:
       "I moved out 45 days ago and landlord has not returned my deposit or sent an itemized statement.",
     amountAtStake: "2500",

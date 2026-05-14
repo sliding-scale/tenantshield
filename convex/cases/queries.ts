@@ -36,8 +36,8 @@ export const listCasesPaged = query({
     const safePage = Math.max(0, Math.floor(args.page))
     const cappedPage =
       totalPages === 0 ? 0 : Math.min(safePage, totalPages - 1)
-    const start = cappedPage * PAGE_SIZE
-    const items = filtered.slice(start, start + PAGE_SIZE)
+    const end = Math.min(filtered.length, (cappedPage + 1) * PAGE_SIZE)
+    const items = filtered.slice(0, end)
 
     return {
       items,

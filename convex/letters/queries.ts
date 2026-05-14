@@ -27,8 +27,8 @@ export const listLettersPaged = query({
     const totalPages = totalCount === 0 ? 0 : Math.ceil(totalCount / PAGE_SIZE)
     const safePage = Math.max(0, Math.floor(args.page))
     const cappedPage = totalPages === 0 ? 0 : Math.min(safePage, totalPages - 1)
-    const start = cappedPage * PAGE_SIZE
-    const pageRows = sorted.slice(start, start + PAGE_SIZE)
+    const end = Math.min(sorted.length, (cappedPage + 1) * PAGE_SIZE)
+    const pageRows = sorted.slice(0, end)
 
     const items = pageRows.map((row) => ({
       _id: row._id,

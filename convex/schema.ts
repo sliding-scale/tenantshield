@@ -146,6 +146,10 @@ export default defineSchema({
       fullName: v.string(),
       landlordName: v.string(),
       propertyAddress: v.string(),
+      /** Tenant mailing address; copied verbatim into letter header (not AI-generated). */
+      senderAddress: v.optional(v.string()),
+      /** Landlord mailing address; copied verbatim into letter header (not AI-generated). */
+      landlordAddress: v.optional(v.string()),
       description: v.string(),
       amountAtStake: v.optional(v.string()),
       deadlineDays: v.string(),

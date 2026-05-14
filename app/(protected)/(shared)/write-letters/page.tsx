@@ -23,6 +23,8 @@ export default function WriteLettersPage() {
   const [fullName, setFullName] = useState("")
   const [landlordName, setLandlordName] = useState("")
   const [propertyAddress, setPropertyAddress] = useState("")
+  const [senderAddress, setSenderAddress] = useState("")
+  const [landlordAddress, setLandlordAddress] = useState("")
   const [description, setDescription] = useState("")
   const [amountAtStake, setAmountAtStake] = useState("")
   const [deadlineDays, setDeadlineDays] = useState("14")
@@ -88,6 +90,8 @@ export default function WriteLettersPage() {
       fullName.trim() &&
       landlordName.trim() &&
       propertyAddress.trim() &&
+      senderAddress.trim() &&
+      landlordAddress.trim() &&
       description.trim() &&
       deadlineDays.trim() &&
       !isSubmitting,
@@ -104,6 +108,8 @@ export default function WriteLettersPage() {
         fullName: fullName.trim(),
         landlordName: landlordName.trim(),
         propertyAddress: propertyAddress.trim(),
+        senderAddress: senderAddress.trim(),
+        landlordAddress: landlordAddress.trim(),
         description: description.trim(),
         amountAtStake: amountAtStake.trim() || undefined,
         deadlineDays: deadlineDays.trim(),
@@ -202,6 +208,10 @@ export default function WriteLettersPage() {
       setLandlordName={setLandlordName}
       propertyAddress={propertyAddress}
       setPropertyAddress={setPropertyAddress}
+      senderAddress={senderAddress}
+      setSenderAddress={setSenderAddress}
+      landlordAddress={landlordAddress}
+      setLandlordAddress={setLandlordAddress}
       description={description}
       setDescription={setDescription}
       amountAtStake={amountAtStake}

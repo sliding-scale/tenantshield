@@ -16,6 +16,55 @@ import {
   type LeaseAnalysis,
 } from "@/components/tenant/analyze-lease/lease-results-view";
 
+type AnalyzeLeaseError = { title: string; body: string };
+
+/**
+ * Strip Convex client wrapper noise. Client actions use
+ * `[CONVEX A(path)] ${errorMessage}\\n  Called by client` (see createHybridErrorStacktrace
+ * in convex); `errorMessage` may itself include `[Request ID…] Server Error Uncaught Error:`.
+ */
+function unwrapConvexClientError(message: string): string {
+  let s = message.trim();
+  s = s.replace(/\s+Called by client\s*$/i, "").trim();
+  s = s.replace(/^\[CONVEX [^\]]+\]\s*/i, "").trim();
+  s = s.replace(/^\[Request ID:[^\]]+\]\s*Server Error\s*/i, "").trim();
+  s = s.replace(/^Uncaught Error:\s*/i, "").trim();
+  const uncaught = /Uncaught Error:\s*/i;
+  const parts = s.split(uncaught);
+  if (parts.length > 1) {
+    s = (parts[parts.length - 1] ?? s).trim();
+  }
+  s = s.replace(
+    /\s*Accepted files:\s*lease agreements[\s\S]*?lease renewals\.?$/i,
+    "",
+  ).trim();
+  return s;
+}
+
+function formatLeaseCheckError(message: string): AnalyzeLeaseError {
+  const normalized = message.toLowerCase();
+
+  if (normalized.includes("does not look like a lease")) {
+    const body = message.trim();
+    return {
+      title: "This doesn’t look like a lease",
+      body,
+    };
+  }
+
+  if (normalized.includes("could not extract any text")) {
+    return {
+      title: "We could not read this file",
+      body: "Please upload a text-based PDF or a plain text file. Scanned images may not work.",
+    };
+  }
+
+  return {
+    title: "Lease analysis failed",
+    body: message,
+  };
+}
+
 export default function AnalyzeLeasePage() {
   const generateUploadUrl = useMutation(
     api.analyzeLease.mutations.generateUploadUrl,
@@ -28,7 +77,7 @@ export default function AnalyzeLeasePage() {
   const [stateSearch, setStateSearch] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<AnalyzeLeaseError | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [leaseId, setLeaseId] = useState<Id<"leases"> | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -80,11 +129,17 @@ export default function AnalyzeLeasePage() {
     }
     const allowed = ["application/pdf", "text/plain"];
     if (!allowed.includes(incoming.type)) {
-      setError("Please upload a PDF or text file.");
+      setError({
+        title: "Unsupported file type",
+        body: "Please upload a PDF or text file.",
+      });
       return;
     }
     if (incoming.size > 20 * 1024 * 1024) {
-      setError("File must be under 20 MB.");
+      setError({
+        title: "File too large",
+        body: "File must be under 20 MB.",
+      });
       return;
     }
     setFile(incoming);
@@ -129,9 +184,19 @@ export default function AnalyzeLeasePage() {
 
       await analyzeLeaseById({ leaseId: newLeaseId });
     } catch (e) {
-      const message =
-        e instanceof Error ? e.message : "Failed to analyze lease";
-      setError(message);
+      const raw =
+        e instanceof Error ? e.message : String(e ?? "Failed to analyze lease");
+      const unwrapped = unwrapConvexClientError(raw);
+      const stillWrapped =
+        !unwrapped || /^\[CONVEX\b/i.test(unwrapped.trim());
+      if (stillWrapped) {
+        setError({
+          title: "Something went wrong",
+          body: "Please try again in a moment. If it keeps happening, contact support.",
+        });
+      } else {
+        setError(formatLeaseCheckError(unwrapped));
+      }
     } finally {
       setIsSubmitting(false);
       setIsAnalyzing(false);
@@ -298,9 +363,18 @@ export default function AnalyzeLeasePage() {
 
             {/* Error */}
             {error ? (
-              <p className="mx-auto mt-4 max-w-xl text-sm font-medium text-destructive">
-                {error}
-              </p>
+              <div className="mx-auto mt-4 max-w-xl rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm shadow-sm">
+                <p className="font-semibold text-destructive">{error.title}</p>
+                {error.body ? (
+                  <p className="mt-2 font-medium leading-relaxed text-pretty text-destructive">
+                    {error.body}
+                  </p>
+                ) : null}
+                <p className="mt-3 border-t border-destructive/15 pt-3 text-xs font-medium text-destructive/90">
+                  Accepted files: lease agreements, lease addendums, or lease
+                  renewals.
+                </p>
+              </div>
             ) : null}
 
             {/* Submit */}

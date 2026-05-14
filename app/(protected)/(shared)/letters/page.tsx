@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useQuery } from "convex/react"
-import { ChevronLeft, ChevronRight, FileText, Plus } from "lucide-react"
+import { FileText, Plus } from "lucide-react"
 import { api } from "@/convex/_generated/api"
 import { ListRowPill } from "@/components/shared/list-row-pill"
 import { Button } from "@/components/ui/button"
@@ -19,8 +19,7 @@ export default function LettersPage() {
 
   const letters = data?.items ?? []
   const totalPages = data?.totalPages ?? 0
-  const canPrev = totalPages > 0 && page > 0
-  const canNext = totalPages > 0 && page < totalPages - 1
+  const hasMore = totalPages > 0 && page < totalPages - 1
 
   return (
     <main className="min-h-[100dvh] bg-cream-page px-4 py-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10">
@@ -84,36 +83,16 @@ export default function LettersPage() {
               ))}
             </div>
 
-            <div className="mt-8 flex flex-wrap items-center justify-end gap-3">
-              {totalPages > 1 ? (
-                <p className="mr-auto text-sm text-muted-foreground md:text-base">
-                  Page {page + 1} of {totalPages}
-                </p>
-              ) : null}
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  className="h-11 w-11 rounded-xl border-cream-border bg-background"
-                  aria-label="Previous page"
-                  disabled={!canPrev}
-                  onClick={() => setPage((p) => Math.max(0, p - 1))}
-                >
-                  <ChevronLeft className="size-5" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  className="h-11 w-11 rounded-xl border-cream-border bg-background"
-                  aria-label="Next page"
-                  disabled={!canNext}
-                  onClick={() => setPage((p) => p + 1)}
-                >
-                  <ChevronRight className="size-5" />
-                </Button>
-              </div>
+            <div className="mt-8 flex justify-center">
+              <Button
+                type="button"
+                variant="outline"
+                className="h-11 min-w-[14rem] rounded-xl border-cream-border bg-background px-6 text-sm font-semibold disabled:pointer-events-none disabled:opacity-80 sm:min-w-[16rem] sm:text-base"
+                disabled={!hasMore}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                {hasMore ? "Load more" : "You have reached the end"}
+              </Button>
             </div>
           </>
         )}

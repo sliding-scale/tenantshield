@@ -1,6 +1,7 @@
 import { action } from "../_generated/server";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
+import { ensureLeaseDocument } from "../lease/validation";
 import type { Id } from "../_generated/dataModel";
 import { initSync, WasmPdfDocument } from "pdf-oxide-wasm/web";
 
@@ -63,6 +64,8 @@ export const extractLeaseText = action({
         "Could not extract any text from the PDF. The file may be scanned or image-based.",
       );
     }
+
+    await ensureLeaseDocument(leaseText);
 
     const createdUnderPlan = await ctx.runQuery(
       (internal as any)["users/queries"].getPlanByClerkId,

@@ -1,7 +1,8 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useQuery } from "convex/react";
+import { useQuery, useAction } from "convex/react";
+import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import type { Id } from "@/convex/_generated/dataModel";
 import { api } from "@/convex/_generated/api";
@@ -72,12 +73,51 @@ export default function LeaseDetailPage() {
           <Button className="w-full">Open PDF</Button>
         </a>
       ) : (
-        <div className="mt-3 text-sm text-muted-foreground">
-          No PDF available
+        <div className="mt-3">
+          <div className="mb-2 text-sm text-muted-foreground">
+            No PDF available
+          </div>
+          <TryLoadPdfButton leaseId={leaseId} />
         </div>
       )}
     </div>
   );
+
+  function TryLoadPdfButton({ leaseId }: { leaseId: Id<"leases"> }) {
+    const fetchPdf = useAction(api.lease.actions.getLeasePdfUrl);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    return (
+      <div>
+        <Button
+          className="w-full"
+          onClick={async () => {
+            setError(null);
+            setLoading(true);
+            try {
+              const url = await fetchPdf({ leaseId });
+              if (url) {
+                window.open(url, "_blank", "noopener,noreferrer");
+              } else {
+                setError("Could not load PDF. Try again in a moment.");
+              }
+            } catch (e) {
+              setError(e instanceof Error ? e.message : String(e));
+            } finally {
+              setLoading(false);
+            }
+          }}
+          disabled={loading}
+        >
+          {loading ? "Loading…" : "Try to load PDF"}
+        </Button>
+        {error ? (
+          <div className="mt-2 text-sm text-destructive">{error}</div>
+        ) : null}
+      </div>
+    );
+  }
 
   return (
     <main className="flex min-h-[100dvh] flex-col bg-cream-page pb-28 pt-5 md:min-h-[calc(100vh-4rem)] md:pb-10 md:pt-6 lg:pt-8">

@@ -12,6 +12,8 @@ export const saveLetterToDB = internalMutation({
       fullName: v.string(),
       landlordName: v.string(),
       propertyAddress: v.string(),
+      senderAddress: v.optional(v.string()),
+      landlordAddress: v.optional(v.string()),
       description: v.string(),
       amountAtStake: v.optional(v.string()),
       deadlineDays: v.string(),

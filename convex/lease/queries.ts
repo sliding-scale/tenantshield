@@ -42,7 +42,7 @@ export const getLeaseById = internalQuery({
   },
 });
 
-/** Paginated list (3 per page) of analyzed leases for the current user. */
+/** List leases in pages of 3; `page` is 0-based and responses are cumulative (rows 0…(page+1)*3-1). */
 export const listLeasesPaged = query({
   args: { page: v.number() },
   handler: async (ctx, args) => {
@@ -71,8 +71,9 @@ export const listLeasesPaged = query({
     const safePage = Math.max(0, Math.floor(args.page));
     const cappedPage =
       totalPages === 0 ? 0 : Math.min(safePage, totalPages - 1);
-    const start = cappedPage * PAGE_SIZE;
-    const pageRows = sorted.slice(start, start + PAGE_SIZE);
+    /** Cumulative rows through this page (for “load more” UI). */
+    const end = Math.min(sorted.length, (cappedPage + 1) * PAGE_SIZE);
+    const pageRows = sorted.slice(0, end);
 
     const items = pageRows.map((row) => {
       const analysis = row.aiAnalysis!;
