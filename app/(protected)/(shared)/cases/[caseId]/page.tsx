@@ -7,15 +7,26 @@ import { useMutation, useQuery } from "convex/react"
 import type { Id } from "@/convex/_generated/dataModel"
 import { api } from "@/convex/_generated/api"
 import { NewCaseAnalysisResult } from "@/components/case/new-case-analysis-result"
+import { PlanUpgradeDialog } from "@/components/tenant/free-plan-upgrade-dialog"
 import { Button } from "@/components/ui/button"
+import useCurrentUser from "@/app/hooks/useCurrentUser"
+import {
+  ACTIVE_CASE_LIMIT_REACHED,
+  hasReachedActiveCaseLimit,
+  resolvePlanId,
+} from "@/lib/plans/plan-access"
+import { getActiveCaseLimit } from "@/lib/plans/plans"
 
 export default function CaseDetailsPage() {
   const params = useParams<{ caseId: string }>()
   const router = useRouter()
   const caseId = (params?.caseId ?? "") as Id<"cases">
   const row = useQuery(api.cases.queries.getByIdForCurrentUser, caseId ? { caseId } : "skip")
+  const planUsage = useQuery(api.planUsage.queries.current, {})
   const setCaseStatus = useMutation(api.cases.mutations.setCaseStatusForCurrentUser)
+  const { convexUser } = useCurrentUser()
   const [statusBusy, setStatusBusy] = useState(false)
+  const [upgradeOpen, setUpgradeOpen] = useState(false)
 
   const effectiveStatus = row?.caseStatus ?? "active"
 
@@ -56,13 +67,34 @@ export default function CaseDetailsPage() {
     )
   }
 
+  const plan = resolvePlanId(convexUser?.plan)
+  const billingPeriod = planUsage?.planType ?? "monthly"
+  const usedActiveCases = planUsage?.usedActiveCases ?? 0
+  const activeCaseLimit = getActiveCaseLimit(plan, billingPeriod)
+
   const toggleArchive = async () => {
+    const nextStatus = effectiveStatus === "active" ? "archived" : "active"
+
+    if (
+      nextStatus === "active" &&
+      hasReachedActiveCaseLimit(plan, billingPeriod, usedActiveCases)
+    ) {
+      setUpgradeOpen(true)
+      return
+    }
+
     setStatusBusy(true)
     try {
       await setCaseStatus({
         caseId,
-        caseStatus: effectiveStatus === "active" ? "archived" : "active",
+        caseStatus: nextStatus,
       })
+    } catch (error) {
+      if (error instanceof Error && error.message === ACTIVE_CASE_LIMIT_REACHED) {
+        setUpgradeOpen(true)
+        return
+      }
+      throw error
     } finally {
       setStatusBusy(false)
     }
@@ -100,6 +132,15 @@ export default function CaseDetailsPage() {
               </Button>
             </div>
           }
+        />
+        <PlanUpgradeDialog
+          open={upgradeOpen}
+          onOpenChange={setUpgradeOpen}
+          eyebrow="Active case limit"
+          title="Upgrade to restore this case"
+          description={`Your current plan allows up to ${activeCaseLimit} active cases at a time. Archive another active case or upgrade on billing to restore this one.`}
+          primaryActionLabel="Go to billing"
+          primaryActionHref="/billing"
         />
       </div>
     </main>

@@ -16,14 +16,20 @@ import {
 } from "lucide-react"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
 import { api } from "@/convex/_generated/api"
-import { FreePlanUpgradeDialog } from "@/components/tenant/free-plan-upgrade-dialog"
+import { PlanUpgradeDialog } from "@/components/tenant/free-plan-upgrade-dialog"
 import { Button } from "@/components/ui/button"
 import {
   ISSUE_TYPES,
   type IssueTypeIconKey,
 } from "@/lib/constants/issue-types"
 import { US_STATE_NAMES, type USStateAbbr } from "@/lib/constants/us-states"
-import { shouldPromptFreePlanUpgrade } from "@/lib/plans/plan-access"
+import {
+  ACTIVE_CASE_LIMIT_REACHED,
+  hasReachedActiveCaseLimit,
+  resolvePlanId,
+  shouldPromptFreePlanUpgrade,
+} from "@/lib/plans/plan-access"
+import { getActiveCaseLimit } from "@/lib/plans/plans"
 
 const ISSUE_TYPE_ICONS: Record<
   IssueTypeIconKey,
@@ -62,7 +68,7 @@ type NewCaseFormProps = {
   error: string | null
   canSubmit: boolean
   isSubmitting: boolean
-  onSubmit: () => void
+  onSubmit: () => void | Promise<void>
   onClose: () => void
   stateChipRefs: MutableRefObject<Map<string, HTMLButtonElement>>
 }
@@ -95,23 +101,45 @@ export function NewCaseForm({
   stateChipRefs,
 }: NewCaseFormProps) {
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false)
+  const [upgradeDialogMode, setUpgradeDialogMode] = useState<"free" | "active-limit">("free")
   const { convexUser } = useCurrentUser()
   const counts = useQuery(api.dashboard.queries.countsForCurrentUser, {})
+  const planUsage = useQuery(api.planUsage.queries.current, {})
+  const plan = resolvePlanId(convexUser?.plan)
+  const billingPeriod = planUsage?.planType ?? "monthly"
+  const usedActiveCases = planUsage?.usedActiveCases ?? 0
+  const activeCaseLimit = getActiveCaseLimit(plan, billingPeriod)
 
   const selectedStateName = useMemo(
     () => (state ? US_STATE_NAMES[state as USStateAbbr] : ""),
     [state],
   )
 
-  const handleSubmitClick = () => {
+  const handleSubmitClick = async () => {
     const generatedCaseCount = counts?.totalCases ?? 0
-    if (shouldPromptFreePlanUpgrade(convexUser?.plan, generatedCaseCount)) {
+    if (shouldPromptFreePlanUpgrade(plan, generatedCaseCount)) {
+      setUpgradeDialogMode("free")
+      setUpgradeDialogOpen(true)
+      return
+    }
+
+    if (hasReachedActiveCaseLimit(plan, billingPeriod, usedActiveCases)) {
+      setUpgradeDialogMode("active-limit")
       setUpgradeDialogOpen(true)
       return
     }
 
     setUpgradeDialogOpen(false)
-    onSubmit()
+    try {
+      await onSubmit()
+    } catch (error) {
+      if (error instanceof Error && error.message === ACTIVE_CASE_LIMIT_REACHED) {
+        setUpgradeDialogMode("active-limit")
+        setUpgradeDialogOpen(true)
+        return
+      }
+      throw error
+    }
   }
 
   return (
@@ -271,18 +299,29 @@ export function NewCaseForm({
           <Button
             type="button"
             disabled={!canSubmit}
-            onClick={handleSubmitClick}
+            onClick={() => void handleSubmitClick()}
             className="mt-8 h-14 mx-auto w-full rounded-2xl bg-surface-strong px-6 text-lg font-semibold text-white hover:bg-surface-strong-hover disabled:bg-muted disabled:text-muted-foreground md:mt-10 md:max-w-md md:text-xl lg:max-w-sm"
           >
             {isSubmitting ? "Analyzing..." : "Analyze My Case"}
           </Button>
         </section>
       </div>
-      <FreePlanUpgradeDialog
+      <PlanUpgradeDialog
         open={upgradeDialogOpen}
         onOpenChange={setUpgradeDialogOpen}
-        title="Upgrade to analyze more cases"
-        description="Your free plan includes one case analysis. Choose a plan to analyze another case."
+        eyebrow={upgradeDialogMode === "free" ? "Free plan limit" : "Active case limit"}
+        title={
+          upgradeDialogMode === "free"
+            ? "Upgrade to analyze more cases"
+            : "Upgrade to analyze another case"
+        }
+        description={
+          upgradeDialogMode === "free"
+            ? "Your free plan includes one case analysis. Choose a plan to analyze another case."
+            : `Your current plan allows up to ${activeCaseLimit} active cases at a time. Archive another active case or upgrade on billing to analyze a new one.`
+        }
+        primaryActionLabel={upgradeDialogMode === "free" ? "View plans" : "Go to billing"}
+        primaryActionHref={upgradeDialogMode === "free" ? "/onboarding/plans" : "/billing"}
       />
     </main>
   )

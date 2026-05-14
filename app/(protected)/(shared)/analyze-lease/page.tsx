@@ -21,6 +21,14 @@ import {
   LeaseResultsView,
   type LeaseAnalysis,
 } from "@/components/tenant/analyze-lease/lease-results-view"
+import { PlanUpgradeDialog } from "@/components/tenant/free-plan-upgrade-dialog"
+import useCurrentUser from "@/app/hooks/useCurrentUser"
+import {
+  hasReachedLeaseAnalysisLimit,
+  LEASE_ANALYSIS_LIMIT_REACHED,
+  resolvePlanId,
+} from "@/lib/plans/plan-access"
+import { getLeaseAnalysisLimit } from "@/lib/plans/plans"
 
 export default function AnalyzeLeasePage() {
   const generateUploadUrl = useMutation(
@@ -39,8 +47,15 @@ export default function AnalyzeLeasePage() {
   const [error, setError] = useState<string | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
   const [leaseId, setLeaseId] = useState<Id<"leases"> | null>(null)
+  const [upgradeOpen, setUpgradeOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const stateChipRefs = useRef<Map<string, HTMLButtonElement>>(new Map())
+  const { convexUser } = useCurrentUser()
+  const planUsage = useQuery(api.planUsage.queries.current, {})
+  const plan = resolvePlanId(convexUser?.plan)
+  const billingPeriod = planUsage?.planType ?? "monthly"
+  const usedLeaseAnalyses = planUsage?.usedLeaseAnalyses ?? 0
+  const leaseAnalysisLimit = getLeaseAnalysisLimit(plan, billingPeriod)
 
   const lease = useQuery(
     api.lease.queries.getLeaseForCurrentUser,
@@ -110,6 +125,12 @@ export default function AnalyzeLeasePage() {
 
   const onSubmit = async () => {
     if (!canSubmit || !file) return
+
+    if (hasReachedLeaseAnalysisLimit(plan, billingPeriod, usedLeaseAnalyses)) {
+      setUpgradeOpen(true)
+      return
+    }
+
     setError(null)
     setIsSubmitting(true)
     try {
@@ -137,6 +158,10 @@ export default function AnalyzeLeasePage() {
 
       await analyzeLeaseById({ leaseId: newLeaseId })
     } catch (e) {
+      if (e instanceof Error && e.message === LEASE_ANALYSIS_LIMIT_REACHED) {
+        setUpgradeOpen(true)
+        return
+      }
       const message =
         e instanceof Error ? e.message : "Failed to analyze lease"
       setError(message)
@@ -346,6 +371,15 @@ export default function AnalyzeLeasePage() {
           <LeaseResultsView analysis={analysis as LeaseAnalysis} />
         )}
       </div>
+      <PlanUpgradeDialog
+        open={upgradeOpen}
+        onOpenChange={setUpgradeOpen}
+        eyebrow="Lease analysis limit"
+        title="Upgrade to analyze another lease"
+        description={`Your current plan allows up to ${leaseAnalysisLimit} lease analyses per ${billingPeriod === "yearly" ? "year" : "month"}. Upgrade on billing to run a new one.`}
+        primaryActionLabel="Go to billing"
+        primaryActionHref="/billing"
+      />
     </main>
   )
 }

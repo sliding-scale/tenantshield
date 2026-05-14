@@ -17,13 +17,19 @@ type FreePlanUpgradeDialogProps = {
   onOpenChange: (open: boolean) => void
   title: string
   description: string
+  eyebrow?: string
+  primaryActionLabel?: string
+  primaryActionHref?: string
 }
 
-export function FreePlanUpgradeDialog({
+export function PlanUpgradeDialog({
   open,
   onOpenChange,
   title,
   description,
+  eyebrow = "Free plan limit",
+  primaryActionLabel = "View plans",
+  primaryActionHref = "/onboarding/plans",
 }: FreePlanUpgradeDialogProps) {
   const router = useRouter()
 
@@ -35,7 +41,7 @@ export function FreePlanUpgradeDialog({
       >
         <div className="px-6 py-7 sm:px-8 sm:py-9">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary sm:text-sm">
-            Free plan limit
+            {eyebrow}
           </p>
           <div className="mt-4 flex items-start gap-4 sm:mt-5 sm:gap-5">
             <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-cream-border bg-cream-surface-deep sm:size-16">
@@ -58,9 +64,9 @@ export function FreePlanUpgradeDialog({
           </AlertDialogCancel>
           <AlertDialogAction
             className="h-12 min-h-11 w-full rounded-2xl border-0 bg-surface-strong px-6 text-base font-semibold text-white hover:bg-surface-strong-hover sm:w-auto"
-            onClick={() => router.push("/onboarding/plans")}
+            onClick={() => router.push(primaryActionHref)}
           >
-            View plans
+            {primaryActionLabel}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

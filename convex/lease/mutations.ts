@@ -2,6 +2,7 @@ import type { Id } from "../_generated/dataModel";
 import { internalMutation } from "../_generated/server";
 import { v } from "convex/values";
 import { Plan } from "../schema";
+import { assertCanCreateLeaseAnalysis, incrementUsedLeaseAnalyses } from "../planUsage/helpers";
 
 export const saveLeaseToDB = internalMutation({
   args: {
@@ -36,7 +37,10 @@ export const saveLeaseToDB = internalMutation({
     embedding: v.array(v.float64()),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert("leases", args);
+    await assertCanCreateLeaseAnalysis(ctx, args.userId);
+    const leaseId = await ctx.db.insert("leases", args);
+    await incrementUsedLeaseAnalyses(ctx, args.userId);
+    return leaseId;
   },
 });
 
