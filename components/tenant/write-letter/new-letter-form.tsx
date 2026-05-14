@@ -1,6 +1,7 @@
 "use client"
 
-import { type ComponentType, type MutableRefObject } from "react"
+import { useState, type ComponentType, type MutableRefObject } from "react"
+import { useQuery } from "convex/react"
 import {
   AlertTriangle,
   CircleHelp,
@@ -13,6 +14,9 @@ import {
   Wrench,
   X,
 } from "lucide-react"
+import useCurrentUser from "@/app/hooks/useCurrentUser"
+import { api } from "@/convex/_generated/api"
+import { FreePlanUpgradeDialog } from "@/components/tenant/free-plan-upgrade-dialog"
 import { Button } from "@/components/ui/button"
 import {
   ISSUE_TYPES,
@@ -20,6 +24,7 @@ import {
   type IssueTypeValue,
 } from "@/lib/constants/issue-types"
 import { US_STATE_NAMES, type USStateAbbr } from "@/lib/constants/us-states"
+import { shouldPromptFreePlanUpgrade } from "@/lib/plans/plan-access"
 
 const ISSUE_TYPE_ICONS: Record<
   IssueTypeIconKey,
@@ -96,6 +101,21 @@ export function NewLetterForm({
   onClose,
   stateChipRefs,
 }: NewLetterFormProps) {
+  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false)
+  const { convexUser } = useCurrentUser()
+  const counts = useQuery(api.dashboard.queries.countsForCurrentUser, {})
+
+  const handleSubmitClick = () => {
+    const generatedLetterCount = counts?.letters ?? 0
+    if (shouldPromptFreePlanUpgrade(convexUser?.plan, generatedLetterCount)) {
+      setUpgradeDialogOpen(true)
+      return
+    }
+
+    setUpgradeDialogOpen(false)
+    onSubmit()
+  }
+
   return (
     <main className="flex min-h-[100dvh] flex-col bg-cream-page pb-28 pt-5 md:min-h-[calc(100vh-4rem)] md:pb-10 md:pt-6 lg:pt-8">
       <div className="flex w-full flex-1 flex-col px-4 sm:px-6 md:px-10 lg:px-14 xl:px-16">
@@ -259,13 +279,19 @@ export function NewLetterForm({
           <Button
             type="button"
             disabled={!canSubmit}
-            onClick={onSubmit}
+            onClick={handleSubmitClick}
             className="mt-8 h-14 w-full rounded-2xl bg-surface-strong px-6 text-lg font-semibold text-white hover:bg-surface-strong-hover disabled:bg-muted disabled:text-muted-foreground md:mt-10 md:max-w-md md:text-xl lg:max-w-sm"
           >
             {isSubmitting ? "Generating..." : "Generate Letter"}
           </Button>
         </section>
       </div>
+      <FreePlanUpgradeDialog
+        open={upgradeDialogOpen}
+        onOpenChange={setUpgradeDialogOpen}
+        title="Upgrade to generate more letters"
+        description="Your free plan includes one letter preview. Choose a plan to generate another letter."
+      />
     </main>
   )
 }

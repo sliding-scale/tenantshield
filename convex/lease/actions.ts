@@ -340,6 +340,10 @@ export const analyzeLeaseDocument = action({
         "Missing user identity. Log in or provide a valid test bypass token in dev.",
       );
     }
+    const createdUnderPlan = await ctx.runQuery(
+      (internal as any)["users/queries"].getPlanByClerkId,
+      { clerkId: userId },
+    );
 
     const { generatedData, embedding, chunkEmbeddings } =
       await runLeaseAnalysisCore(args.state, args.leaseText);
@@ -348,6 +352,7 @@ export const analyzeLeaseDocument = action({
       (internal as any)["lease/mutations"].saveLeaseToDB,
       {
         userId,
+        createdUnderPlan,
         state: args.state,
         leaseText: args.leaseText,
         aiAnalysis: generatedData,

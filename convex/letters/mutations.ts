@@ -1,9 +1,11 @@
 import { internalMutation, mutation } from "../_generated/server";
 import { v } from "convex/values";
+import { Plan } from "../schema";
 
 export const saveLetterToDB = internalMutation({
   args: {
     userId: v.string(),
+    createdUnderPlan: Plan,
     inputData: v.object({
       letterType: v.string(),
       state: v.string(),

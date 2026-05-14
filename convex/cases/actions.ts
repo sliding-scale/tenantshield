@@ -24,7 +24,11 @@ export const analyzeNewCase = action({
   handler: async (
     ctx,
     args,
-  ): Promise<{ caseId: Id<"cases">; aiAnalysis: CaseAnalysis }> => {
+  ): Promise<{
+    caseId: Id<"cases">;
+    aiAnalysis: CaseAnalysis;
+    createdUnderPlan: "free" | "pro" | "power";
+  }> => {
     const identity = await ctx.auth.getUserIdentity();
     const expectedBypassToken = process.env.TEST_BYPASS_TOKEN;
     const canUseTestBypass =
@@ -37,6 +41,10 @@ export const analyzeNewCase = action({
         "Missing user identity. Log in or provide a valid test bypass token in dev.",
       );
     }
+    const createdUnderPlan = await ctx.runQuery(
+      (internal as any)["users/queries"].getPlanByClerkId,
+      { clerkId: userId },
+    );
     const inputData = {
       issueType: args.issueType,
       shortTitle: args.shortTitle,
@@ -336,6 +344,7 @@ If Exa does not support a right, return exactly: "Local laws require verificatio
       (internal as any)["cases/mutations"].saveCaseToDB,
       {
         userId,
+        createdUnderPlan,
         inputData,
         aiAnalysis: generatedAiData,
         embedding: generatedVector,
@@ -409,6 +418,7 @@ If Exa does not support a right, return exactly: "Local laws require verificatio
     return {
       caseId: newCaseId,
       aiAnalysis: generatedAiData,
+      createdUnderPlan,
     };
   },
 });

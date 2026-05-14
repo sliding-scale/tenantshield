@@ -64,10 +64,16 @@ export const extractLeaseText = action({
       )
     }
 
+    const createdUnderPlan = await ctx.runQuery(
+      (internal as any)["users/queries"].getPlanByClerkId,
+      { clerkId: userId },
+    )
+
     const leaseId: Id<"leases"> = await ctx.runMutation(
       (internal as any)["analyzeLease/mutations"].saveLeaseToDB,
       {
         userId,
+        createdUnderPlan,
         state: args.state,
         leaseText,
         pdfFile: args.storageId,

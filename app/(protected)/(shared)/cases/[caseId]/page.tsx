@@ -74,6 +74,7 @@ export default function CaseDetailsPage() {
         <NewCaseAnalysisResult
           details={details}
           aiAnalysis={row.aiAnalysis}
+          createdUnderPlan={row.createdUnderPlan}
           onBack={() => router.push("/cases")}
           headerTrailing={
             <div className="flex max-w-[min(100vw-8rem,20rem)] flex-wrap items-center justify-end gap-2 sm:max-w-none">

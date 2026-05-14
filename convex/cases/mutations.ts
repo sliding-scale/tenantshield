@@ -1,9 +1,11 @@
 import { internalMutation, mutation } from "../_generated/server";
 import { v } from "convex/values";
+import { Plan } from "../schema";
 
 export const saveCaseToDB = internalMutation({
   args: {
     userId: v.string(),
+    createdUnderPlan: Plan,
     inputData: v.object({
       issueType: v.string(),
       shortTitle: v.string(),
@@ -29,6 +31,7 @@ export const saveCaseToDB = internalMutation({
     const newCaseId = await ctx.db.insert("cases", {
       userId: args.userId,
       caseStatus: "active",
+      createdUnderPlan: args.createdUnderPlan,
       inputData: args.inputData,
       aiAnalysis: args.aiAnalysis,
       embedding: args.embedding,

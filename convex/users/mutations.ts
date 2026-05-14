@@ -22,6 +22,7 @@ export const createOrUpdateFromClerk = internalMutation({
         email,
         name: args.name,
         role: byClerk.role === "admin" ? "admin" : "tenant",
+        plan: byClerk.plan?? "free",
       })
       return byClerk._id
     }
@@ -30,6 +31,7 @@ export const createOrUpdateFromClerk = internalMutation({
       email,
       name: args.name,
       role: "tenant",
+      plan: "free",
     })
   },
 })

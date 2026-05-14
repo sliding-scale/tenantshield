@@ -6,8 +6,11 @@ import type { z } from "zod"
 import { ArrowLeft } from "lucide-react"
 import { caseAnalysisSchema } from "@/convex/cases/aiSchema"
 import { Button } from "@/components/ui/button"
+import { UpgradeToViewCta } from "@/components/shared/upgrade-to-view-cta"
 import { US_STATE_NAMES, type USStateAbbr } from "@/lib/constants/us-states"
 import { caseStrengthLabel } from "@/lib/case/caseStrengthLabel"
+import { shouldBlurFreeCaseAnalysis, type PlanId } from "@/lib/plans/plan-access"
+import { cn } from "@/lib/utils"
 
 export type CaseAnalysis = z.infer<typeof caseAnalysisSchema>
 
@@ -24,6 +27,7 @@ export type NewCaseDetailsSnapshot = {
 type Props = {
   details: NewCaseDetailsSnapshot
   aiAnalysis: CaseAnalysis
+  createdUnderPlan?: PlanId | null
   onBack: () => void
   /** e.g. Archive / Restore — rendered top-right next to the title */
   headerTrailing?: ReactNode
@@ -54,12 +58,24 @@ function CaseStrengthDonut({ score }: { score: number }) {
   )
 }
 
-function AnalysisSections({ analysis }: { analysis: CaseAnalysis }) {
+function AnalysisSections({
+  analysis,
+  blurContent,
+}: {
+  analysis: CaseAnalysis
+  blurContent: boolean
+}) {
+  const blurredBodyClass = blurContent ? "blur-sm select-none" : undefined
   const listSection = (title: string, items: string[]) =>
     items.length > 0 ? (
       <section className="space-y-2">
         <h3 className="font-heading text-lg font-semibold text-ink-warm md:text-xl">{title}</h3>
-        <ul className="list-inside list-disc space-y-1.5 text-base leading-relaxed text-foreground md:text-lg">
+        <ul
+          className={cn(
+            "list-inside list-disc space-y-1.5 text-base leading-relaxed text-foreground md:text-lg",
+            blurredBodyClass,
+          )}
+        >
           {items.map((item, i) => (
             <li key={i}>{item}</li>
           ))}
@@ -75,12 +91,26 @@ function AnalysisSections({ analysis }: { analysis: CaseAnalysis }) {
 
       <section className="space-y-2">
         <h4 className="font-heading text-lg font-semibold text-ink-warm md:text-xl">Summary</h4>
-        <p className="text-base leading-relaxed text-foreground md:text-lg">{analysis.summary}</p>
+        <p
+          className={cn(
+            "text-base leading-relaxed text-foreground md:text-lg",
+            blurredBodyClass,
+          )}
+        >
+          {analysis.summary}
+        </p>
       </section>
 
       <section className="space-y-2">
         <h4 className="font-heading text-lg font-semibold text-ink-warm md:text-xl">Case strength</h4>
-        <p className="text-base leading-relaxed text-foreground md:text-lg">{analysis.caseStrengthDescription}</p>
+        <p
+          className={cn(
+            "text-base leading-relaxed text-foreground md:text-lg",
+            blurredBodyClass,
+          )}
+        >
+          {analysis.caseStrengthDescription}
+        </p>
       </section>
 
       {listSection("Your rights", analysis.yourRights)}
@@ -92,7 +122,14 @@ function AnalysisSections({ analysis }: { analysis: CaseAnalysis }) {
   )
 }
 
-export function NewCaseAnalysisResult({ details, aiAnalysis, onBack, headerTrailing }: Props) {
+export function NewCaseAnalysisResult({
+  details,
+  aiAnalysis,
+  createdUnderPlan,
+  onBack,
+  headerTrailing,
+}: Props) {
+  const blurAnalysis = shouldBlurFreeCaseAnalysis(createdUnderPlan)
   const [showFullDescription, setShowFullDescription] = useState(false)
 
   useEffect(() => {
@@ -188,8 +225,21 @@ export function NewCaseAnalysisResult({ details, aiAnalysis, onBack, headerTrail
 
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-warm-muted">AI analysis</p>
-          <div className="mt-3 rounded-3xl border border-cream-border bg-background px-5 py-6 shadow-sm md:px-8 md:py-8">
-            <AnalysisSections analysis={aiAnalysis} />
+          <div
+            className={cn(
+              "mt-3 overflow-hidden rounded-3xl border border-cream-border bg-background px-5 py-6 shadow-sm md:px-8 md:py-8",
+              blurAnalysis && "relative min-h-[20rem]",
+            )}
+          >
+            <AnalysisSections analysis={aiAnalysis} blurContent={blurAnalysis} />
+            {blurAnalysis ? (
+              <UpgradeToViewCta
+                eyebrow="Case analysis"
+                title="Upgrade to view this analysis"
+                description="See the full TenantShield breakdown, recommended actions, and next steps on a paid plan."
+                actionLabel="Upgrade to view it"
+              />
+            ) : null}
           </div>
         </div>
 

@@ -7,12 +7,18 @@ export const createConversation = mutation({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Unauthorized");
 
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
     const now = Date.now();
     return await ctx.db.insert("chatConversations", {
       userId: identity.subject,
       title: args.title ?? "New chat",
       updatedAt: now,
       createdAt: now,
+      createdUnderPlan: user?.plan ?? "free",
     });
   },
 });

@@ -13,6 +13,7 @@ import {
 } from "@/components/tenant/write-letter/letter-tiptap-editor"
 import { Button } from "@/components/ui/button"
 import { US_STATE_NAMES, type USStateAbbr } from "@/lib/constants/us-states"
+import { shouldBlurFreeLetterPreview } from "@/lib/plans/plan-access"
 
 export default function LetterDetailPage() {
   const params = useParams<{ letterId: string }>()
@@ -100,9 +101,12 @@ export default function LetterDetailPage() {
     )
   }
 
+  const blurLetter = shouldBlurFreeLetterPreview(row.createdUnderPlan)
+
   return (
     <LetterResultView
       letterData={row.letterData as LetterData}
+      createdUnderPlan={row.createdUnderPlan}
       letterType={row.inputData.letterType}
       stateName={stateName}
       landlordName={row.inputData.landlordName}
@@ -114,7 +118,7 @@ export default function LetterDetailPage() {
           ? "Edit the body below, then save. Copy uses the editor text while you’re editing."
           : undefined
       }
-      onEditLetter={isEditing ? undefined : () => setIsEditing(true)}
+      onEditLetter={isEditing || blurLetter ? undefined : () => setIsEditing(true)}
       letterContentSlot={
         isEditing ? (
           <LetterTipTapEditor

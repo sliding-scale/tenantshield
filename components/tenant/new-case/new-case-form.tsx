@@ -1,6 +1,7 @@
 "use client"
 
-import { useMemo, type ComponentType, type MutableRefObject } from "react"
+import { useMemo, useState, type ComponentType, type MutableRefObject } from "react"
+import { useQuery } from "convex/react"
 import {
   AlertTriangle,
   CircleHelp,
@@ -13,12 +14,16 @@ import {
   Wrench,
   X,
 } from "lucide-react"
+import useCurrentUser from "@/app/hooks/useCurrentUser"
+import { api } from "@/convex/_generated/api"
+import { FreePlanUpgradeDialog } from "@/components/tenant/free-plan-upgrade-dialog"
 import { Button } from "@/components/ui/button"
 import {
   ISSUE_TYPES,
   type IssueTypeIconKey,
 } from "@/lib/constants/issue-types"
 import { US_STATE_NAMES, type USStateAbbr } from "@/lib/constants/us-states"
+import { shouldPromptFreePlanUpgrade } from "@/lib/plans/plan-access"
 
 const ISSUE_TYPE_ICONS: Record<
   IssueTypeIconKey,
@@ -89,10 +94,25 @@ export function NewCaseForm({
   onClose,
   stateChipRefs,
 }: NewCaseFormProps) {
+  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false)
+  const { convexUser } = useCurrentUser()
+  const counts = useQuery(api.dashboard.queries.countsForCurrentUser, {})
+
   const selectedStateName = useMemo(
     () => (state ? US_STATE_NAMES[state as USStateAbbr] : ""),
     [state],
   )
+
+  const handleSubmitClick = () => {
+    const generatedCaseCount = counts?.totalCases ?? 0
+    if (shouldPromptFreePlanUpgrade(convexUser?.plan, generatedCaseCount)) {
+      setUpgradeDialogOpen(true)
+      return
+    }
+
+    setUpgradeDialogOpen(false)
+    onSubmit()
+  }
 
   return (
     <main className="flex min-h-[100dvh] flex-col bg-cream-page pb-28 pt-5 md:min-h-[calc(100vh-4rem)] md:pb-10 md:pt-6 lg:pt-8">
@@ -251,13 +271,19 @@ export function NewCaseForm({
           <Button
             type="button"
             disabled={!canSubmit}
-            onClick={onSubmit}
+            onClick={handleSubmitClick}
             className="mt-8 h-14 mx-auto w-full rounded-2xl bg-surface-strong px-6 text-lg font-semibold text-white hover:bg-surface-strong-hover disabled:bg-muted disabled:text-muted-foreground md:mt-10 md:max-w-md md:text-xl lg:max-w-sm"
           >
             {isSubmitting ? "Analyzing..." : "Analyze My Case"}
           </Button>
         </section>
       </div>
+      <FreePlanUpgradeDialog
+        open={upgradeDialogOpen}
+        onOpenChange={setUpgradeDialogOpen}
+        title="Upgrade to analyze more cases"
+        description="Your free plan includes one case analysis. Choose a plan to analyze another case."
+      />
     </main>
   )
 }

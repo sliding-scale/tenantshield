@@ -30,6 +30,8 @@ import type * as letters_mutations from "../letters/mutations.js";
 import type * as letters_queries from "../letters/queries.js";
 import type * as onboarding_mutations from "../onboarding/mutations.js";
 import type * as onboarding_queries from "../onboarding/queries.js";
+import type * as planUsage_mutations from "../planUsage/mutations.js";
+import type * as planUsage_queries from "../planUsage/queries.js";
 import type * as properties_helper from "../properties/helper.js";
 import type * as properties_mutations from "../properties/mutations.js";
 import type * as properties_queries from "../properties/queries.js";
@@ -71,6 +73,8 @@ declare const fullApi: ApiFromModules<{
   "letters/queries": typeof letters_queries;
   "onboarding/mutations": typeof onboarding_mutations;
   "onboarding/queries": typeof onboarding_queries;
+  "planUsage/mutations": typeof planUsage_mutations;
+  "planUsage/queries": typeof planUsage_queries;
   "properties/helper": typeof properties_helper;
   "properties/mutations": typeof properties_mutations;
   "properties/queries": typeof properties_queries;

@@ -9,17 +9,47 @@ export const OnboardingOptionKey = v.union(
   v.literal("option4")
 )
 
+export const Plan = v.union(v.literal("free"), v.literal("pro"), v.literal("power"))
 export default defineSchema({
   users: defineTable({
     clerkId: v.string(),
     email: v.string(),
     name: v.string(),
     role: Role,
+    plan: v.optional(Plan),
     onboardingSkippedAt: v.optional(v.number()),
     acceptedTerms: v.optional(v.boolean()),
   })
     .index("by_clerk_id", ["clerkId"])
     .index("by_email", ["email"]),
+  
+    planUsage: defineTable({
+      clerkId: v.string(),
+      stripeCustomerId: v.optional(v.string()),
+      stripeSubscriptionId: v.optional(v.string()),
+      plan: Plan,
+      planType: v.union(
+        v.literal("monthly"),
+        v.literal("yearly")
+      ),
+      subscriptionStatus: v.union(
+        v.literal("active"),
+        v.literal("canceled"),
+        v.literal("past_due"),
+        v.literal("trialing")
+      ),
+      currentPeriodStart: v.number(),
+      currentPeriodEnd: v.number(),
+      // usage counters
+      usedActiveCases: v.number(),
+      usedLeaseAnalyses: v.number(),
+      usedLetters: v.number(),
+    
+    })
+    
+    .index("by_clerk_id", ["clerkId"])
+    
+    .index("by_subscription_id", ["stripeSubscriptionId"]),
 
   onboardingQuestions: defineTable({
     step: v.number(),
@@ -57,6 +87,7 @@ export default defineSchema({
     // New inserts always set "active"; optional only for legacy rows before this field existed.
     caseStatus: v.optional(v.union(v.literal("active"), v.literal("archived"))),
     //ye frontend se ayega is mein save hoga
+    createdUnderPlan: v.optional(Plan),
     inputData:v.object({
       issueType: v.string(),
       shortTitle: v.string(),
@@ -110,7 +141,8 @@ export default defineSchema({
     //ye letters ka schema hai
     letters: defineTable({
       userId: v.string(),
-      
+      createdUnderPlan: v.optional(Plan),
+
       // The raw data from the frontend form
       inputData: v.object({
         letterType: v.string(),
@@ -121,6 +153,7 @@ export default defineSchema({
         description: v.string(),
         amountAtStake: v.optional(v.string()),
         deadlineDays: v.string(),
+
       }),
   
       // The structured AI output (matching our aiSchema)
@@ -162,6 +195,7 @@ export default defineSchema({
     state: v.string(),
     leaseText: v.string(),
     pdfFile: v.optional(v.id("_storage")),
+    createdUnderPlan: v.optional(Plan),
     aiAnalysis: v.optional(v.object({
       leaseReview: v.string(),
       documentSummary: v.string(),
@@ -236,6 +270,7 @@ export default defineSchema({
     title: v.string(),
     updatedAt: v.number(),
     createdAt: v.number(),
+    createdUnderPlan: v.optional(Plan),
   }).index("by_user_updated", ["userId", "updatedAt"]),
 
   chatMessages: defineTable({

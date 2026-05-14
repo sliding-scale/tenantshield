@@ -9,6 +9,7 @@ import { DEFAULT_ISSUE_TYPE, type IssueTypeValue } from "@/lib/constants/issue-t
 import { filterUSStates, US_STATE_NAMES, type USStateAbbr } from "@/lib/constants/us-states"
 import { LetterResultView, type LetterData } from "../../../../components/tenant/write-letter/letter-result-view"
 import { NewLetterForm } from "../../../../components/tenant/write-letter/new-letter-form"
+import type { PlanId } from "@/lib/plans/plan-access"
 
 export default function WriteLettersPage() {
   const router = useRouter()
@@ -31,6 +32,7 @@ export default function WriteLettersPage() {
   const [letterResult, setLetterResult] = useState<{
     letterId: string
     letterData: LetterData
+    createdUnderPlan?: PlanId | null
   } | null>(null)
   const [didCopy, setDidCopy] = useState(false)
 
@@ -110,6 +112,7 @@ export default function WriteLettersPage() {
       setLetterResult({
         letterId: String(result.letterId),
         letterData: result.letterData as LetterData,
+        createdUnderPlan: result.createdUnderPlan,
       })
       setSuccess("Letter generated successfully.")
     } catch (e) {
@@ -167,6 +170,7 @@ export default function WriteLettersPage() {
     return (
       <LetterResultView
         letterData={letterResult.letterData}
+        createdUnderPlan={letterResult.createdUnderPlan}
         letterType={letterType}
         stateName={stateName}
         landlordName={landlordName}
