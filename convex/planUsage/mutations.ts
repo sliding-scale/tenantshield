@@ -11,36 +11,25 @@ function getPeriodEnd(start: number, planType: "monthly" | "yearly") {
   return start + days * 24 * 60 * 60 * 1000
 }
 
+/** First paid subscription: only backfill active case count; letters/leases count from creation only. */
 async function syncFirstPaidPlanEntitlements(
   ctx: MutationCtx,
   clerkId: string,
   plan: PaidPlanId,
 ) {
-  const [cases, letters, leases] = await Promise.all([
-    ctx.db
-      .query("cases")
-      .withIndex("by_user_id", (q) => q.eq("userId", clerkId))
-      .collect(),
-    ctx.db
-      .query("letters")
-      .withIndex("by_user_id", (q) => q.eq("userId", clerkId))
-      .collect(),
-    ctx.db
-      .query("leases")
-      .withIndex("by_user_id", (q) => q.eq("userId", clerkId))
-      .collect(),
-  ])
+  const cases = await ctx.db
+    .query("cases")
+    .withIndex("by_user_id", (q) => q.eq("userId", clerkId))
+    .collect()
 
-  await Promise.all([
-    ...cases.map((row) => ctx.db.patch(row._id, { createdUnderPlan: plan })),
-    ...letters.map((row) => ctx.db.patch(row._id, { createdUnderPlan: plan })),
-    ...leases.map((row) => ctx.db.patch(row._id, { createdUnderPlan: plan })),
-  ])
+  await Promise.all(
+    cases.map((row) => ctx.db.patch(row._id, { createdUnderPlan: plan })),
+  )
 
   return {
     usedActiveCases: cases.filter((row) => (row.caseStatus ?? "active") === "active").length,
-    usedLeaseAnalyses: leases.length,
-    usedLetters: letters.length,
+    usedLeaseAnalyses: 0,
+    usedLetters: 0,
   }
 }
 

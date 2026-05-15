@@ -1,11 +1,7 @@
 import { internalMutation, mutation } from "../_generated/server";
 import { v } from "convex/values";
 import { Plan } from "../schema";
-import {
-  assertCanCreateLetter,
-  decrementUsedLetters,
-  incrementUsedLetters,
-} from "../planUsage/helpers";
+import { assertCanCreateLetter, incrementUsedLetters } from "../planUsage/helpers";
 
 const CASE_ALREADY_HAS_LETTER =
   "This case already has a letter attached. Open the existing letter from the case page.";
@@ -86,7 +82,6 @@ export const deleteLetterForCurrentUser = mutation({
     }
 
     await ctx.db.delete(args.letterId);
-    await decrementUsedLetters(ctx, identity.subject);
 
     return { success: true };
   },

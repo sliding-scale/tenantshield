@@ -94,8 +94,5 @@ export const adjustUsedActiveCases = (ctx: MutationCtx, clerkId: string, delta: 
 export const incrementUsedLetters = (ctx: MutationCtx, clerkId: string) =>
   adjustCounter(ctx, clerkId, "usedLetters", 1)
 
-export const decrementUsedLetters = (ctx: MutationCtx, clerkId: string) =>
-  adjustCounter(ctx, clerkId, "usedLetters", -1)
-
 export const incrementUsedLeaseAnalyses = (ctx: MutationCtx, clerkId: string) =>
   adjustCounter(ctx, clerkId, "usedLeaseAnalyses", 1)
