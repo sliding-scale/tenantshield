@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
 import { Button } from "@/components/ui/button"
-import { PRICING_PLANS, getPricingPlanFeatures } from "@/lib/plans/plans"
+import { PRICING_PLANS, getPricingPlanFeatures } from "@/lib/plans/pricing"
 import { useState } from "react"
 import { BrandedAlertDialog } from "@/components/ui/branded-alert-dialog"
 

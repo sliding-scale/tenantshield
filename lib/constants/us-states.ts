@@ -69,3 +69,10 @@ export function filterUSStates(query: string): USStateAbbr[] {
     return abbr.toLowerCase().includes(q) || name.includes(q)
   })
 }
+
+/** Valid US state abbreviation from profile/signup, or empty string. */
+export function normalizeUserStateAbbr(state: string | undefined | null): USStateAbbr | "" {
+  const abbr = state?.trim().toUpperCase() ?? ""
+  if (abbr && abbr in US_STATE_NAMES) return abbr as USStateAbbr
+  return ""
+}

@@ -23,6 +23,10 @@ export default function CaseDetailsPage() {
   const router = useRouter()
   const caseId = (params?.caseId ?? "") as Id<"cases">
   const row = useQuery(api.cases.queries.getByIdForCurrentUser, caseId ? { caseId } : "skip")
+  const attachedLetterId = useQuery(
+    api.letters.queries.getLetterIdByCaseForCurrentUser,
+    caseId ? { caseId } : "skip",
+  )
   const planUsage = useQuery(api.planUsage.queries.current, {})
   const setCaseStatus = useMutation(api.cases.mutations.setCaseStatusForCurrentUser)
   const { convexUser } = useCurrentUser()
@@ -108,6 +112,8 @@ export default function CaseDetailsPage() {
           details={details}
           aiAnalysis={row.aiAnalysis}
           createdUnderPlan={row.createdUnderPlan}
+          caseId={caseId}
+          attachedLetterId={attachedLetterId ?? null}
           onBack={() => router.push("/cases")}
           headerTrailing={
             <div className="flex max-w-[min(100vw-8rem,20rem)] flex-wrap items-center justify-end gap-2 sm:max-w-none">

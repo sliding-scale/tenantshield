@@ -12,6 +12,7 @@ import ChatSidebar, { ChatSidebarMobileToggle } from "./chat-sidebar";
 import ChatStatePicker from "./chat-state-picker";
 import ChatThread from "./chat-thread";
 import useCurrentUser from "@/app/hooks/useCurrentUser";
+import { normalizeUserStateAbbr } from "@/lib/constants/us-states";
 import { resolvePlanId, shouldPromptFreePlanChatUpgrade } from "@/lib/plans/plan-access";
 import { PlanUpgradeDialog } from "@/components/tenant/free-plan-upgrade-dialog";
 
@@ -32,8 +33,18 @@ export default function AskAiShell() {
   /** Client-only; wire to chat API / system prompt later */
   const [selectedStateCode, setSelectedStateCode] = useState<string | null>(null);
   const creatingFirstConversationRef = useRef(false);
+  const didInitStateFromProfile = useRef(false);
 
   const plan = resolvePlanId(convexUser?.plan);
+
+  useEffect(() => {
+    if (didInitStateFromProfile.current || selectedStateCode !== null) return
+    const fromProfile = normalizeUserStateAbbr(convexUser?.state)
+    if (fromProfile) {
+      setSelectedStateCode(fromProfile)
+      didInitStateFromProfile.current = true
+    }
+  }, [convexUser?.state, selectedStateCode])
 
   const fallbackFirst =
     conversations && conversations.length > 0 ? conversations[0]._id : null;

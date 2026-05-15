@@ -12,19 +12,20 @@ import {
 import { NewCaseForm } from "@/components/tenant/new-case/new-case-form"
 import { NewCaseResultView } from "@/components/tenant/new-case/new-case-result-view"
 import { DEFAULT_ISSUE_TYPE } from "@/lib/constants/issue-types"
-import { filterUSStates, US_STATE_NAMES, type USStateAbbr } from "@/lib/constants/us-states"
+import { filterUSStates, type USStateAbbr } from "@/lib/constants/us-states"
 import type { PlanId } from "@/lib/plans/plan-access"
+import { usePrefilledUSState } from "@/app/hooks/usePrefilledUSState"
 
 export default function NewCasePage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const analyzeCase = useAction(api.cases.actions.analyzeNewCase)
   const stateChipRefs = useRef<Map<string, HTMLButtonElement>>(new Map())
+  const { state, setState } = usePrefilledUSState(searchParams.get("state"))
 
   const [issueType, setIssueType] = useState<string>(DEFAULT_ISSUE_TYPE)
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [state, setState] = useState<string>("")
   const [stateSearch, setStateSearch] = useState("")
   const [city, setCity] = useState("")
   const [landlord, setLandlord] = useState("")
@@ -46,13 +47,6 @@ export default function NewCasePage() {
     if (filteredStates.includes(sel)) return filteredStates
     return [sel, ...filteredStates]
   }, [filteredStates, state])
-
-  useEffect(() => {
-    const prefillState = searchParams.get("state")?.trim().toUpperCase() ?? ""
-    if (!state && prefillState in US_STATE_NAMES) {
-      setState(prefillState)
-    }
-  }, [searchParams, state])
 
   useEffect(() => {
     const el = stateChipRefs.current.get(state)

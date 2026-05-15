@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useQuery } from "convex/react"
-import { FileText, Plus } from "lucide-react"
+import { Plus } from "lucide-react"
 import { api } from "@/convex/_generated/api"
-import { ListRowPill } from "@/components/shared/list-row-pill"
+import { LetterListRow } from "@/components/tenant/letters/letter-list-row"
 import { ShieldLoader } from "@/components/shared/shield-loader"
 import { Button } from "@/components/ui/button"
 
@@ -59,30 +59,7 @@ export default function LettersPage() {
           <>
             <div className="grid gap-4 md:gap-5">
               {letters.map((item) => (
-                <Link
-                  key={item._id}
-                  href={`/letters/${item._id}`}
-                  className="block rounded-3xl border border-cream-border bg-cream-surface p-4 transition hover:bg-cream-surface-soft sm:p-5 md:p-5"
-                >
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-                      {item.inputData.state} · {item.inputData.letterType}
-                    </p>
-                    <ListRowPill tone="muted">
-                      Recipient · {item.inputData.landlordName || "Landlord"}
-                    </ListRowPill>
-                  </div>
-                  <h2 className="mt-1.5 line-clamp-2 break-words text-balance font-heading text-xl font-semibold leading-snug text-ink-warm sm:text-2xl">
-                    {item.letterData?.header?.subjectLine || "Demand Letter"}
-                  </h2>
-                  <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-ink-warm-muted">
-                    {item.preview}
-                  </p>
-                  <div className="mt-3 flex items-center gap-2 text-sm font-medium text-foreground">
-                    <FileText className="size-4" />
-                    View letter
-                  </div>
-                </Link>
+                <LetterListRow key={item._id} item={item} />
               ))}
             </div>
 

@@ -1,7 +1,9 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Copy, ChevronLeft, Pencil, Download } from "lucide-react";
+import Link from "next/link";
+import type { Id } from "@/convex/_generated/dataModel";
+import { Briefcase, Copy, ChevronLeft, Pencil, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UpgradeToViewCta } from "@/components/shared/upgrade-to-view-cta";
 import {
@@ -98,6 +100,8 @@ type LetterResultViewProps = {
   onEditLetter?: () => void;
   /** Extra controls in the header row, before the copy icon (e.g. rate CTA). */
   headerBeforeCopy?: ReactNode;
+  /** When set, shows a link to the case this letter was generated from. */
+  caseId?: Id<"cases">;
 };
 
 export function LetterResultView({
@@ -116,6 +120,7 @@ export function LetterResultView({
   heroSubtitle,
   onEditLetter,
   headerBeforeCopy,
+  caseId,
 }: LetterResultViewProps) {
   const blurLetter = shouldBlurFreeLetterPreview(createdUnderPlan);
   const fullText = letterBodyOverride ?? buildFullLetterText(letterData);
@@ -170,7 +175,14 @@ export function LetterResultView({
   };
 
   return (
-    <main className="flex min-h-[100dvh] flex-col bg-cream-page pb-28 pt-5 md:min-h-[calc(100vh-4rem)] md:pb-10 md:pt-6 lg:pt-8">
+    <main
+      className={cn(
+        "flex min-h-[100dvh] flex-col bg-cream-page pt-5 md:min-h-[calc(100vh-4rem)] md:pb-10 md:pt-6 lg:pt-8",
+        caseId
+          ? "pb-[calc(22rem+env(safe-area-inset-bottom,0px))]"
+          : "pb-[calc(18rem+env(safe-area-inset-bottom,0px))]",
+      )}
+    >
       <div className="flex w-full flex-1 flex-col px-4 sm:px-6 md:px-10 lg:px-14 xl:px-16">
         <header className="mb-5 grid grid-cols-[2.75rem_1fr_auto] items-center gap-2 md:mb-8">
           <Button
@@ -254,7 +266,7 @@ export function LetterResultView({
           </div>
 
           {!letterContentSlot ? (
-            <div className="mt-6 rounded-3xl border border-cream-border bg-cream-surface p-5 shadow-sm sm:p-6 mb-26 sm:mb-0">
+            <div className="mt-6 rounded-3xl border border-cream-border bg-cream-surface p-5 shadow-sm sm:p-6">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-warm-muted">
                 Delivery tips
               </p>
@@ -280,6 +292,21 @@ export function LetterResultView({
         <div className="mx-auto w-full max-w-3xl">
           {footerSlot ?? (
             <div className="flex flex-col gap-2">
+              {caseId ? (
+                <Button
+                  asChild
+                  variant="outline"
+                  className="h-14 w-full rounded-2xl border-cream-border bg-cream-surface-deep px-6 text-lg font-semibold text-ink-warm hover:bg-cream-surface"
+                >
+                  <Link
+                    href={`/cases/${caseId}`}
+                    className="inline-flex items-center justify-center gap-2"
+                  >
+                    <Briefcase className="size-5 shrink-0" aria-hidden />
+                    View case
+                  </Link>
+                </Button>
+              ) : null}
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <Button
                   type="button"

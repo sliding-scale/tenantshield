@@ -9,11 +9,8 @@ import { Upload, FileText, X, Search } from "lucide-react";
 import { GavelLoader } from "@/components/shared/gavel-loader";
 import { ShieldLoader } from "@/components/shared/shield-loader";
 import { Button } from "@/components/ui/button";
-import {
-  US_STATE_NAMES,
-  filterUSStates,
-  type USStateAbbr,
-} from "@/lib/constants/us-states";
+import { US_STATE_NAMES, filterUSStates, type USStateAbbr } from "@/lib/constants/us-states";
+import { usePrefilledUSState } from "@/app/hooks/usePrefilledUSState";
 import {
   LeaseResultsView,
   type LeaseAnalysis,
@@ -86,7 +83,7 @@ export default function AnalyzeLeasePage() {
   const analyzeLeaseById = useAction(api.lease.actions.analyzeLeaseById);
 
   const [file, setFile] = useState<File | null>(null);
-  const [state, setState] = useState<string>("");
+  const { state, setState } = usePrefilledUSState();
   const [stateSearch, setStateSearch] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);

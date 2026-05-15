@@ -4,25 +4,35 @@ import { useSignUp } from "@clerk/nextjs"
 import Link from "next/link"
 import { ShieldLoader } from "@/components/shared/shield-loader"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { US_STATES, US_STATE_NAMES } from "@/lib/constants/us-states"
 
 export default function LoginContinuePage() {
   const router = useRouter()
   const { signUp } = useSignUp()
+  const [state, setState] = useState("")
+  const [error, setError] = useState<string | null>(null)
 
-  const handleSubmit = async (formData: FormData) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
     if (!signUp) return
+    setError(null)
+
+    const formData = new FormData(e.currentTarget)
     const fullName = (formData.get("fullName") as string) ?? ""
-    const { error } = await signUp.update({ unsafeMetadata: { fullName } })
-    if (error) {
-      console.error(error)
+
+    const { error: updateError } = await signUp.update({
+      unsafeMetadata: { fullName, ...(state ? { state } : {}) },
+    })
+    if (updateError) {
+      console.error(updateError)
+      setError("Could not save your details. Please try again.")
       return
     }
     if (signUp.status === "complete") {
-      const { error } = await signUp.finalize({
+      const { error: finalizeError } = await signUp.finalize({
         navigate: async ({ session, decorateUrl }) => {
-          if (session?.currentTask) {
-            return
-          }
+          if (session?.currentTask) return
           const url = decorateUrl("/dashboard")
           if (url.startsWith("http")) {
             window.location.href = url
@@ -31,8 +41,8 @@ export default function LoginContinuePage() {
           }
         },
       })
-      if (error) {
-        console.error(error)
+      if (finalizeError) {
+        console.error(finalizeError)
       }
     } else if (signUp.status !== "missing_requirements") {
       console.error("Sign-up attempt not complete:", signUp.status)
@@ -48,48 +58,57 @@ export default function LoginContinuePage() {
     return null
   }
 
+  const inputClass = "h-11 rounded-lg border border-border bg-background px-3 text-foreground outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-4 py-10">
       <Link href="/signup" className="text-sm text-muted-foreground hover:text-foreground">
         ← Back to sign up
       </Link>
       <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-sm sm:p-8">
-        <h1 className="font-heading text-2xl tracking-tight">Continue sign-up</h1>
+        <h1 className="font-heading text-2xl tracking-tight">Almost there!</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Add a few more details to finish creating your account.
+          A couple more details to finish setting up your account.
         </p>
-        <form action={handleSubmit} className="mt-6 flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="firstName" className="text-sm font-medium">
-              First name
+            <label htmlFor="fullName" className="text-sm font-medium">
+              Full name
             </label>
             <input
-              id="firstName"
-              name="firstName"
+              id="fullName"
+              name="fullName"
               type="text"
               required
-              autoComplete="given-name"
-              className="h-11 rounded-lg border border-border bg-background px-3 text-foreground outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
+              autoComplete="name"
+              className={inputClass}
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="lastName" className="text-sm font-medium">
-              Last name
+            <label htmlFor="continue-state" className="text-sm font-medium">
+              Your state <span className="text-muted-foreground font-normal">(optional)</span>
             </label>
-            <input
-              id="lastName"
-              name="lastName"
-              type="text"
-              required
-              autoComplete="family-name"
-              className="h-11 rounded-lg border border-border bg-background px-3 text-foreground outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
-            />
+            <select
+              id="continue-state"
+              name="state"
+              value={state}
+              onChange={(e) => setState(e.target.value)}
+              className={`${inputClass} appearance-none`}
+            >
+              <option value="">Select your state…</option>
+              {US_STATES.map((abbr) => (
+                <option key={abbr} value={abbr}>
+                  {US_STATE_NAMES[abbr]} ({abbr})
+                </option>
+              ))}
+            </select>
           </div>
+          {error ? <p className="text-sm text-destructive">{error}</p> : null}
           <button
             type="submit"
             className="mt-2 h-11 rounded-full bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Submit
+            Continue
           </button>
         </form>
       </div>

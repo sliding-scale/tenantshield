@@ -26,6 +26,7 @@ export function NewCaseResultView({ result, onBack }: NewCaseResultViewProps) {
           details={result.details}
           aiAnalysis={result.aiAnalysis}
           createdUnderPlan={result.createdUnderPlan}
+          caseId={result.caseId}
           onBack={onBack}
         />
       </div>

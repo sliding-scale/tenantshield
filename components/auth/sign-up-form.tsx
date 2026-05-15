@@ -7,6 +7,7 @@ import { firstClerkErrorMessage } from "@/lib/auth/clerk-errors"
 import { splitFullName } from "@/lib/auth/signup-metadata"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { US_STATES, US_STATE_NAMES } from "@/lib/constants/us-states"
 
 const authFieldClass =
   "h-12 rounded-full border-border bg-popover px-5 text-base shadow-sm placeholder:text-muted-foreground md:text-sm"
@@ -22,6 +23,7 @@ export function SignUpForm({ unsafeMetadata }: Props) {
   const [fullName, setFullName] = useState("")
   const [emailAddress, setEmailAddress] = useState("")
   const [password, setPassword] = useState("")
+  const [state, setState] = useState("")
   const [code, setCode] = useState("")
   const [awaitingEmailCode, setAwaitingEmailCode] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
@@ -72,7 +74,7 @@ export function SignUpForm({ unsafeMetadata }: Props) {
       password,
       firstName,
       lastName,
-      unsafeMetadata,
+      unsafeMetadata: { ...unsafeMetadata, ...(state ? { state } : {}) },
     })
 
     if (signUpError) {
@@ -241,6 +243,25 @@ export function SignUpForm({ unsafeMetadata }: Props) {
         {errors.fields.password ? (
           <p className="text-sm text-destructive">{errors.fields.password.message}</p>
         ) : null}
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="signup-state" className="sr-only">
+          Your state
+        </label>
+        <select
+          id="signup-state"
+          name="state"
+          value={state}
+          onChange={(ev) => setState(ev.target.value)}
+          className={`${authFieldClass} appearance-none`}
+        >
+          <option value="">State (optional)</option>
+          {US_STATES.map((abbr) => (
+            <option key={abbr} value={abbr}>
+              {US_STATE_NAMES[abbr]} ({abbr})
+            </option>
+          ))}
+        </select>
       </div>
       {formError ? <p className="text-sm text-destructive">{formError}</p> : null}
       <Button

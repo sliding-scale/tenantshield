@@ -107,6 +107,7 @@ export default function LetterDetailPage() {
   return (
     <LetterResultView
       letterData={row.letterData as LetterData}
+      caseId={row.caseId}
       createdUnderPlan={row.createdUnderPlan}
       letterType={row.inputData.letterType}
       stateName={stateName}

@@ -2,10 +2,9 @@
 
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
-import { useMutation } from "convex/react"
 import { Check } from "lucide-react"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
-import { api } from "@/convex/_generated/api"
+import { useSelectPaidPlan } from "@/app/hooks/useSelectPaidPlan"
 import {
   formatPlanPrice,
   formatYearlyPlanPrice,
@@ -16,7 +15,8 @@ import {
   PRICING_PLANS,
   type BillingPeriod,
   type PlanId,
-} from "@/lib/plans/plans"
+  type PricingAudience,
+} from "@/lib/plans/pricing"
 import { resolvePlanId } from "@/lib/plans/plan-access"
 import { cn } from "@/lib/utils"
 
@@ -24,7 +24,7 @@ type PricingPlansSectionProps = {
   id?: string
   title?: string
   subtitle?: string
-  audience?: "landing" | "billing"
+  audience?: PricingAudience
   showBillingPeriodToggle?: boolean
   defaultBillingPeriod?: BillingPeriod
   className?: string
@@ -86,7 +86,7 @@ function PricingPlanCard({
   onSelectPlan,
   isSelecting = false,
 }: (typeof PRICING_PLANS)[number] & {
-  audience: "landing" | "billing"
+  audience: PricingAudience
   billingPeriod?: BillingPeriod
   isCurrentPlan?: boolean
   onSelectPlan?: (planId: PlanId) => void
@@ -101,7 +101,9 @@ function PricingPlanCard({
   const displayFeatures = getPricingPlanFeatures(planId, billingPeriod)
   const href = getPlanCtaHref(planId, audience)
   const usesBillingSelection =
-    audience === "billing" && planId !== "free" && Boolean(onSelectPlan)
+    (audience === "billing" || audience === "onboarding") &&
+    planId !== "free" &&
+    Boolean(onSelectPlan)
   const ctaClassName = cn(
     "block w-full rounded-full px-4 py-3 text-center text-sm font-bold transition-all duration-200 active:scale-95",
     popular
@@ -196,7 +198,7 @@ export function PricingPlansSection({
   className,
 }: PricingPlansSectionProps) {
   const { clerkUser, convexUser, isLoading } = useCurrentUser()
-  const selectPlan = useMutation(api.planUsage.mutations.selectPlanForCurrentUser)
+  const { selectPaidPlan } = useSelectPaidPlan()
   const activeUserPlanId =
     clerkUser && !isLoading ? resolvePlanId(convexUser?.plan) : null
   const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>("monthly")
@@ -216,11 +218,11 @@ export function PricingPlansSection({
     hasAppliedDefaultBillingPeriod.current = true
   }, [defaultBillingPeriod, showBillingPeriodToggle])
   const handleSelectPlan = async (planId: PlanId) => {
-    if (audience !== "billing" || planId === "free") return
+    if ((audience !== "billing" && audience !== "onboarding") || planId === "free") return
 
     setPendingPlanId(planId)
     try {
-      await selectPlan({ plan: planId, planType: billingPeriod })
+      await selectPaidPlan({ plan: planId, planType: billingPeriod })
     } finally {
       setPendingPlanId(null)
     }
@@ -272,7 +274,11 @@ export function PricingPlansSection({
                     audience={audience}
                     billingPeriod={showBillingPeriodToggle ? billingPeriod : "monthly"}
                     isCurrentPlan={activeUserPlanId === plan.id}
-                    onSelectPlan={audience === "billing" ? handleSelectPlan : undefined}
+                    onSelectPlan={
+                      audience === "billing" || audience === "onboarding"
+                        ? handleSelectPlan
+                        : undefined
+                    }
                     isSelecting={pendingPlanId === plan.id}
                   />
                 </div>
@@ -304,7 +310,11 @@ export function PricingPlansSection({
               audience={audience}
               billingPeriod={showBillingPeriodToggle ? billingPeriod : "monthly"}
               isCurrentPlan={activeUserPlanId === plan.id}
-              onSelectPlan={audience === "billing" ? handleSelectPlan : undefined}
+              onSelectPlan={
+                audience === "billing" || audience === "onboarding"
+                  ? handleSelectPlan
+                  : undefined
+              }
               isSelecting={pendingPlanId === plan.id}
             />
           ))}

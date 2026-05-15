@@ -3,7 +3,8 @@
 import Link from "next/link"
 import { useEffect, useState, type ReactNode } from "react"
 import type { z } from "zod"
-import { ArrowLeft } from "lucide-react"
+import type { Id } from "@/convex/_generated/dataModel"
+import { ArrowLeft, FileText } from "lucide-react"
 import { caseAnalysisSchema } from "@/convex/cases/aiSchema"
 import { Button } from "@/components/ui/button"
 import { UpgradeToViewCta } from "@/components/shared/upgrade-to-view-cta"
@@ -29,6 +30,10 @@ type Props = {
   aiAnalysis: CaseAnalysis
   createdUnderPlan?: PlanId | null
   onBack: () => void
+  /** When set, letter generation links include this case and persist caseId on the letter. */
+  caseId?: Id<"cases">
+  /** When set, hide generate CTA and show link to the existing letter. */
+  attachedLetterId?: Id<"letters"> | null
   /** e.g. Archive / Restore — rendered top-right next to the title */
   headerTrailing?: ReactNode
 }
@@ -127,6 +132,8 @@ export function NewCaseAnalysisResult({
   aiAnalysis,
   createdUnderPlan,
   onBack,
+  caseId,
+  attachedLetterId,
   headerTrailing,
 }: Props) {
   const blurAnalysis = shouldBlurFreeCaseAnalysis(createdUnderPlan)
@@ -243,25 +250,39 @@ export function NewCaseAnalysisResult({
           </div>
         </div>
 
-        <Button
-          asChild
-          className="h-14 w-full rounded-2xl bg-surface-strong px-6 text-lg font-semibold text-white hover:bg-surface-strong-hover md:text-xl"
-        >
-          <Link
-            href={{
-              pathname: "/write-letters",
-              query: {
-                issueType: details.issueType,
-                issue: details.description || details.title,
-                state: details.state || "",
-                landlord: details.landlord || "",
-                propertyAddress: details.propertyAddress || "",
-              },
-            }}
+        {attachedLetterId ? (
+          <Button
+            asChild
+            variant="outline"
+            className="h-14 w-full rounded-2xl border-cream-border bg-cream-surface-deep px-6 text-lg font-semibold text-ink-warm hover:bg-cream-surface md:text-xl"
           >
-            Generate a letter
-          </Link>
-        </Button>
+            <Link href={`/letters/${attachedLetterId}`} className="inline-flex items-center justify-center gap-2">
+              <FileText className="size-5 shrink-0" aria-hidden />
+              Attached letter
+            </Link>
+          </Button>
+        ) : (
+          <Button
+            asChild
+            className="h-14 w-full rounded-2xl bg-surface-strong px-6 text-lg font-semibold text-white hover:bg-surface-strong-hover md:text-xl"
+          >
+            <Link
+              href={{
+                pathname: "/write-letters",
+                query: {
+                  ...(caseId ? { caseId } : {}),
+                  issueType: details.issueType,
+                  issue: details.description || details.title,
+                  state: details.state || "",
+                  landlord: details.landlord || "",
+                  propertyAddress: details.propertyAddress || "",
+                },
+              }}
+            >
+              Generate a letter
+            </Link>
+          </Button>
+        )}
       </div>
     </div>
   )

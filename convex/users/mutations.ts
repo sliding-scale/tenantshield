@@ -8,6 +8,7 @@ export const createOrUpdateFromClerk = internalMutation({
     email: v.string(),
     name: v.string(),
     role: Role,
+    state: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const email = args.email.trim().toLowerCase()
@@ -22,7 +23,9 @@ export const createOrUpdateFromClerk = internalMutation({
         email,
         name: args.name,
         role: byClerk.role === "admin" ? "admin" : "tenant",
-        plan: byClerk.plan?? "free",
+        plan: byClerk.plan ?? "free",
+        // Only overwrite state if a new value is provided (don't clear an existing one)
+        ...(args.state ? { state: args.state } : {}),
       })
       return byClerk._id
     }
@@ -32,6 +35,7 @@ export const createOrUpdateFromClerk = internalMutation({
       name: args.name,
       role: "tenant",
       plan: "free",
+      ...(args.state ? { state: args.state } : {}),
     })
   },
 })
@@ -76,6 +80,24 @@ export const acceptTerms = mutation({
     if (!existing) throw new Error("User not found")
     
     await ctx.db.patch(existing._id, { acceptedTerms: true })
+    return existing._id
+  },
+})
+
+export const updateState = mutation({
+  args: { state: v.string() },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity()
+    if (!identity) throw new Error("Unauthenticated")
+
+    const existing = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique()
+
+    if (!existing) throw new Error("User not found")
+
+    await ctx.db.patch(existing._id, { state: args.state || undefined })
     return existing._id
   },
 })

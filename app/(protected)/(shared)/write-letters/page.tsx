@@ -1,8 +1,10 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
+import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useAction } from "convex/react"
+import { useAction, useQuery } from "convex/react"
+import type { Id } from "@/convex/_generated/dataModel"
 import { api } from "@/convex/_generated/api"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
 import {
@@ -10,7 +12,8 @@ import {
   isIssueTypeValue,
   type IssueTypeValue,
 } from "@/lib/constants/issue-types"
-import { filterUSStates, US_STATE_NAMES, type USStateAbbr } from "@/lib/constants/us-states"
+import { filterUSStates, type USStateAbbr } from "@/lib/constants/us-states"
+import { usePrefilledUSState } from "@/app/hooks/usePrefilledUSState"
 import { NewLetterForm } from "../../../../components/tenant/write-letter/new-letter-form"
 
 export default function WriteLettersPage() {
@@ -19,8 +22,14 @@ export default function WriteLettersPage() {
   const { clerkUser } = useCurrentUser()
   const generateLetter = useAction(api.letters.actions.generateTenantLetter)
   const stateChipRefs = useRef<Map<string, HTMLButtonElement>>(new Map())
+  const caseIdParam = searchParams.get("caseId")?.trim() ?? ""
+  const caseId = caseIdParam ? (caseIdParam as Id<"cases">) : undefined
+  const attachedLetterId = useQuery(
+    api.letters.queries.getLetterIdByCaseForCurrentUser,
+    caseId ? { caseId } : "skip",
+  )
+  const { state, setState } = usePrefilledUSState(searchParams.get("state"))
   const [letterType, setLetterType] = useState<IssueTypeValue>(DEFAULT_ISSUE_TYPE)
-  const [state, setState] = useState<string>("")
   const [stateSearch, setStateSearch] = useState("")
   const [fullName, setFullName] = useState("")
   const [landlordName, setLandlordName] = useState("")
@@ -62,14 +71,10 @@ export default function WriteLettersPage() {
   }, [searchParams])
 
   useEffect(() => {
-    const prefillState = searchParams.get("state")?.trim().toUpperCase() ?? ""
     const prefillIssue = searchParams.get("issue")?.trim() ?? ""
     const prefillLandlord = searchParams.get("landlord")?.trim() ?? ""
     const prefillPropertyAddress = searchParams.get("propertyAddress")?.trim() ?? ""
 
-    if (!state && prefillState in US_STATE_NAMES) {
-      setState(prefillState)
-    }
     if (!description && prefillIssue) {
       setDescription(prefillIssue)
     }
@@ -79,7 +84,7 @@ export default function WriteLettersPage() {
     if (!propertyAddress && prefillPropertyAddress) {
       setPropertyAddress(prefillPropertyAddress)
     }
-  }, [description, landlordName, propertyAddress, searchParams, state])
+  }, [description, landlordName, propertyAddress, searchParams])
 
   useEffect(() => {
     const el = stateChipRefs.current.get(state)
@@ -91,6 +96,8 @@ export default function WriteLettersPage() {
     stateSearch.trim().length > 0 &&
     !filteredStates.includes(state as USStateAbbr)
 
+  const caseAlreadyHasLetter = Boolean(caseId && attachedLetterId)
+
   const canSubmit = Boolean(
     letterType &&
       state &&
@@ -101,7 +108,8 @@ export default function WriteLettersPage() {
       landlordAddress.trim() &&
       description.trim() &&
       deadlineDays.trim() &&
-      !isSubmitting,
+      !isSubmitting &&
+      !caseAlreadyHasLetter,
   )
   const onSubmit = async () => {
     if (!canSubmit) return
@@ -120,6 +128,7 @@ export default function WriteLettersPage() {
         description: description.trim(),
         amountAtStake: amountAtStake.trim() || undefined,
         deadlineDays: deadlineDays.trim(),
+        ...(caseId ? { caseId } : {}),
       })
       console.log("generateTenantLetter response", result)
       router.push(`/letters/${result.letterId}`)
@@ -132,8 +141,20 @@ export default function WriteLettersPage() {
     }
   }
 
+  const caseLetterBanner =
+    caseId && attachedLetterId ? (
+      <div className="mb-4 rounded-2xl border border-cream-border bg-cream-surface-deep px-4 py-3 text-sm text-foreground">
+        This case already has a letter.{" "}
+        <Link href={`/letters/${attachedLetterId}`} className="font-semibold text-primary hover:underline">
+          View attached letter
+        </Link>
+      </div>
+    ) : null
+
   return (
-    <NewLetterForm
+    <>
+      {caseLetterBanner}
+      <NewLetterForm
       letterType={letterType}
       setLetterType={setLetterType}
       state={state}
@@ -167,5 +188,6 @@ export default function WriteLettersPage() {
       onClose={() => router.back()}
       stateChipRefs={stateChipRefs}
     />
+    </>
   )
 }

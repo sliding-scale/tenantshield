@@ -23,6 +23,7 @@ export default defineSchema({
     plan: v.optional(Plan),
     onboardingSkippedAt: v.optional(v.number()),
     acceptedTerms: v.optional(v.boolean()),
+    state: v.optional(v.string()),
   })
     .index("by_clerk_id", ["clerkId"])
     .index("by_email", ["email"])
@@ -138,7 +139,7 @@ export default defineSchema({
   letters: defineTable({
     userId: v.string(),
     createdUnderPlan: v.optional(Plan),
-
+    caseId: v.optional(v.id("cases")),
     // The raw data from the frontend form
     inputData: v.object({
       letterType: v.string(),
@@ -169,6 +170,7 @@ export default defineSchema({
     embedding: v.array(v.float64()),
   })
     .index("by_user_id", ["userId"])
+    .index("by_case_id", ["caseId"])
     .vectorIndex("by_user_letter_embedding", {
       vectorField: "embedding",
       dimensions: 768,

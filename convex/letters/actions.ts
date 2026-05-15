@@ -23,6 +23,7 @@ export const generateTenantLetter = action({
     description: v.string(),
     amountAtStake: v.optional(v.string()),
     deadlineDays: v.string(),
+    caseId: v.optional(v.id("cases")),
     testUserId: v.optional(v.string()),
     testBypassToken: v.optional(v.string()),
   },
@@ -51,6 +52,18 @@ export const generateTenantLetter = action({
       (internal as any)["users/queries"].getPlanByClerkId,
       { clerkId: userId },
     );
+
+    if (args.caseId) {
+      const existingLetterId = await ctx.runQuery(
+        internal.letters.queries.getLetterIdByCaseForUser,
+        { userId, caseId: args.caseId },
+      );
+      if (existingLetterId) {
+        throw new Error(
+          "This case already has a letter attached. Open the existing letter from the case page.",
+        );
+      }
+    }
 
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
     const exa = new Exa(process.env.EXA_API_KEY!);
@@ -316,6 +329,7 @@ Hard rules:
       {
         userId,
         createdUnderPlan,
+        caseId: args.caseId,
         inputData,
         letterData: generatedData,
         fullLetterText: fullText,

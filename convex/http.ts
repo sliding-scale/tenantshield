@@ -71,11 +71,13 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
           console.warn("Clerk user webhook missing email:", clerkUser.id)
           break
         }
+        const stateFromMeta = clerkUser.unsafe_metadata?.state
         await ctx.runMutation(internal.users.mutations.createOrUpdateFromClerk, {
           clerkId: clerkUser.id,
           email,
           name,
           role: roleFromClerkUser(clerkUser),
+          state: typeof stateFromMeta === "string" && stateFromMeta ? stateFromMeta : undefined,
         })
         break
       }

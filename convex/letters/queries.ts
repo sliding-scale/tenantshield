@@ -1,5 +1,5 @@
 import { v } from "convex/values"
-import { query } from "../_generated/server"
+import { internalQuery, query } from "../_generated/server"
 
 const PAGE_SIZE = 3
 
@@ -55,6 +55,40 @@ export const listLettersPaged = query({
   },
 })
 
+export const getLetterIdByCaseForUser = internalQuery({
+  args: { userId: v.string(), caseId: v.id("cases") },
+  handler: async (ctx, args) => {
+    const caseRow = await ctx.db.get(args.caseId)
+    if (!caseRow || caseRow.userId !== args.userId) return null
+
+    const letter = await ctx.db
+      .query("letters")
+      .withIndex("by_case_id", (q) => q.eq("caseId", args.caseId))
+      .first()
+
+    return letter ? letter._id : null
+  },
+})
+
+/** Letter attached to a case for the current user, if any. */
+export const getLetterIdByCaseForCurrentUser = query({
+  args: { caseId: v.id("cases") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity()
+    if (!identity) return null
+
+    const caseRow = await ctx.db.get(args.caseId)
+    if (!caseRow || caseRow.userId !== identity.subject) return null
+
+    const letter = await ctx.db
+      .query("letters")
+      .withIndex("by_case_id", (q) => q.eq("caseId", args.caseId))
+      .first()
+
+    return letter ? letter._id : null
+  },
+})
+
 /** Full letter for detail view; excludes embedding. */
 export const getByIdForCurrentUser = query({
   args: { letterId: v.id("letters") },
@@ -66,6 +100,7 @@ export const getByIdForCurrentUser = query({
     if (!row || row.userId !== identity.subject) return null
 
     return {
+      caseId: row.caseId,
       inputData: row.inputData,
       letterData: row.letterData,
       fullLetterText: row.fullLetterText,

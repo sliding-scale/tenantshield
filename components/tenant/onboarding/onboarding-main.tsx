@@ -7,6 +7,7 @@ import { api } from "@/convex/_generated/api"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
 import { ShieldLoader } from "@/components/shared/shield-loader"
 import { Button } from "@/components/ui/button"
+import { US_STATES, US_STATE_NAMES } from "@/lib/constants/us-states"
 
 type OptionKey = "option1" | "option2" | "option3" | "option4"
 
@@ -14,7 +15,7 @@ const optionOrder: OptionKey[] = ["option1", "option2", "option3", "option4"]
 
 export default function OnboardingMain() {
   const router = useRouter()
-  const { clerkUser, role, isLoading: userLoading } = useCurrentUser()
+  const { clerkUser, role, convexUser, isLoading: userLoading } = useCurrentUser()
   const status = useQuery(api.onboarding.queries.onboardingStatus, clerkUser ? {} : "skip")
   const questions = useQuery(
     api.onboarding.queries.questionsForCurrentUser,
@@ -23,12 +24,21 @@ export default function OnboardingMain() {
   const saveResponse = useMutation(api.onboarding.mutations.saveResponse)
   const finalizeOnboarding = useMutation(api.onboarding.mutations.finalizeOnboarding)
   const skipOnboarding = useMutation(api.onboarding.mutations.skip)
+  const updateState = useMutation(api.users.mutations.updateState)
 
   const [currentIndex, setCurrentIndex] = useState(0)
   const [selectedByQuestion, setSelectedByQuestion] = useState<Record<string, OptionKey>>({})
   const [isSaving, setIsSaving] = useState(false)
   const [isSkipping, setIsSkipping] = useState(false)
+  const [stateGateDismissed, setStateGateDismissed] = useState(false)
+  const [selectedState, setSelectedState] = useState("")
+  const [isSavingState, setIsSavingState] = useState(false)
+  const [stateGateError, setStateGateError] = useState<string | null>(null)
   const hasInitializedIndex = useRef(false)
+
+  const needsStateGate = Boolean(
+    convexUser && !convexUser.state?.trim() && !stateGateDismissed,
+  )
 
   useEffect(() => {
     if (!clerkUser) return
@@ -116,11 +126,97 @@ export default function OnboardingMain() {
     }
   }
 
+  const handleStateContinue = async () => {
+    if (!selectedState) {
+      setStateGateError("Select your state to continue, or skip for now.")
+      return
+    }
+    setStateGateError(null)
+    setIsSavingState(true)
+    try {
+      await updateState({ state: selectedState })
+      setStateGateDismissed(true)
+    } catch (e) {
+      console.error(e)
+      setStateGateError("Could not save your state. Please try again.")
+    } finally {
+      setIsSavingState(false)
+    }
+  }
+
+  const handleStateSkip = () => {
+    setStateGateError(null)
+    setStateGateDismissed(true)
+  }
+
   if (userLoading || status === undefined || questions === undefined) {
     return <ShieldLoader variant="onboarding" fullPage className="min-h-[70vh]" />
   }
 
-  if (!clerkUser || role !== "tenant" || !currentQuestion || totalQuestions === 0) {
+  if (!clerkUser || role !== "tenant") {
+    return null
+  }
+
+  if (needsStateGate) {
+    return (
+      <main className="flex min-h-[100dvh] w-full flex-col md:min-h-[calc(100vh-4rem)]">
+        <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-8 pt-8 sm:px-6 lg:max-w-lg lg:px-10 lg:pt-12">
+          <p className="text-sm font-semibold tracking-[0.2em] text-primary">Before we start</p>
+          <h1 className="mt-3 font-heading text-4xl leading-tight text-foreground lg:text-5xl">
+            Where are you renting?
+          </h1>
+          <p className="mt-3 text-lg text-muted-foreground">
+            Pick your state so we can tailor laws, letters, and case guidance to your location. You can
+            change this anytime in your profile.
+          </p>
+
+          <div className="mt-8 flex flex-col gap-4">
+            <label htmlFor="onboarding-state" className="text-sm font-medium text-foreground">
+              Your state
+            </label>
+            <select
+              id="onboarding-state"
+              value={selectedState}
+              onChange={(e) => {
+                setSelectedState(e.target.value)
+                setStateGateError(null)
+              }}
+              className="h-14 w-full appearance-none rounded-2xl border border-border bg-background px-5 text-lg text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <option value="">Select your state…</option>
+              {US_STATES.map((abbr) => (
+                <option key={abbr} value={abbr}>
+                  {US_STATE_NAMES[abbr]} ({abbr})
+                </option>
+              ))}
+            </select>
+            {stateGateError ? (
+              <p className="text-sm font-medium text-destructive">{stateGateError}</p>
+            ) : null}
+
+            <Button
+              type="button"
+              onClick={() => void handleStateContinue()}
+              disabled={isSavingState}
+              className="mt-2 h-14 w-full rounded-2xl border border-cream-border bg-cream-surface px-6 text-lg font-semibold text-ink-warm hover:bg-cream-surface-soft disabled:opacity-60 lg:h-16"
+            >
+              {isSavingState ? "Saving…" : "Continue"}
+            </Button>
+            <button
+              type="button"
+              onClick={handleStateSkip}
+              disabled={isSavingState}
+              className="text-center text-sm font-medium text-muted-foreground underline underline-offset-4 hover:text-foreground disabled:opacity-50"
+            >
+              Skip for now
+            </button>
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  if (!currentQuestion || totalQuestions === 0) {
     return null
   }
 

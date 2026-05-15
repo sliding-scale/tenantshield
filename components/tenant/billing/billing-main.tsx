@@ -6,7 +6,7 @@ import useCurrentUser from "@/app/hooks/useCurrentUser"
 import { PricingPlansSection } from "@/components/shared/pricing-plans-section"
 import { api } from "@/convex/_generated/api"
 import { resolvePlanId } from "@/lib/plans/plan-access"
-import type { BillingPeriod } from "@/lib/plans/plans"
+import type { BillingPeriod } from "@/lib/plans/pricing"
 
 export function BillingMain() {
   const { clerkUser, convexUser, isLoading } = useCurrentUser()
