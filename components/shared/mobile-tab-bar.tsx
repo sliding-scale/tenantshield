@@ -31,7 +31,7 @@ export default function MobileTabBar() {
         aria-label="Main"
       >
         <div className="mx-auto flex max-w-lg items-stretch justify-around px-1 pt-1">
-          {APP_NAV_ITEMS.map(({ href, label, Icon, matches }) => {
+          {APP_NAV_ITEMS.filter((item) => !item.hideOnMobile).map(({ href, label, Icon, matches }) => {
             const active = matches(pathname)
             return (
               <Link

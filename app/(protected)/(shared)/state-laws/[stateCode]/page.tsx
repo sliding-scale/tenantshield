@@ -127,7 +127,7 @@ export default function StateLawDetailPage({
 
         {/* CTA Banner */}
         <Link
-          href="/newcase"
+          href={`/newcase?state=${encodeURIComponent(stateCode)}`}
           className="group mt-12 flex flex-col justify-between gap-6 rounded-3xl border border-cream-border bg-ink-warm p-6 transition hover:bg-ink-warm/95 sm:flex-row sm:items-center sm:p-8 md:mt-16 md:p-10"
         >
           <div className="flex items-center gap-4 md:gap-6">

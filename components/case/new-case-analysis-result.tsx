@@ -251,9 +251,11 @@ export function NewCaseAnalysisResult({
             href={{
               pathname: "/write-letters",
               query: {
-                issue: details.description || details.issueType || details.title,
+                issueType: details.issueType,
+                issue: details.description || details.title,
                 state: details.state || "",
                 landlord: details.landlord || "",
+                propertyAddress: details.propertyAddress || "",
               },
             }}
           >

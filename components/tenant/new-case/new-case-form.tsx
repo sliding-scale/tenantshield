@@ -182,7 +182,7 @@ export function NewCaseForm({
                     type="button"
                     onClick={() => setIssueType(value)}
                     className={[
-                      "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 py-2.5 text-base font-medium transition md:text-lg",
+                      "inline-flex min-h-11 items-center gap-3 rounded-full border px-4 py-2.5 text-base font-medium transition md:text-lg",
                       active
                         ? "border-cream-border bg-cream-surface-deep text-ink-warm shadow-sm ring-1 ring-cream-border/80 font-semibold"
                         : "border-border bg-background text-foreground hover:bg-accent",

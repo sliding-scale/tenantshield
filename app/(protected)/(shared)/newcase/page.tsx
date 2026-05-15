@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useAction } from "convex/react"
 import type { Id } from "@/convex/_generated/dataModel"
 import { api } from "@/convex/_generated/api"
@@ -12,11 +12,12 @@ import {
 import { NewCaseForm } from "@/components/tenant/new-case/new-case-form"
 import { NewCaseResultView } from "@/components/tenant/new-case/new-case-result-view"
 import { DEFAULT_ISSUE_TYPE } from "@/lib/constants/issue-types"
-import { filterUSStates, type USStateAbbr } from "@/lib/constants/us-states"
+import { filterUSStates, US_STATE_NAMES, type USStateAbbr } from "@/lib/constants/us-states"
 import type { PlanId } from "@/lib/plans/plan-access"
 
 export default function NewCasePage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const analyzeCase = useAction(api.cases.actions.analyzeNewCase)
   const stateChipRefs = useRef<Map<string, HTMLButtonElement>>(new Map())
 
@@ -45,6 +46,13 @@ export default function NewCasePage() {
     if (filteredStates.includes(sel)) return filteredStates
     return [sel, ...filteredStates]
   }, [filteredStates, state])
+
+  useEffect(() => {
+    const prefillState = searchParams.get("state")?.trim().toUpperCase() ?? ""
+    if (!state && prefillState in US_STATE_NAMES) {
+      setState(prefillState)
+    }
+  }, [searchParams, state])
 
   useEffect(() => {
     const el = stateChipRefs.current.get(state)

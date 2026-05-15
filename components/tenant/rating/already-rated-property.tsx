@@ -44,7 +44,7 @@ export function AlreadyRatedProperty({
           >
             <Link href={propertyHref}>View property &amp; reviews</Link>
           </Button>
-          <Button variant="outline" className="h-11 rounded-full border-cream-border bg-background" asChild>
+          <Button variant="outline" className="h-11 rounded-full hover:bg-cream-surface hover:text-ink-warm border-cream-border bg-background" asChild>
             <Link href="/ratings">Browse all properties</Link>
           </Button>
         </div>

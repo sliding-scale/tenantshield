@@ -1,6 +1,6 @@
 "use client"
 import Link from "next/link"
-import { FileText, MessageSquareShare, PlusCircle, Sparkles, Star, UserRound } from "lucide-react"
+import { FileText, MessageSquareShare, PlusCircle, Sparkles, Star, UserRound, Scale, CreditCard } from "lucide-react"
 import { useQuery } from "convex/react"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
 import { api } from "@/convex/_generated/api"
@@ -16,7 +16,7 @@ const quickActions = [
   {
     title: "Ask AI",
     subtitle: "Claude Sonnet 4.5",
-    href: "/ask-AI",
+    href: "/ask-ai",
     Icon: Sparkles,
     featured: false,
   },
@@ -35,6 +35,13 @@ const quickActions = [
     featured: false,
   },
   {
+    title: "State Laws",
+    subtitle: "Browse renter rights",
+    href: "/state-laws",
+    Icon: Scale,
+    featured: false,
+  },
+  {
     title: "Profile",
     subtitle: "Renter details & preferences",
     href: "/profile",
@@ -46,6 +53,13 @@ const quickActions = [
     subtitle: "Share your experience with a Landlord/Property",
     href: "/ratings",
     Icon: Star,
+    featured: false,
+  },
+  {
+    title: "Billing",
+    subtitle: "Manage your plan",
+    href: "/billing",
+    Icon: CreditCard,
     featured: false,
   },
 ]
@@ -75,7 +89,7 @@ export default function TenantDashboardMain() {
 
         <section>
           <div className="rounded-[2rem] border border-cream-border bg-cream-surface p-5 text-ink-warm shadow-[0_16px_35px_-24px_rgba(50,38,18,0.45)] md:p-7 lg:px-10 lg:py-8 xl:px-12 xl:py-9">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-300">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary text-bold">
               Protection Index
             </p>
             <div className="mt-4 grid grid-cols-[1fr_auto] items-start gap-4 sm:flex sm:flex-row sm:items-end sm:justify-between lg:items-center">
@@ -108,7 +122,7 @@ export default function TenantDashboardMain() {
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
             Take Action
           </p>
-          <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-6 md:gap-4">
+          <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-8 md:gap-4">
             {quickActions.map(({ title, subtitle, href, Icon, featured }, index) => (
               <Link
                 key={title}

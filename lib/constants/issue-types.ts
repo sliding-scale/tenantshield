@@ -50,6 +50,10 @@ export type IssueTypeIconKey = (typeof ISSUE_TYPES)[number]["iconKey"]
 /** First entry is the default selection in forms */
 export const DEFAULT_ISSUE_TYPE = ISSUE_TYPES[0].value satisfies IssueTypeValue
 
+export function isIssueTypeValue(value: string): value is IssueTypeValue {
+  return ISSUE_TYPES.some((t) => t.value === value)
+}
+
 /** Rating page: all properties + each issue type label */
 export const RATING_FILTER_TAGS = [
   "All Properties",

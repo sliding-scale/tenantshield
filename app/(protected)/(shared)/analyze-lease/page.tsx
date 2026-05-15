@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -75,6 +76,7 @@ import {
 import { getLeaseAnalysisLimit } from "@/lib/plans/plans"
 
 export default function AnalyzeLeasePage() {
+  const router = useRouter();
   const generateUploadUrl = useMutation(
     api.analyzeLease.mutations.generateUploadUrl,
   );
@@ -244,6 +246,17 @@ export default function AnalyzeLeasePage() {
   return (
     <main className="flex min-h-[100dvh] flex-col bg-cream-page pb-28 pt-5 md:min-h-[calc(100vh-4rem)] md:pb-10 md:pt-6 lg:pt-8">
       <div className="flex w-full flex-1 flex-col px-4 sm:px-6 md:px-10 lg:px-14 xl:px-16">
+        <header className="mb-5 flex shrink-0 items-center justify-between md:hidden">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.back()}
+            className="h-11 w-11 rounded-full border-border bg-cream-surface-soft p-0 text-foreground"
+            aria-label="Back"
+          >
+            <X className="size-5" />
+          </Button>
+        </header>
         {showUploadForm ? (
           <section className="flex min-h-0 flex-1 flex-col rounded-2xl border border-cream-border bg-cream-surface p-5 shadow-sm sm:p-7 md:rounded-3xl md:p-10 lg:p-12 xl:p-14">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary md:text-sm">

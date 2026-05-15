@@ -5,11 +5,13 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useAction } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
-import { DEFAULT_ISSUE_TYPE, type IssueTypeValue } from "@/lib/constants/issue-types"
+import {
+  DEFAULT_ISSUE_TYPE,
+  isIssueTypeValue,
+  type IssueTypeValue,
+} from "@/lib/constants/issue-types"
 import { filterUSStates, US_STATE_NAMES, type USStateAbbr } from "@/lib/constants/us-states"
-import { LetterResultView, type LetterData } from "../../../../components/tenant/write-letter/letter-result-view"
 import { NewLetterForm } from "../../../../components/tenant/write-letter/new-letter-form"
-import type { PlanId } from "@/lib/plans/plan-access"
 
 export default function WriteLettersPage() {
   const router = useRouter()
@@ -27,16 +29,10 @@ export default function WriteLettersPage() {
   const [landlordAddress, setLandlordAddress] = useState("")
   const [description, setDescription] = useState("")
   const [amountAtStake, setAmountAtStake] = useState("")
-  const [deadlineDays, setDeadlineDays] = useState("14")
+  const [deadlineDays, setDeadlineDays] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-  const [letterResult, setLetterResult] = useState<{
-    letterId: string
-    letterData: LetterData
-    createdUnderPlan?: PlanId | null
-  } | null>(null)
-  const [didCopy, setDidCopy] = useState(false)
 
   const inferredName = useMemo(() => {
     const parts = [clerkUser?.firstName, clerkUser?.lastName].filter(Boolean)
@@ -59,9 +55,17 @@ export default function WriteLettersPage() {
   }, [inferredName, fullName])
 
   useEffect(() => {
+    const prefillIssueType = searchParams.get("issueType")?.trim() ?? ""
+    if (prefillIssueType && isIssueTypeValue(prefillIssueType)) {
+      setLetterType(prefillIssueType)
+    }
+  }, [searchParams])
+
+  useEffect(() => {
     const prefillState = searchParams.get("state")?.trim().toUpperCase() ?? ""
     const prefillIssue = searchParams.get("issue")?.trim() ?? ""
     const prefillLandlord = searchParams.get("landlord")?.trim() ?? ""
+    const prefillPropertyAddress = searchParams.get("propertyAddress")?.trim() ?? ""
 
     if (!state && prefillState in US_STATE_NAMES) {
       setState(prefillState)
@@ -72,7 +76,10 @@ export default function WriteLettersPage() {
     if (!landlordName && prefillLandlord) {
       setLandlordName(prefillLandlord)
     }
-  }, [description, landlordName, searchParams, state])
+    if (!propertyAddress && prefillPropertyAddress) {
+      setPropertyAddress(prefillPropertyAddress)
+    }
+  }, [description, landlordName, propertyAddress, searchParams, state])
 
   useEffect(() => {
     const el = stateChipRefs.current.get(state)
@@ -115,12 +122,7 @@ export default function WriteLettersPage() {
         deadlineDays: deadlineDays.trim(),
       })
       console.log("generateTenantLetter response", result)
-      setLetterResult({
-        letterId: String(result.letterId),
-        letterData: result.letterData as LetterData,
-        createdUnderPlan: result.createdUnderPlan,
-      })
-      setSuccess("Letter generated successfully.")
+      router.push(`/letters/${result.letterId}`)
     } catch (e) {
       const message = e instanceof Error ? e.message : "Failed to generate letter"
       setError(message)
@@ -128,67 +130,6 @@ export default function WriteLettersPage() {
     } finally {
       setIsSubmitting(false)
     }
-  }
-
-  const onCopy = async () => {
-    if (!letterResult) return
-    const fullText = [
-      letterResult.letterData.header.date,
-      letterResult.letterData.header.senderAddress,
-      letterResult.letterData.header.landlordAddress,
-      `RE: ${letterResult.letterData.header.subjectLine}`,
-      letterResult.letterData.salutation,
-      ...letterResult.letterData.paragraphs.map((p) => p.content),
-      letterResult.letterData.signOff,
-    ]
-      .filter(Boolean)
-      .join("\n\n")
-
-    setDidCopy(false)
-    try {
-      await navigator.clipboard.writeText(fullText)
-      setDidCopy(true)
-      setTimeout(() => setDidCopy(false), 1800)
-      return
-    } catch {}
-
-    try {
-      const el = document.createElement("textarea")
-      el.value = fullText
-      el.setAttribute("readonly", "true")
-      el.style.position = "fixed"
-      el.style.left = "-9999px"
-      document.body.appendChild(el)
-      el.select()
-      const ok = document.execCommand("copy")
-      document.body.removeChild(el)
-      setDidCopy(ok)
-      if (ok) setTimeout(() => setDidCopy(false), 1800)
-    } catch {
-      setDidCopy(false)
-    }
-  }
-
-  const stateName =
-    state && state in US_STATE_NAMES ? US_STATE_NAMES[state as USStateAbbr] : state ? state : ""
-
-  if (letterResult) {
-    return (
-      <LetterResultView
-        letterData={letterResult.letterData}
-        createdUnderPlan={letterResult.createdUnderPlan}
-        letterType={letterType}
-        stateName={stateName}
-        landlordName={landlordName}
-        didCopy={didCopy}
-        onBack={() => {
-          setLetterResult(null)
-          setSuccess(null)
-          setDidCopy(false)
-        }}
-        onCopy={() => void onCopy()}
-      />
-    )
   }
 
   return (

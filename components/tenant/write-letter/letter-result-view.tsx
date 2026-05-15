@@ -182,7 +182,7 @@ export function LetterResultView({
           >
             <ChevronLeft className="size-5" />
           </Button>
-          <h1 className="min-w-0 text-center font-heading text-xl font-semibold text-foreground sm:text-2xl">
+          <h1 className="min-w-0 text-center font-heading text-base font-semibold text-foreground sm:text-2xl">
             {letterData.metadata.letterTitle || letterType}
           </h1>
           <div className="flex min-w-0 items-center justify-end gap-2">
@@ -254,7 +254,7 @@ export function LetterResultView({
           </div>
 
           {!letterContentSlot ? (
-            <div className="mt-6 rounded-3xl border border-cream-border bg-cream-surface p-5 shadow-sm sm:p-6">
+            <div className="mt-6 rounded-3xl border border-cream-border bg-cream-surface p-5 shadow-sm sm:p-6 mb-26 sm:mb-0">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-warm-muted">
                 Delivery tips
               </p>

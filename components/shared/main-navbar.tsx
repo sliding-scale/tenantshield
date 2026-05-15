@@ -92,10 +92,12 @@ export default function Navbar() {
           </Show>
           <Show when="signed-in">
             {!isLoading ? (
+              <Link href="/billing">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow-md">
                 <Sparkles className="size-3.5" />
                 {planLabel}
               </span>
+              </Link>
             ) : null}
             <UserButton
               appearance={{

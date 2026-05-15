@@ -53,7 +53,7 @@ export default function CasesPage() {
               </Link>
             </Button>
             <div
-              className="flex shrink-0 rounded-2xl border border-cream-border bg-cream-surface p-1 shadow-sm"
+              className="flex shrink-0 w-full rounded-xl border border-cream-border bg-cream-surface px-2 py-1.5 shadow-sm sm:w-auto"
               role="tablist"
               aria-label="Case list filter"
             >
@@ -63,7 +63,7 @@ export default function CasesPage() {
                 aria-selected={bucket === "active"}
                 onClick={() => setBucket("active")}
                 className={[
-                  "rounded-xl px-4 py-2.5 text-sm font-semibold transition md:px-5 md:text-base",
+                  "flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition sm:flex-none",
                   bucket === "active"
                     ? "bg-cream-surface-deep text-ink-warm shadow-sm"
                     : "text-muted-foreground hover:text-foreground",
@@ -77,7 +77,7 @@ export default function CasesPage() {
                 aria-selected={bucket === "archived"}
                 onClick={() => setBucket("archived")}
                 className={[
-                  "rounded-xl px-4 py-2.5 text-sm font-semibold transition md:px-5 md:text-base",
+                  "flex-1 rounded-lg px-4 text-sm font-semibold transition sm:flex-none",
                   bucket === "archived"
                     ? "bg-cream-surface-deep text-ink-warm shadow-sm"
                     : "text-muted-foreground hover:text-foreground",

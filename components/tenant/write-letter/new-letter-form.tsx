@@ -144,7 +144,7 @@ export function NewLetterForm({
 
   return (  
     <main className="flex min-h-[100dvh] flex-col bg-cream-page pb-28 pt-5 md:min-h-[calc(100vh-4rem)] md:pb-10 md:pt-6 lg:pt-8">
-      <div className="flex w-full flex-1 flex-col px-4 sm:px-6 md:px-10 lg:px-14 xl:px-16">
+      <div className="mx-auto flex w-full flex-1 flex-col px-4 sm:px-6 md:px-10 lg:px-14 xl:px-16">
         <header className="mb-5 flex shrink-0 items-center justify-between md:hidden">
           <Button
             type="button"
@@ -159,10 +159,10 @@ export function NewLetterForm({
 
         <section className="flex min-h-0 flex-1 flex-col rounded-2xl border border-cream-border bg-cream-surface p-5 shadow-sm sm:p-7 md:rounded-3xl md:p-10 lg:p-12 xl:p-14">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary md:text-sm">Demand letter</p>
-          <h2 className="mt-3 max-w-5xl font-heading text-4xl font-semibold leading-[0.95] text-ink-warm text-balance sm:text-5xl md:text-6xl lg:text-7xl xl:max-w-6xl">
+          <h2 className="mt-3 font-heading text-4xl font-semibold leading-[0.95] text-ink-warm text-balance sm:text-5xl md:text-6xl lg:text-7xl">
             Turn your issue into a legal-grade letter.
           </h2>
-          <p className="mt-4 max-w-3xl text-lg text-ink-warm-muted text-pretty sm:text-xl lg:max-w-4xl lg:text-2xl">
+          <p className="mt-4 text-lg text-ink-warm-muted text-pretty sm:text-xl lg:text-2xl">
             Our AI drafts a state-specific demand letter with statute citations, timelines, and consequences.
           </p>
 
@@ -170,7 +170,7 @@ export function NewLetterForm({
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-warm-muted md:text-sm">
               Issue type
             </p>
-            <div className="mt-4 grid gap-2.5 md:gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+            <div className="mt-4 grid gap-2.5 md:gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
               {ISSUE_TYPES.map((type) => {
                 const active = letterType === type.value
                 const Icon = ISSUE_TYPE_ICONS[type.iconKey]
@@ -180,7 +180,7 @@ export function NewLetterForm({
                     type="button"
                     onClick={() => setLetterType(type.value)}
                     className={[
-                      "inline-flex w-full min-h-11 items-center justify-start gap-2 rounded-full border px-4 py-2 text-sm font-medium transition md:min-h-[2.75rem] md:text-base",
+                      "inline-flex w-full min-h-11 items-center justify-start gap-3 rounded-full border px-4 py-2 text-sm font-medium transition md:min-h-[2.75rem] md:text-base",
                       active
                         ? "border-cream-border bg-cream-surface-deep text-ink-warm shadow-sm ring-1 ring-cream-border/80 font-semibold"
                         : "border-border bg-background text-foreground hover:bg-accent",
@@ -259,7 +259,7 @@ export function NewLetterForm({
             ) : null}
           </div>
 
-          <div className="mt-6 grid gap-4 md:mt-8 lg:max-w-6xl lg:grid-cols-2 lg:gap-6">
+          <div className="mt-6 grid gap-4 md:mt-8 lg:grid-cols-2 lg:gap-6">
             <input
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
@@ -320,7 +320,7 @@ export function NewLetterForm({
             type="button"
             disabled={!canSubmit}
             onClick={() => void handleSubmitClick()}
-            className="mt-8 h-14 w-full rounded-2xl bg-surface-strong px-6 text-lg font-semibold text-white hover:bg-surface-strong-hover disabled:bg-muted disabled:text-muted-foreground md:mt-10 md:max-w-md md:text-xl lg:max-w-sm"
+            className="mt-8 h-14 w-full rounded-2xl bg-surface-strong px-6 text-lg font-semibold text-white hover:bg-surface-strong-hover disabled:bg-muted disabled:text-muted-foreground md:mt-10 md:text-xl"
           >
             {isSubmitting ? "Generating..." : "Generate Letter"}
           </Button>

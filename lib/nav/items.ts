@@ -15,6 +15,7 @@ export type AppNavItem = {
   label: string
   Icon: LucideIcon
   matches: (pathname: string) => boolean
+  hideOnMobile?: boolean
 }
 
 export const APP_NAV_ITEMS: AppNavItem[] = [
@@ -31,12 +32,12 @@ export const APP_NAV_ITEMS: AppNavItem[] = [
     Icon: Briefcase,
     matches: (pathname) => pathname.startsWith("/cases"),
   },
-  {
-    href: "/ai",
-    label: "AI",
-    Icon: Sparkles,
-    matches: (pathname) => pathname.startsWith("/ai"),
-  },
+  // {
+  //   href: "/ai",
+  //   label: "AI",
+  //   Icon: Sparkles,
+  //   matches: (pathname) => pathname.startsWith("/ai"),
+  // },
   {
     href: "/letters",
     label: "Letters",
@@ -54,12 +55,14 @@ export const APP_NAV_ITEMS: AppNavItem[] = [
     label: "Laws",
     Icon: Scale,
     matches: (pathname) => pathname.startsWith("/state-laws"),
+    hideOnMobile: true,
   },
   {
     href: "/billing",
     label: "Billing",
     Icon: CreditCard,
     matches: (pathname) => pathname.startsWith("/billing"),
+    hideOnMobile: true,
   },
   {
     href: "/profile",

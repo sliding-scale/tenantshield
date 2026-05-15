@@ -165,7 +165,10 @@ export default function LetterDetailPage() {
           className="h-10 max-w-[10.5rem] truncate rounded-xl border-0 bg-surface-strong px-3 text-xs font-semibold text-white shadow-sm hover:bg-surface-strong-hover sm:max-w-none sm:px-4 sm:text-sm"
           asChild
         >
-          <Link href="/ratings">Rate your experience</Link>
+          <Link href="/ratings">
+            <span className="sm:hidden">Rate</span>
+            <span className="hidden sm:inline">Rate your experience</span>
+          </Link>
         </Button>
       }
     />

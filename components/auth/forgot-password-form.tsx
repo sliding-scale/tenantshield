@@ -25,6 +25,10 @@ export function ForgotPasswordForm({ initialEmail = "", onBack }: Props) {
   const [codeSent, setCodeSent] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
 
+  const emailError = errors.fields.identifier?.message ?? formError
+  const codeError = errors.fields.code?.message ?? formError
+  const passwordError = errors.fields.password?.message ?? formError
+
   const handleBack = async () => {
     await signIn?.reset()
     setCodeSent(false)
@@ -154,11 +158,10 @@ export function ForgotPasswordForm({ initialEmail = "", onBack }: Props) {
                 placeholder="Email"
                 className={authFieldClass}
               />
-              {errors.fields.identifier ? (
-                <p className="text-sm text-destructive">{errors.fields.identifier.message}</p>
+              {emailError ? (
+                <p className="text-sm text-destructive">{emailError}</p>
               ) : null}
             </div>
-            {formError ? <p className="text-sm text-destructive">{formError}</p> : null}
             <Button
               type="submit"
               variant="cta"
@@ -196,11 +199,10 @@ export function ForgotPasswordForm({ initialEmail = "", onBack }: Props) {
                 placeholder="Enter code from email"
                 className={authFieldClass}
               />
-              {errors.fields.code ? (
-                <p className="text-sm text-destructive">{errors.fields.code.message}</p>
+              {codeError ? (
+                <p className="text-sm text-destructive">{codeError}</p>
               ) : null}
             </div>
-            {formError ? <p className="text-sm text-destructive">{formError}</p> : null}
             <Button
               type="submit"
               variant="cta"
@@ -237,11 +239,10 @@ export function ForgotPasswordForm({ initialEmail = "", onBack }: Props) {
                 placeholder="New password"
                 className={authFieldClass}
               />
-              {errors.fields.password ? (
-                <p className="text-sm text-destructive">{errors.fields.password.message}</p>
+              {passwordError ? (
+                <p className="text-sm text-destructive">{passwordError}</p>
               ) : null}
             </div>
-            {formError ? <p className="text-sm text-destructive">{formError}</p> : null}
             <Button
               type="submit"
               variant="cta"
