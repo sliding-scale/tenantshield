@@ -1,5 +1,5 @@
 import type { Id } from "../_generated/dataModel";
-import { internalMutation } from "../_generated/server";
+import { internalMutation, mutation } from "../_generated/server";
 import { v } from "convex/values";
 import { Plan } from "../schema";
 import { assertCanCreateLeaseAnalysis, incrementUsedLeaseAnalyses } from "../planUsage/helpers";
@@ -104,5 +104,37 @@ export const saveLeaseEmbeddingsToDB = internalMutation({
       });
     }
     return args.leaseId as Id<"leases">;
+  },
+});
+
+export const deleteLeaseForCurrentUser = mutation({
+  args: { leaseId: v.id("leases") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const row = await ctx.db.get(args.leaseId);
+    if (!row || row.userId !== identity.subject) {
+      throw new Error("Lease not found");
+    }
+
+    const chunks = await ctx.db
+      .query("leaseEmbeddings")
+      .withIndex("by_lease_id", (q) => q.eq("leaseId", args.leaseId))
+      .collect();
+
+    for (const chunk of chunks) {
+      await ctx.db.delete(chunk._id);
+    }
+
+    if (row.pdfFile) {
+      await ctx.storage.delete(row.pdfFile);
+    }
+
+    await ctx.db.delete(args.leaseId);
+
+    return { success: true };
   },
 });

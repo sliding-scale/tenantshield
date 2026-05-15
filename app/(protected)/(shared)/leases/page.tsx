@@ -3,9 +3,8 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useQuery } from "convex/react"
-import { FileSearch } from "lucide-react"
-import { LeaseVerdictTag } from "@/components/shared/list-row-pill"
 import { api } from "@/convex/_generated/api"
+import { LeaseListRow } from "@/components/tenant/leases/lease-list-row"
 import { ShieldLoader } from "@/components/shared/shield-loader"
 import { Button } from "@/components/ui/button"
 
@@ -54,38 +53,7 @@ export default function LeasesPage() {
           <>
             <div className="grid gap-4 md:gap-5">
               {leases.map((item) => (
-                <Link
-                  key={item._id}
-                  href={`/leases/${item._id}`}
-                  className="block rounded-3xl border border-cream-border bg-cream-surface p-4 transition hover:bg-cream-surface-soft sm:p-5 md:p-5"
-                >
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-                      {item.state} · Lease Analysis
-                    </p>
-                    <LeaseVerdictTag verdict={item.verdict} />
-                  </div>
-                  <h2 className="mt-1.5 line-clamp-2 break-words text-balance font-heading text-xl font-semibold leading-snug text-ink-warm sm:text-2xl">
-                    {item.leaseReview || "Lease Review"}
-                  </h2>
-                  <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-ink-warm-muted">
-                    {item.documentSummary}
-                  </p>
-                  {item.issuesCount > 0 ? (
-                    <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs font-medium text-ink-warm-muted">
-                      {item.redFlagsCount > 0 ? (
-                        <span>{item.redFlagsCount} red flag{item.redFlagsCount === 1 ? "" : "s"}</span>
-                      ) : null}
-                      {item.missingClausesCount > 0 ? (
-                        <span>{item.missingClausesCount} missing clause{item.missingClausesCount === 1 ? "" : "s"}</span>
-                      ) : null}
-                    </div>
-                  ) : null}
-                  <div className="mt-3 flex items-center gap-2 text-sm font-medium text-foreground">
-                    <FileSearch className="size-4" />
-                    View analysis
-                  </div>
-                </Link>
+                <LeaseListRow key={item._id} item={item} />
               ))}
             </div>
 

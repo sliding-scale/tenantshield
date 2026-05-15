@@ -3,42 +3,40 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useMutation } from "convex/react"
-import { FileText, Trash2 } from "lucide-react"
+import { FileSearch, Trash2 } from "lucide-react"
 import type { Id } from "@/convex/_generated/dataModel"
 import { api } from "@/convex/_generated/api"
-import { ListRowPill } from "@/components/shared/list-row-pill"
+import { LeaseVerdictTag } from "@/components/shared/list-row-pill"
 import { Button } from "@/components/ui/button"
 import { BrandedAlertDialog } from "@/components/ui/branded-alert-dialog"
 
-type LetterListItem = {
-  _id: Id<"letters">
-  inputData: {
-    letterType: string
-    state: string
-    landlordName: string
-  }
-  letterData?: {
-    header?: { subjectLine?: string }
-  }
-  preview: string
+type LeaseListItem = {
+  _id: Id<"leases">
+  state: string
+  leaseReview: string
+  documentSummary: string
+  verdict: "good" | "negotiate" | "avoid" | "unknown"
+  redFlagsCount: number
+  missingClausesCount: number
+  issuesCount: number
 }
 
-export function LetterListRow({ item }: { item: LetterListItem }) {
-  const deleteLetter = useMutation(api.letters.mutations.deleteLetterForCurrentUser)
+export function LeaseListRow({ item }: { item: LeaseListItem }) {
+  const deleteLease = useMutation(api.lease.mutations.deleteLeaseForCurrentUser)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const title = item.letterData?.header?.subjectLine || "Demand Letter"
+  const title = item.leaseReview || "Lease Review"
 
   const handleDelete = async () => {
     setError(null)
     setIsDeleting(true)
     try {
-      await deleteLetter({ letterId: item._id })
+      await deleteLease({ leaseId: item._id })
       setConfirmOpen(false)
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to delete letter")
+      setError(e instanceof Error ? e.message : "Failed to delete lease")
     } finally {
       setIsDeleting(false)
     }
@@ -48,26 +46,39 @@ export function LetterListRow({ item }: { item: LetterListItem }) {
     <>
       <article className="flex items-stretch gap-2 rounded-3xl border border-cream-border bg-cream-surface transition hover:bg-cream-surface-soft sm:gap-3">
         <Link
-          href={`/letters/${item._id}`}
+          href={`/leases/${item._id}`}
           className="min-w-0 flex-1 p-4 sm:p-5 md:p-5"
         >
           <div className="flex flex-wrap items-center gap-2">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-              {item.inputData.state} · {item.inputData.letterType}
+              {item.state} · Lease Analysis
             </p>
-            <ListRowPill tone="muted">
-              Recipient · {item.inputData.landlordName || "Landlord"}
-            </ListRowPill>
+            <LeaseVerdictTag verdict={item.verdict} />
           </div>
           <h2 className="mt-1.5 line-clamp-2 break-words text-balance font-heading text-xl font-semibold leading-snug text-ink-warm sm:text-2xl">
             {title}
           </h2>
           <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-ink-warm-muted">
-            {item.preview}
+            {item.documentSummary}
           </p>
+          {item.issuesCount > 0 ? (
+            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs font-medium text-ink-warm-muted">
+              {item.redFlagsCount > 0 ? (
+                <span>
+                  {item.redFlagsCount} red flag{item.redFlagsCount === 1 ? "" : "s"}
+                </span>
+              ) : null}
+              {item.missingClausesCount > 0 ? (
+                <span>
+                  {item.missingClausesCount} missing clause
+                  {item.missingClausesCount === 1 ? "" : "s"}
+                </span>
+              ) : null}
+            </div>
+          ) : null}
           <div className="mt-3 flex items-center gap-2 text-sm font-medium text-foreground">
-            <FileText className="size-4" />
-            View letter
+            <FileSearch className="size-4" />
+            View analysis
           </div>
         </Link>
 
@@ -76,7 +87,7 @@ export function LetterListRow({ item }: { item: LetterListItem }) {
             type="button"
             variant="outline"
             size="icon"
-            aria-label={`Delete letter: ${title}`}
+            aria-label={`Delete lease: ${title}`}
             disabled={isDeleting}
             onClick={() => {
               setError(null)
@@ -94,17 +105,17 @@ export function LetterListRow({ item }: { item: LetterListItem }) {
         onOpenChange={(open) => {
           if (!isDeleting) setConfirmOpen(open)
         }}
-        title="Delete this letter?"
+        title="Delete this lease?"
         description={
           error
             ? `${error} This cannot be undone.`
-            : `“${title}” will be permanently deleted. This cannot be undone.`
+            : `“${title}” will be permanently deleted, including any uploaded PDF and analysis. This cannot be undone.`
         }
-        eyebrow="Delete letter"
+        eyebrow="Delete lease"
         eyebrowVariant="destructive"
         iconVariant="destructive"
-        cancelLabel="Keep letter"
-        actionLabel="Delete letter"
+        cancelLabel="Keep lease"
+        actionLabel="Delete lease"
         actionVariant="destructive"
         onAction={handleDelete}
         isActionLoading={isDeleting}
