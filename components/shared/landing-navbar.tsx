@@ -1,6 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
+
+const APP_LOGO_SRC =
+  "/vecteezy_stylized-yellow-shield-icon-flat-design_54786290.png";
 
 export default function LandingNavbar() {
   return (
@@ -8,9 +12,17 @@ export default function LandingNavbar() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link
           href="/"
-          className="shrink-0 font-heading text-lg font-bold tracking-tight text-gray-900 sm:text-xl"
+          className="inline-flex shrink-0 items-center gap-2 font-heading text-lg font-bold tracking-tight text-gray-900 sm:gap-2.5 sm:text-xl"
         >
-          TenantShield
+          <Image
+            src={APP_LOGO_SRC}
+            alt=""
+            width={32}
+            height={32}
+            className="size-8 shrink-0 object-contain sm:size-9"
+            priority
+          />
+          <span>TenantShield</span>
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">

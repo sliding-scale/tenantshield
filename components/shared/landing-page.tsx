@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
   Check,
   MessageCircle,
@@ -10,9 +11,9 @@ import {
 } from "lucide-react";
 import { PricingPlansSection } from "@/components/shared/pricing-plans-section";
 
-export default function LandingPage() {
-  const currentYear = new Date().getFullYear();
+const HERO_IMAGE_SRC = "/tenantshield_hero_image_v2.svg";
 
+export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
@@ -45,10 +46,13 @@ export default function LandingPage() {
 
           <div className="relative">
             <div className="absolute inset-0 rounded-xl bg-gradient-to-tr from-amber-100/50 to-emerald-100/40 blur-2xl" />
-            <img
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDkHkOMDz2ElR_yP-oU8wgrNKELuLNze2D4Z8JvdGoQGkFLW6CThK6iNG_mbyJzV9o5sCx4qmF-v3iVQNngy0tZsjCpiyhQjwH6jX_nMJdnTZkwGIZj9luKnIP12a5RLFvMLAva3X9fUeWrcGoZpHCDZ6T2_7lnnceE7vw_cfrUQdmefaKQOErgmhVneNmkbKmGx_WLkqzsUT0gsA1lPkI6fHn-k1YvZusj5omt6khrU1a46yjhG66gHVzAeR5d20kqiJcQM9F4IQ"
-              alt="TenantShield Interface"
-              className="relative aspect-[4/3] w-full rounded-xl border border-gray-200 object-cover shadow-2xl"
+            <Image
+              src={HERO_IMAGE_SRC}
+              alt="TenantShield hero illustration"
+              width={690}
+              height={460}
+              priority
+              className="relative aspect-[4/3] w-full rounded-xl border border-gray-200 object-contain shadow-2xl"
             />
           </div>
         </div>
@@ -252,7 +256,8 @@ export default function LandingPage() {
           </div>
           <div className="border-t-2 border-gray-200 pt-8 text-center text-sm text-gray-600">
             <p>
-              © {currentYear} TenantShield. All rights reserved. Powered by
+              © {new Date().getFullYear()} TenantShield. All rights reserved.
+              Powered by
               Jurisdictional AI.
             </p>
           </div>

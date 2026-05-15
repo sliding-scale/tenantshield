@@ -4,10 +4,13 @@ import {
   CreditCard,
   FileSearch,
   FileText,
+  MessageSquareShare,
+  PlusCircle,
+  Scale,
   Shield,
   Sparkles,
+  Star,
   UserRound,
-  Scale,
 } from "lucide-react"
 
 export type AppNavItem = {
@@ -45,10 +48,17 @@ export const APP_NAV_ITEMS: AppNavItem[] = [
     matches: (pathname) => pathname.startsWith("/letters"),
   },
   {
+    href: "/ask-ai",
+    label: "Ask AI",
+    Icon: Sparkles,
+    matches: (pathname) => pathname.toLowerCase().startsWith("/ask-ai"),
+  },
+  {
     href: "/leases",
     label: "Leases",
     Icon: FileSearch,
     matches: (pathname) => pathname.startsWith("/leases"),
+    hideOnMobile: true,
   },
   {
     href: "/state-laws",
@@ -71,4 +81,48 @@ export const APP_NAV_ITEMS: AppNavItem[] = [
     matches: (pathname) => pathname.startsWith("/profile"),
   },
 ]
+
+/** Overflow links opened from the mobile tab bar hamburger menu. */
+export const MOBILE_MORE_NAV_ITEMS: AppNavItem[] = [
+  {
+    href: "/ratings",
+    label: "Ratings",
+    Icon: Star,
+    matches: (pathname) => pathname.startsWith("/ratings"),
+  },
+  {
+    href: "/leases",
+    label: "Leases",
+    Icon: FileSearch,
+    matches: (pathname) => pathname.startsWith("/leases"),
+  },
+  {
+    href: "/analyze-lease",
+    label: "Analyze Lease",
+    Icon: MessageSquareShare,
+    matches: (pathname) => pathname.startsWith("/analyze-lease"),
+  },
+  {
+    href: "/newcase",
+    label: "New Case",
+    Icon: PlusCircle,
+    matches: (pathname) => pathname.startsWith("/newcase"),
+  },
+  {
+    href: "/state-laws",
+    label: "State Laws",
+    Icon: Scale,
+    matches: (pathname) => pathname.startsWith("/state-laws"),
+  },
+  {
+    href: "/billing",
+    label: "Billing",
+    Icon: CreditCard,
+    matches: (pathname) => pathname.startsWith("/billing"),
+  },
+]
+
+export function isMobileMoreNavActive(pathname: string) {
+  return MOBILE_MORE_NAV_ITEMS.some((item) => item.matches(pathname))
+}
 

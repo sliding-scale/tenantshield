@@ -2,6 +2,7 @@
 
 import { Show, UserButton } from "@clerk/nextjs";
 import { Sparkles } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import useCurrentUser from "@/app/hooks/useCurrentUser";
@@ -9,6 +10,9 @@ import { APP_NAV_ITEMS } from "@/lib/nav/items";
 import { planDisplayLabel } from "@/lib/plans/plan-access";
 import { cn } from "@/lib/utils";
 import { isAuthPagePath } from "@/lib/nav/visibility";
+
+const APP_LOGO_SRC =
+  "/vecteezy_stylized-yellow-shield-icon-flat-design_54786290.png";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -26,9 +30,17 @@ export default function Navbar() {
         <div className="flex min-w-0 flex-1 items-center gap-4 sm:gap-8">
           <Link
             href="/"
-            className="shrink-0 font-heading text-lg font-bold tracking-tight text-gray-900 sm:text-xl"
+            className="inline-flex shrink-0 items-center gap-2 font-heading text-lg font-bold tracking-tight text-gray-900 sm:gap-2.5 sm:text-xl"
           >
-            TenantShield
+            <Image
+              src={APP_LOGO_SRC}
+              alt=""
+              width={32}
+              height={32}
+              className="size-8 shrink-0 object-contain sm:size-9"
+              priority
+            />
+            <span>TenantShield</span>
           </Link>
           <Show when="signed-in">
             <nav className="ml-1 hidden items-center gap-1 lg:flex">

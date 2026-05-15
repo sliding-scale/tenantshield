@@ -24,6 +24,7 @@ type PricingPlansSectionProps = {
   id?: string
   title?: string
   subtitle?: string
+  hideHeader?: boolean
   audience?: PricingAudience
   showBillingPeriodToggle?: boolean
   defaultBillingPeriod?: BillingPeriod
@@ -114,7 +115,7 @@ function PricingPlanCard({
   return (
     <div
       className={cn(
-        "relative rounded-xl border-2 bg-white p-8 transition-all duration-300",
+        "relative rounded-xl border-2 bg-white p-6 transition-all duration-300 sm:p-8",
         isCurrentPlan
           ? "border-primary shadow-md ring-2 ring-primary/15"
           : popular
@@ -192,6 +193,7 @@ export function PricingPlansSection({
   id = "pricing",
   title = "Start Your Protection Today",
   subtitle = "Choose the level of advocacy that fits your rental needs. Protect yourself from unfair practices.",
+  hideHeader = false,
   audience = "landing",
   showBillingPeriodToggle = false,
   defaultBillingPeriod,
@@ -248,18 +250,20 @@ export function PricingPlansSection({
   return (
     <section id={id} className={cn("px-4 py-20 sm:px-6 lg:px-8", className)}>
       <div className="mx-auto max-w-6xl">
-        <div className="mb-12 text-center">
-          <h2 className="mb-4 text-3xl font-bold tracking-tight text-gray-900">{title}</h2>
-          <p className="text-lg text-gray-600">{subtitle}</p>
-        </div>
+        {!hideHeader ? (
+          <div className="mb-12 text-center">
+            <h2 className="mb-4 text-3xl font-bold tracking-tight text-gray-900">{title}</h2>
+            <p className="text-lg text-gray-600">{subtitle}</p>
+          </div>
+        ) : null}
 
         {showBillingPeriodToggle ? (
           <BillingPeriodToggle billingPeriod={billingPeriod} onChange={setBillingPeriod} />
         ) : null}
 
-        <div className="lg:hidden">
+        <div className={cn("lg:hidden", audience === "billing" && "pb-2")}>
           <div
-            className="overflow-hidden"
+            className="overflow-x-hidden pt-5"
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
           >
@@ -286,7 +290,12 @@ export function PricingPlansSection({
             </div>
           </div>
 
-          <div className="mt-6 flex justify-center gap-2">
+          <div
+            className={cn(
+              "mt-6 flex justify-center gap-2",
+              audience === "billing" && "mb-4",
+            )}
+          >
             {PRICING_PLANS.map((plan, index) => (
               <button
                 key={plan.id}

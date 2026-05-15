@@ -288,7 +288,7 @@ function ChatThreadLoaded({
           onSubmit={handleSubmit}
           className="border-cream-border bg-cream-page/90 sticky bottom-0 z-10 mt-auto shrink-0 border-t px-4 pt-4 pb-[max(1rem,calc(0.75rem+env(safe-area-inset-bottom,0px)))] backdrop-blur-md dark:bg-background/90 md:static md:z-0 md:px-8 md:pb-4"
         >
-          <div className="mx-auto flex max-w-3xl gap-2">
+          <div className="mx-auto flex max-w-3xl items-center gap-2">
             <textarea
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
@@ -298,7 +298,7 @@ function ChatThreadLoaded({
               rows={1}
               disabled={busy || isLimitReached}
               className={cn(
-                "border-input bg-background placeholder:text-muted-foreground focus-visible:ring-ring max-h-40 min-h-11 flex-1 resize-none rounded-xl border px-4 py-3 text-[15px] shadow-sm outline-none transition-[box-shadow] focus-visible:ring-3 disabled:opacity-60",
+                "border-input bg-background placeholder:text-muted-foreground focus-visible:ring-ring max-h-40 min-h-11 flex-1 resize-none rounded-xl border px-4 py-2.5 text-[15px] leading-snug shadow-sm outline-none transition-[box-shadow] focus-visible:ring-3 disabled:opacity-60",
               )}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
@@ -313,7 +313,7 @@ function ChatThreadLoaded({
                 type="button"
                 variant="secondary"
                 size="icon-lg"
-                className="shrink-0 self-end"
+                className="size-11 shrink-0 rounded-xl"
                 aria-label="Stop generating"
                 onClick={() => void stop()}
               >
@@ -323,7 +323,7 @@ function ChatThreadLoaded({
               <Button
                 type="submit"
                 size="icon-lg"
-                className="shrink-0 self-end"
+                className="size-11 shrink-0 rounded-xl"
                 disabled={!draft.trim() || isLimitReached}
                 aria-label="Send message"
               >

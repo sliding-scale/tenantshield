@@ -43,14 +43,14 @@ const quickActions = [
   },
   {
     title: "Profile",
-    subtitle: "Renter details & preferences",
+    subtitle: "Your details & preferences",
     href: "/profile",
     Icon: UserRound,
     featured: false,
   },
   {
     title: "Give Rating",
-    subtitle: "Share your experience with a Landlord/Property",
+    subtitle: "Rate a landlord or property",
     href: "/ratings",
     Icon: Star,
     featured: false,
@@ -123,12 +123,13 @@ export default function TenantDashboardMain() {
             Take Action
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-8 md:gap-4">
-            {quickActions.map(({ title, subtitle, href, Icon, featured }, index) => (
+            {quickActions.map(({ title, subtitle, href, Icon, featured }) => (
               <Link
                 key={title}
                 href={href}
                 className={[
-                  "group rounded-3xl border p-4 transition",
+                  "group flex h-full min-h-[7.75rem] min-w-0 flex-col gap-2 rounded-3xl border p-4 transition",
+                  "sm:min-h-[8.25rem] md:min-h-0",
                   "md:col-span-2",
                   featured
                     ? "border-surface-strong bg-surface-strong text-white hover:bg-surface-strong-hover"
@@ -137,23 +138,30 @@ export default function TenantDashboardMain() {
               >
                 <div
                   className={[
-                    "inline-flex p-1",
-                    featured ? "text-amber-300" : "text-ink-warm",
+                    "inline-flex shrink-0",
+                    featured ? "text-primary" : "text-ink-warm",
                   ].join(" ")}
                 >
                   <Icon className="size-5" />
                 </div>
-                <h3
-                  className={[
-                    "mt-4 font-heading text-3xl font-semibold leading-tight",
-                    featured ? "text-white" : "text-ink-warm",
-                  ].join(" ")}
-                >
-                  {title}
-                </h3>
-                <p className={["mt-1 text-sm", featured ? "text-white/75" : "text-ink-warm-muted"].join(" ")}>
-                  {subtitle}
-                </p>
+                <div className="flex min-h-0 flex-1 flex-col gap-1">
+                  <h3
+                    className={[
+                      "font-heading text-base font-semibold leading-snug sm:text-xl md:text-3xl md:leading-tight",
+                      featured ? "text-white" : "text-ink-warm",
+                    ].join(" ")}
+                  >
+                    {title}
+                  </h3>
+                  <p
+                    className={[
+                      "line-clamp-2 text-xs leading-relaxed break-words sm:text-sm md:line-clamp-none",
+                      featured ? "text-white/75" : "text-ink-warm-muted",
+                    ].join(" ")}
+                  >
+                    {subtitle}
+                  </p>
+                </div>
               </Link>
             ))}
           </div>

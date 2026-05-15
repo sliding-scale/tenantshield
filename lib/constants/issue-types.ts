@@ -4,42 +4,42 @@
 export const ISSUE_TYPES = [
   {
     value: "Security Deposit",
-    subtitle: "Deposit limits, deductions, and return timelines",
+    subtitle: "Deposits & return timelines",
     iconKey: "gavel",
   },
   {
     value: "Repairs / Habitability",
-    subtitle: "Unsafe conditions, repairs, and habitability",
+    subtitle: "Repairs & habitability",
     iconKey: "wrench",
   },
   {
     value: "Eviction Notice",
-    subtitle: "Notices to quit, nonpayment, or lease violations",
+    subtitle: "Quit notices & violations",
     iconKey: "alert-triangle",
   },
   {
     value: "Rent Increase",
-    subtitle: "Increases, notices, and allowable limits",
+    subtitle: "Increases & legal limits",
     iconKey: "trending-up",
   },
   {
     value: "Lease Dispute",
-    subtitle: "Terms, breaches, and compliance",
+    subtitle: "Terms & lease breaches",
     iconKey: "file-text",
   },
   {
     value: "Landlord Harassment",
-    subtitle: "Harassment, entry, retaliation, or coercion",
+    subtitle: "Harassment & retaliation",
     iconKey: "shield",
   },
   {
     value: "Discrimination",
-    subtitle: "Protected-class or unfair treatment",
+    subtitle: "Protected-class bias",
     iconKey: "scale",
   },
   {
     value: "Other",
-    subtitle: "Other tenant–landlord matters",
+    subtitle: "Other tenant matters",
     iconKey: "circle-help",
   },
 ] as const

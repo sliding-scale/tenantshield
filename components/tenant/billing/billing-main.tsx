@@ -5,8 +5,10 @@ import { useQuery } from "convex/react"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
 import { PricingPlansSection } from "@/components/shared/pricing-plans-section"
 import { api } from "@/convex/_generated/api"
+import { MOBILE_TAB_BAR_PAGE_PADDING } from "@/lib/nav/mobile-chrome"
 import { resolvePlanId } from "@/lib/plans/plan-access"
 import type { BillingPeriod } from "@/lib/plans/pricing"
+import { cn } from "@/lib/utils"
 
 export function BillingMain() {
   const { clerkUser, convexUser, isLoading } = useCurrentUser()
@@ -26,7 +28,12 @@ export function BillingMain() {
   }, [clerkUser, convexUser?.plan, isLoading, planUsage])
 
   return (
-    <main className="min-h-[100dvh] bg-cream-page pb-28 pt-5 md:min-h-[calc(100vh-4rem)] md:pb-10 md:pt-8">
+    <main
+      className={cn(
+        "min-h-[100dvh] bg-cream-page pt-5 md:min-h-[calc(100vh-4rem)] md:pb-10 md:pt-8",
+        MOBILE_TAB_BAR_PAGE_PADDING,
+      )}
+    >
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 md:px-8 lg:px-10">
         <div className="mb-4 text-center md:mb-6">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary md:text-sm">
@@ -43,6 +50,7 @@ export function BillingMain() {
 
         <PricingPlansSection
           id="billing-plans"
+          hideHeader
           audience="billing"
           showBillingPeriodToggle
           defaultBillingPeriod={defaultBillingPeriod}
