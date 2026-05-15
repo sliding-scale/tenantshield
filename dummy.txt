@@ -3,4 +3,4 @@ deploy
 deploy
 deploy payment checkss
 deploy
-deploy
+deployy
