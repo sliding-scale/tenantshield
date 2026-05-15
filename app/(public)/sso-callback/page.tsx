@@ -3,6 +3,7 @@
 import { useClerk, useSignIn, useSignUp } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
 import { useEffect, useRef } from "react"
+import { ShieldLoader } from "@/components/shared/shield-loader"
 
 export default function SsoCallbackPage() {
   const clerk = useClerk()
@@ -147,12 +148,8 @@ export default function SsoCallbackPage() {
   }, [clerk, clerk.loaded, signIn, signUp, router])
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4">
-      <div
-        className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary"
-        aria-hidden
-      />
-      <p className="text-sm text-muted-foreground">Finishing sign-in…</p>
+    <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-4">
+      <ShieldLoader variant="auth" embedded label="Finishing sign-in…" />
       <div id="clerk-captcha" />
     </div>
   )

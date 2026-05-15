@@ -8,6 +8,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { ShieldLoader } from "@/components/shared/shield-loader";
 
 export default function SharedDashboardPage() {
   const router = useRouter();
@@ -26,17 +27,7 @@ export default function SharedDashboardPage() {
   }, [role, onboardingStatus, router]);
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 px-4">
-        <div
-          className="h-8 w-8 animate-spin rounded-full border-2 border-neutral-300 border-t-foreground dark:border-neutral-600"
-          aria-hidden
-        />
-        <p className="text-sm text-neutral-600 dark:text-neutral-400">
-          Loading your account…
-        </p>
-      </div>
-    );
+    return <ShieldLoader variant="account" fullPage />;
   }
 
   if (!clerkUser) {
@@ -63,17 +54,7 @@ export default function SharedDashboardPage() {
 
   if (role === "tenant") {
     if (onboardingStatus === undefined) {
-      return (
-        <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 px-4">
-          <div
-            className="h-8 w-8 animate-spin rounded-full border-2 border-neutral-300 border-t-foreground dark:border-neutral-600"
-            aria-hidden
-          />
-          <p className="text-sm text-neutral-600 dark:text-neutral-400">
-            Checking onboarding…
-          </p>
-        </div>
-      );
+      return <ShieldLoader variant="onboarding" fullPage />;
     }
     if (onboardingStatus?.shouldShowOnboarding) {
       return null;

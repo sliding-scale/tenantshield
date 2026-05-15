@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useQuery } from "convex/react"
 import { Search } from "lucide-react"
 import { api } from "@/convex/_generated/api"
+import { ShieldLoader } from "@/components/shared/shield-loader"
 
 export default function StateLawsPage() {
   const stateLaws = useQuery(api.stateLaws.queries.getAllStateLaws)
@@ -45,7 +46,9 @@ export default function StateLawsPage() {
         </div>
 
         {stateLaws === undefined ? (
-          <p className="text-muted-foreground">Loading state laws...</p>
+          <div className="flex justify-center py-16">
+            <ShieldLoader variant="laws" embedded />
+          </div>
         ) : stateLaws.length === 0 ? (
           <div className="rounded-3xl border border-cream-border bg-cream-surface p-8 text-center">
             <p className="font-heading text-2xl text-ink-warm">No state laws found</p>

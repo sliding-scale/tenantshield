@@ -6,6 +6,7 @@ import { useQuery } from "convex/react"
 import { FileSearch } from "lucide-react"
 import { LeaseVerdictTag } from "@/components/shared/list-row-pill"
 import { api } from "@/convex/_generated/api"
+import { ShieldLoader } from "@/components/shared/shield-loader"
 import { Button } from "@/components/ui/button"
 
 export default function LeasesPage() {
@@ -32,7 +33,9 @@ export default function LeasesPage() {
         </header>
 
         {data === undefined ? (
-          <p className="text-muted-foreground">Loading leases...</p>
+          <div className="flex justify-center py-16">
+            <ShieldLoader variant="leases" embedded />
+          </div>
         ) : leases.length === 0 ? (
           <div className="rounded-3xl border border-cream-border bg-cream-surface p-8 text-center">
             <p className="font-heading text-2xl text-ink-warm">No leases yet</p>

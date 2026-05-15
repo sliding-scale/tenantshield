@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { useQuery } from "convex/react"
 import { Briefcase, ChevronLeft, ChevronRight, Scale } from "lucide-react"
 import { api } from "@/convex/_generated/api"
+import { ShieldLoader } from "@/components/shared/shield-loader"
 
 export default function StateLawDetailPage({
   params,
@@ -21,11 +22,7 @@ export default function StateLawDetailPage({
   })
 
   if (stateLaw === undefined) {
-    return (
-      <main className="flex min-h-[100dvh] items-center justify-center bg-cream-page px-4 md:min-h-[calc(100vh-4rem)]">
-        <p className="text-muted-foreground">Loading...</p>
-      </main>
-    )
+    return <ShieldLoader variant="laws" fullPage />
   }
 
   if (stateLaw === null) {

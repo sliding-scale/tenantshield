@@ -6,6 +6,7 @@ import { ChevronLeft, Star } from "lucide-react"
 import { useQuery } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
+import { ShieldLoader } from "@/components/shared/shield-loader"
 import { Button } from "@/components/ui/button"
 import { RecentReviews } from "@/components/tenant/rating/recent-reviews"
 //next image component import
@@ -29,11 +30,7 @@ export default function PropertyRatingsPage() {
   )
 
   if (property === undefined) {
-    return (
-      <main className="flex min-h-[50vh] items-center justify-center bg-cream-page px-4">
-        <p className="text-sm text-ink-warm-muted">Loading property…</p>
-      </main>
-    )
+    return <ShieldLoader variant="property" fullPage />
   }
 
   if (property === null) {

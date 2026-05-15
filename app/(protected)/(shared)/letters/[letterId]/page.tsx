@@ -6,6 +6,7 @@ import Link from "next/link"
 import { useMutation, useQuery } from "convex/react"
 import type { Id } from "@/convex/_generated/dataModel"
 import { api } from "@/convex/_generated/api"
+import { ShieldLoader } from "@/components/shared/shield-loader"
 import { LetterResultView, type LetterData } from "@/components/tenant/write-letter/letter-result-view"
 import {
   LetterTipTapEditor,
@@ -88,7 +89,7 @@ export default function LetterDetailPage() {
   if (row === undefined) {
     return (
       <main className="min-h-[100dvh] bg-cream-page px-4 py-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10">
-        <p className="text-muted-foreground">Loading letter...</p>
+        <ShieldLoader variant="letter" fullPage />
       </main>
     )
   }

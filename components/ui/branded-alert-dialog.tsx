@@ -1,7 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { AlertTriangle, Loader2 } from "lucide-react"
+import { AlertTriangle } from "lucide-react"
+import { ShieldLoader } from "@/components/shared/shield-loader"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -102,10 +103,10 @@ export function BrandedAlertDialog({
             disabled={isActionLoading}
           >
             {isActionLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <span className="inline-flex items-center gap-2">
+                <ShieldLoader variant="generic" compact />
                 Processing...
-              </>
+              </span>
             ) : (
               actionLabel
             )}
