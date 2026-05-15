@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useQuery, useAction } from "convex/react";
 import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
+import { ShieldLoader } from "@/components/shared/shield-loader";
 import type { Id } from "@/convex/_generated/dataModel";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
@@ -32,7 +33,7 @@ export default function LeaseDetailPage() {
   if (lease === undefined) {
     return (
       <main className="min-h-[100dvh] bg-cream-page px-4 py-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10">
-        <p className="text-muted-foreground">Loading lease...</p>
+        <ShieldLoader variant="lease" fullPage />
       </main>
     );
   }
@@ -110,7 +111,14 @@ export default function LeaseDetailPage() {
           }}
           disabled={loading}
         >
-          {loading ? "Loading…" : "Try to load PDF"}
+          {loading ? (
+            <span className="inline-flex items-center gap-2">
+              <ShieldLoader variant="lease" compact />
+              Loading…
+            </span>
+          ) : (
+            "Try to load PDF"
+          )}
         </Button>
         {error ? (
           <div className="mt-2 text-sm text-destructive">{error}</div>

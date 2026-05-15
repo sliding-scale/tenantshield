@@ -2,19 +2,18 @@
 
 import { useSignUp } from "@clerk/nextjs"
 import Link from "next/link"
-// import { Loader } from "@/components/shared/loader"
+import { ShieldLoader } from "@/components/shared/shield-loader"
 
 export default function VerifyEmailPage() {
   const { signUp } = useSignUp()
 
   if (!signUp) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4">
-        <h1 className="text-2xl font-semibold">Loading verification...</h1>
-        <p className="text-center text-muted-foreground">
-          Please wait while we verify your email.
-        </p>
-      </div>
+      <ShieldLoader
+        variant="verify"
+        fullPage
+        description="Please wait while we verify your email."
+      />
     )
   }
 

@@ -4,7 +4,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { Upload, FileText, X, Search, Loader2 } from "lucide-react";
+import { Upload, FileText, X, Search } from "lucide-react";
+import { GavelLoader } from "@/components/shared/gavel-loader";
+import { ShieldLoader } from "@/components/shared/shield-loader";
 import { Button } from "@/components/ui/button";
 import {
   US_STATE_NAMES,
@@ -420,30 +422,24 @@ export default function AnalyzeLeasePage() {
               className="mx-auto mt-8 h-14 w-full max-w-xl rounded-2xl bg-surface-strong px-6 text-lg font-semibold text-white hover:bg-surface-strong-hover disabled:bg-muted disabled:text-muted-foreground md:mt-10 md:text-xl"
             >
               {isSubmitting ? (
-                <span className="flex items-center gap-2">
-                  <Loader2 className="size-5 animate-spin" />
-                  Uploading…
+                <span className="flex items-center justify-center gap-3">
+                  <ShieldLoader variant="upload" compact />
+                  <span>Uploading…</span>
                 </span>
               ) : isAnalyzing ? (
-                <span className="flex items-center gap-2">
-                  <Loader2 className="size-5 animate-spin" />
-                  Analyzing…
-                </span>
+                "Analyzing…"
               ) : (
                 "Analyze Lease"
               )}
             </Button>
           </section>
         ) : !analysis ? (
-          <section className="flex min-h-0 flex-1 flex-col items-center justify-center rounded-2xl border border-cream-border bg-cream-surface p-10 shadow-sm md:rounded-3xl">
-            <Loader2 className="size-10 animate-spin text-primary" />
-            <p className="mt-5 text-lg font-semibold text-ink-warm">
-              Analyzing your lease…
-            </p>
-            <p className="mt-2 max-w-md text-center text-sm text-ink-warm-muted">
-              Our AI is reviewing every clause against {state || "your state"}
-              &rsquo;s tenant law. This usually takes 30–60 seconds.
-            </p>
+          <section className="flex min-h-0 flex-1 flex-col items-center justify-center rounded-2xl border border-cream-border bg-cream-surface p-6 shadow-sm sm:p-10 md:rounded-3xl">
+            <GavelLoader
+              variant="lease"
+              embedded
+              description={`Our AI is reviewing every clause against ${state || "your state"}'s tenant law. This usually takes 30–60 seconds.`}
+            />
           </section>
         ) : (
           <LeaseResultsView

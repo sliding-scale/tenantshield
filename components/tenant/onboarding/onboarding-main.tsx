@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { useMutation, useQuery } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
+import { ShieldLoader } from "@/components/shared/shield-loader"
 import { Button } from "@/components/ui/button"
 
 type OptionKey = "option1" | "option2" | "option3" | "option4"
@@ -116,11 +117,7 @@ export default function OnboardingMain() {
   }
 
   if (userLoading || status === undefined || questions === undefined) {
-    return (
-      <div className="flex min-h-[70vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-neutral-300 border-t-foreground dark:border-neutral-600" />
-      </div>
-    )
+    return <ShieldLoader variant="onboarding" fullPage className="min-h-[70vh]" />
   }
 
   if (!clerkUser || role !== "tenant" || !currentQuestion || totalQuestions === 0) {

@@ -5,6 +5,7 @@ import { useQuery } from "convex/react"
 import { Search } from "lucide-react"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
 import { api } from "@/convex/_generated/api"
+import { ShieldLoader } from "@/components/shared/shield-loader"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
@@ -68,8 +69,10 @@ function AdminUsersResults({ searchName }: { searchName: string }) {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={7} className="px-4 py-10 text-center text-muted-foreground">
-                  Loading users…
+                <td colSpan={7} className="px-4 py-10">
+                  <div className="flex justify-center">
+                    <ShieldLoader variant="admin" embedded label="Loading users…" />
+                  </div>
                 </td>
               </tr>
             ) : rows.length === 0 ? (

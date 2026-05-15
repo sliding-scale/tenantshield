@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ShieldLoader } from "@/components/shared/shield-loader";
 import { useEffect } from "react";
 import { useQuery } from "convex/react";
 import useCurrentUser from "@/app/hooks/useCurrentUser";
@@ -76,11 +77,7 @@ export default function ImpactScorePage() {
   }, [clerkUser, role, onboardingStatus, router]);
 
   if (userLoading || impact === undefined || onboardingStatus === undefined) {
-    return (
-      <div className="flex min-h-[70vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-neutral-300 border-t-foreground dark:border-neutral-600" />
-      </div>
-    );
+    return <ShieldLoader variant="onboarding" fullPage className="min-h-[70vh]" />;
   }
 
   if (!clerkUser || role !== "tenant") {

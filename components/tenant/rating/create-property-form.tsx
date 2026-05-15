@@ -3,7 +3,8 @@
 import { useId, useRef, useState } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { ImagePlus, Loader2, Star, X } from "lucide-react"
+import { ImagePlus, Star, X } from "lucide-react"
+import { ShieldLoader } from "@/components/shared/shield-loader"
 import { useMutation } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import { Button } from "@/components/ui/button"
@@ -197,10 +198,10 @@ export function CreatePropertyForm({ initialName = "" }: Props) {
           className="h-12 w-full rounded-xl border-0 bg-surface-strong text-base font-semibold text-white shadow-md hover:bg-surface-strong-hover disabled:bg-cream-surface-deep disabled:text-ink-warm-muted disabled:opacity-100 sm:h-14 sm:text-lg"
         >
           {isSubmitting ? (
-            <>
-              <Loader2 className="size-4 animate-spin" />
+            <span className="inline-flex items-center gap-2">
+              <ShieldLoader variant="ratings" compact />
               Creating…
-            </>
+            </span>
           ) : (
             <>
               <Star className="size-4 fill-primary text-primary" strokeWidth={0} />

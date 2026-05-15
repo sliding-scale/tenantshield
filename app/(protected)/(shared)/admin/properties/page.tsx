@@ -6,6 +6,7 @@ import { Search } from "lucide-react"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
+import { ShieldLoader } from "@/components/shared/shield-loader"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
@@ -76,8 +77,10 @@ function AdminPropertiesResults({ searchName }: { searchName: string }) {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={5} className="px-4 py-10 text-center text-muted-foreground">
-                  Loading properties…
+                <td colSpan={5} className="px-4 py-10">
+                  <div className="flex justify-center">
+                    <ShieldLoader variant="admin" embedded label="Loading properties…" />
+                  </div>
                 </td>
               </tr>
             ) : rows.length === 0 ? (

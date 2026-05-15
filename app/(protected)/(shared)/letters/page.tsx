@@ -6,6 +6,7 @@ import { useQuery } from "convex/react"
 import { FileText, Plus } from "lucide-react"
 import { api } from "@/convex/_generated/api"
 import { ListRowPill } from "@/components/shared/list-row-pill"
+import { ShieldLoader } from "@/components/shared/shield-loader"
 import { Button } from "@/components/ui/button"
 
 export default function LettersPage() {
@@ -44,7 +45,9 @@ export default function LettersPage() {
         </header>
 
         {data === undefined ? (
-          <p className="text-muted-foreground">Loading letters...</p>
+          <div className="flex justify-center py-16">
+            <ShieldLoader variant="letters" embedded />
+          </div>
         ) : letters.length === 0 ? (
           <div className="rounded-3xl border border-cream-border bg-cream-surface p-8 text-center">
             <p className="font-heading text-2xl text-ink-warm">No letters yet</p>

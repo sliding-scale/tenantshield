@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
-import { Loader2, MapPin, Plus, Search, Star } from "lucide-react"
+import { MapPin, Plus, Search, Star } from "lucide-react"
+import { ShieldLoader } from "@/components/shared/shield-loader"
 import { usePaginatedQuery } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import { Button } from "@/components/ui/button"
@@ -282,8 +283,8 @@ export default function RatingsPage() {
             className="mt-6 flex min-h-14 items-center justify-center py-4"
           >
             {loadingMore ? (
-              <span className="inline-flex items-center gap-2 text-sm text-ink-warm-muted">
-                <Loader2 className="size-5 animate-spin text-primary" />
+              <span className="inline-flex items-center gap-3 text-sm text-ink-warm-muted">
+                <ShieldLoader variant="ratings" compact />
                 Loading more…
               </span>
             ) : (

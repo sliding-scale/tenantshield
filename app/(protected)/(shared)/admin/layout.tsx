@@ -2,6 +2,7 @@
 
 import useCurrentUser from "@/app/hooks/useCurrentUser";
 import NoAccessMessage from "@/components/shared/NoAccessMessage";
+import { ShieldLoader } from "@/components/shared/shield-loader";
 
 export default function AdminSectionLayout({
   children,
@@ -11,15 +12,7 @@ export default function AdminSectionLayout({
   const { role, isLoading, convexUser } = useCurrentUser();
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 px-4">
-        <div
-          className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary"
-          aria-hidden
-        />
-        <p className="text-sm text-muted-foreground">Loading…</p>
-      </div>
-    );
+    return <ShieldLoader variant="admin" fullPage />;
   }
 
   if (!convexUser || role !== "admin") {

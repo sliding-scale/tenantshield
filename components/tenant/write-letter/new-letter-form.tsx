@@ -16,6 +16,7 @@ import {
 } from "lucide-react"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
 import { api } from "@/convex/_generated/api"
+import { GavelLoaderOverlay } from "@/components/shared/gavel-loader"
 import { PlanUpgradeDialog } from "@/components/tenant/free-plan-upgrade-dialog"
 import { Button } from "@/components/ui/button"
 import {
@@ -326,6 +327,7 @@ export function NewLetterForm({
           </Button>
         </section>
       </div>
+      <GavelLoaderOverlay show={isSubmitting} variant="letter" />
       <PlanUpgradeDialog
         open={upgradeDialogOpen}
         onOpenChange={setUpgradeDialogOpen}

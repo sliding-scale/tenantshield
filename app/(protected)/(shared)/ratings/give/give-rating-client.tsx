@@ -3,7 +3,8 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { ChevronLeft, Loader2, Shield } from "lucide-react"
+import { ChevronLeft, Shield } from "lucide-react"
+import { ShieldLoader } from "@/components/shared/shield-loader"
 import { useMutation, useQuery } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
@@ -133,7 +134,9 @@ export default function GiveRatingClient() {
             {alreadyRated ? "Your review" : "Rate this property"}
           </h1>
           {property === undefined && propertyIdRaw ? (
-            <p className="mt-2 text-sm text-ink-warm-muted">Loading property…</p>
+            <div className="mt-4 flex justify-start">
+              <ShieldLoader variant="property" embedded />
+            </div>
           ) : null}
           {property ? (
             <p className="mt-2 text-base font-medium text-ink-warm md:text-lg">{property.name}</p>
@@ -159,7 +162,7 @@ export default function GiveRatingClient() {
 
         {checkingExisting ? (
           <div className="flex min-h-[12rem] items-center justify-center rounded-2xl border border-cream-border bg-cream-surface/40 px-4 py-10">
-            <p className="text-sm text-ink-warm-muted">Checking your reviews…</p>
+            <ShieldLoader variant="ratings" embedded label="Checking your\nreviews…" />
           </div>
         ) : null}
 
@@ -213,10 +216,10 @@ export default function GiveRatingClient() {
               className="h-12 w-full rounded-xl border-0 bg-surface-strong text-base font-semibold text-white shadow-md hover:bg-surface-strong-hover disabled:bg-cream-surface-deep disabled:text-ink-warm-muted disabled:opacity-100 sm:h-14 sm:text-lg"
             >
               {isSubmitting ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" />
+                <span className="inline-flex items-center gap-2">
+                  <ShieldLoader variant="ratings" compact />
                   Submitting…
-                </>
+                </span>
               ) : (
                 "Submit review"
               )}

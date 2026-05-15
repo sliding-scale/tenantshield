@@ -8,6 +8,7 @@ import type { Id } from "@/convex/_generated/dataModel"
 import { api } from "@/convex/_generated/api"
 import { NewCaseAnalysisResult } from "@/components/case/new-case-analysis-result"
 import { PlanUpgradeDialog } from "@/components/tenant/free-plan-upgrade-dialog"
+import { ShieldLoader } from "@/components/shared/shield-loader"
 import { Button } from "@/components/ui/button"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
 import {
@@ -54,7 +55,7 @@ export default function CaseDetailsPage() {
   if (row === undefined) {
     return (
       <main className="min-h-[100dvh] bg-cream-page px-4 py-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10">
-        <p className="text-muted-foreground">Loading case...</p>
+        <ShieldLoader variant="case" fullPage />
       </main>
     )
   }
