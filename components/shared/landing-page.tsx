@@ -11,6 +11,8 @@ import {
 import { PricingPlansSection } from "@/components/shared/pricing-plans-section";
 
 export default function LandingPage() {
+  const currentYear = new Date().getFullYear();
+
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
@@ -250,7 +252,7 @@ export default function LandingPage() {
           </div>
           <div className="border-t-2 border-gray-200 pt-8 text-center text-sm text-gray-600">
             <p>
-              © 2024 TenantShield. All rights reserved. Powered by
+              © {currentYear} TenantShield. All rights reserved. Powered by
               Jurisdictional AI.
             </p>
           </div>
