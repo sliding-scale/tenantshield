@@ -3,7 +3,7 @@
 import "./gavel-loader.css"
 import { cn } from "@/lib/utils"
 
-export type GavelLoaderVariant = "letter" | "case" | "lease"
+export type GavelLoaderVariant = "letter" | "case" | "lease" | "ask-ai"
 
 const VARIANT_COPY: Record<
   GavelLoaderVariant,
@@ -23,6 +23,10 @@ const VARIANT_COPY: Record<
     label: "Analyzing your\nlease…",
     defaultDescription:
       "Our AI is reviewing every clause against your state's tenant law. This usually takes 30–60 seconds.",
+  },
+  "ask-ai": {
+    label: "Preparing Ask\nAI…",
+    defaultDescription: "Setting up your legal assistant. Just a moment.",
   },
 }
 
@@ -293,6 +297,7 @@ function GavelLoaderSvg({ className }: { className?: string }) {
 
 type GavelLoaderProps = {
   variant: GavelLoaderVariant
+  label?: string
   description?: string
   className?: string
   /** Omit card chrome when embedding in a page section */
@@ -301,11 +306,13 @@ type GavelLoaderProps = {
 
 export function GavelLoader({
   variant,
+  label,
   description,
   className,
   embedded = false,
 }: GavelLoaderProps) {
   const copy = VARIANT_COPY[variant]
+  const heading = label ?? copy.label
   const body = description ?? copy.defaultDescription
 
   return (
@@ -323,7 +330,7 @@ export function GavelLoader({
       <GavelLoaderSvg />
       <div className="flex flex-col items-center gap-3 text-center">
         <p className="whitespace-pre-line font-heading text-lg font-semibold leading-snug text-ink-warm sm:text-xl">
-          {copy.label}
+          {heading}
         </p>
         {body ? (
           <p className="max-w-md text-sm leading-relaxed text-ink-warm-muted">{body}</p>

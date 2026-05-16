@@ -15,6 +15,7 @@ import useCurrentUser from "@/app/hooks/useCurrentUser";
 import { normalizeUserStateAbbr } from "@/lib/constants/us-states";
 import { resolvePlanId, shouldPromptFreePlanChatUpgrade } from "@/lib/plans/plan-access";
 import { PlanUpgradeDialog } from "@/components/tenant/free-plan-upgrade-dialog";
+import { GavelLoader } from "@/components/shared/gavel-loader";
 
 export default function AskAiShell() {
   const { isLoaded, userId } = useAuth();
@@ -82,24 +83,16 @@ export default function AskAiShell() {
 
   if (!isLoaded || !userId) {
     return (
-      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 px-4">
-        <div
-          className="border-muted-foreground h-8 w-8 animate-spin rounded-full border-2 border-t-primary"
-          aria-hidden
-        />
-        <p className="text-muted-foreground text-sm">Loading…</p>
+      <div className="flex min-h-[50vh] items-center justify-center px-4">
+        <GavelLoader variant="ask-ai" embedded label="Loading…" description="" />
       </div>
     );
   }
 
   if (conversations === undefined || activeConversationId === null) {
     return (
-      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 px-4">
-        <div
-          className="border-muted-foreground h-8 w-8 animate-spin rounded-full border-2 border-t-primary"
-          aria-hidden
-        />
-        <p className="text-muted-foreground text-sm">Preparing Ask AI…</p>
+      <div className="flex min-h-[50vh] items-center justify-center px-4">
+        <GavelLoader variant="ask-ai" embedded />
       </div>
     );
   }
