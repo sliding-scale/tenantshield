@@ -230,19 +230,22 @@ export function PricingPlansSection({
     }
   }
   const [carouselIndex, setCarouselIndex] = useState(1)
-  const [touchStart, setTouchStart] = useState(0)
-  const [touchEnd, setTouchEnd] = useState(0)
+  const touchStartRef = useRef({ x: 0, y: 0 })
 
   const handleTouchStart = (event: React.TouchEvent) => {
-    setTouchStart(event.targetTouches[0].clientX)
+    const touch = event.targetTouches[0]
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY }
   }
 
   const handleTouchEnd = (event: React.TouchEvent) => {
-    setTouchEnd(event.changedTouches[0].clientX)
-    if (touchStart - touchEnd > 50) {
+    const touch = event.changedTouches[0]
+    const dx = touch.clientX - touchStartRef.current.x
+    const dy = touch.clientY - touchStartRef.current.y
+    // Let vertical pans scroll the page; only horizontal swipes change slides.
+    if (Math.abs(dx) <= Math.abs(dy) || Math.abs(dx) < 50) return
+    if (dx < 0) {
       setCarouselIndex((previous) => (previous + 1) % PRICING_PLANS.length)
-    }
-    if (touchEnd - touchStart > 50) {
+    } else {
       setCarouselIndex((previous) => (previous - 1 + PRICING_PLANS.length) % PRICING_PLANS.length)
     }
   }
@@ -263,7 +266,7 @@ export function PricingPlansSection({
 
         <div className={cn("lg:hidden", audience === "billing" && "pb-2")}>
           <div
-            className="overflow-x-hidden pt-5"
+            className="touch-pan-y overflow-x-hidden pt-5"
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
           >
