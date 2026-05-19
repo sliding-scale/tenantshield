@@ -13,6 +13,8 @@ import {
   LEASE_ANALYSIS_LIMIT_REACHED,
 } from "../../lib/plans/plan-access"
 
+import { usageMonthKeyEastern } from "./usageMonthKey"
+
 // ── Reads ────────────────────────────────────────────────────────────────────
 
 export async function getPlanUsageForUser(ctx: MutationCtx, clerkId: string) {
@@ -25,6 +27,42 @@ export async function getPlanUsageForUser(ctx: MutationCtx, clerkId: string) {
   const planType = (planUsage?.planType ?? "monthly") as BillingPeriod
 
   return { plan, planType, planUsage }
+}
+
+/** Lazy reset for letter/lease quotas only (yearly: NY calendar month; monthly: Stripe period). */
+export async function ensureLetterLeaseQuotaWindow(ctx: MutationCtx, clerkId: string) {
+  const { plan, planType, planUsage } = await getPlanUsageForUser(ctx, clerkId)
+  if (!planUsage || plan === "free") return
+
+  if (planType === "yearly") {
+    const key = usageMonthKeyEastern(Date.now())
+    if (planUsage.usageQuotaMonthKey === undefined) {
+      await ctx.db.patch(planUsage._id, { usageQuotaMonthKey: key })
+      return
+    }
+    if (planUsage.usageQuotaMonthKey !== key) {
+      await ctx.db.patch(planUsage._id, {
+        usedLetters: 0,
+        usedLeaseAnalyses: 0,
+        usageQuotaMonthKey: key,
+      })
+    }
+    return
+  }
+
+  const periodStart = planUsage.currentPeriodStart
+  const anchor = planUsage.usageStripePeriodStart
+  if (anchor === undefined) {
+    await ctx.db.patch(planUsage._id, { usageStripePeriodStart: periodStart })
+    return
+  }
+  if (anchor !== periodStart) {
+    await ctx.db.patch(planUsage._id, {
+      usedLetters: 0,
+      usedLeaseAnalyses: 0,
+      usageStripePeriodStart: periodStart,
+    })
+  }
 }
 
 // ── Guards ───────────────────────────────────────────────────────────────────
@@ -49,8 +87,9 @@ export async function assertCanCreateCase(ctx: MutationCtx, clerkId: string) {
 export async function assertCanActivateCase(
   ctx: MutationCtx,
   clerkId: string,
-  _caseId: Id<"cases">,
+  caseId: Id<"cases">,
 ) {
+  void caseId
   const { plan, planType, planUsage } = await getPlanUsageForUser(ctx, clerkId)
   const used = planUsage?.usedActiveCases ?? 0
   const limit = getActiveCaseLimit(plan, planType)
@@ -58,6 +97,7 @@ export async function assertCanActivateCase(
 }
 
 export async function assertCanCreateLetter(ctx: MutationCtx, clerkId: string) {
+  await ensureLetterLeaseQuotaWindow(ctx, clerkId)
   const { plan, planType, planUsage } = await getPlanUsageForUser(ctx, clerkId)
   if (plan === "free") return
   const used = planUsage?.usedLetters ?? 0
@@ -66,6 +106,7 @@ export async function assertCanCreateLetter(ctx: MutationCtx, clerkId: string) {
 }
 
 export async function assertCanCreateLeaseAnalysis(ctx: MutationCtx, clerkId: string) {
+  await ensureLetterLeaseQuotaWindow(ctx, clerkId)
   const { plan, planType, planUsage } = await getPlanUsageForUser(ctx, clerkId)
   if (plan === "free") return
   const used = planUsage?.usedLeaseAnalyses ?? 0
@@ -91,8 +132,12 @@ async function adjustCounter(
 export const adjustUsedActiveCases = (ctx: MutationCtx, clerkId: string, delta: number) =>
   adjustCounter(ctx, clerkId, "usedActiveCases", delta)
 
-export const incrementUsedLetters = (ctx: MutationCtx, clerkId: string) =>
-  adjustCounter(ctx, clerkId, "usedLetters", 1)
+export const incrementUsedLetters = async (ctx: MutationCtx, clerkId: string) => {
+  await ensureLetterLeaseQuotaWindow(ctx, clerkId)
+  return adjustCounter(ctx, clerkId, "usedLetters", 1)
+}
 
-export const incrementUsedLeaseAnalyses = (ctx: MutationCtx, clerkId: string) =>
-  adjustCounter(ctx, clerkId, "usedLeaseAnalyses", 1)
+export const incrementUsedLeaseAnalyses = async (ctx: MutationCtx, clerkId: string) => {
+  await ensureLetterLeaseQuotaWindow(ctx, clerkId)
+  return adjustCounter(ctx, clerkId, "usedLeaseAnalyses", 1)
+}

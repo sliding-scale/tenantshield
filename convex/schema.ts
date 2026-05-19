@@ -43,6 +43,12 @@ export default defineSchema({
     ),
     currentPeriodStart: v.number(),
     currentPeriodEnd: v.number(),
+    /** Stripe `cancel_at_period_end` — user canceled but retains access until `currentPeriodEnd`. */
+    cancelAtPeriodEnd: v.optional(v.boolean()),
+    /** Calendar month key YYYY-MM in America/New_York — letter/lease quota for yearly pay. */
+    usageQuotaMonthKey: v.optional(v.string()),
+    /** Stripe `current_period_start` (ms) that letter/lease counters were last reset for (monthly pay). */
+    usageStripePeriodStart: v.optional(v.number()),
     // usage counters
     usedActiveCases: v.number(),
     usedLeaseAnalyses: v.number(),
@@ -50,6 +56,52 @@ export default defineSchema({
   })
     .index("by_clerk_id", ["clerkId"])
     .index("by_subscription_id", ["stripeSubscriptionId"]),
+
+  /**
+   * Product catalog for pricing UI + Stripe price IDs (optional per billing interval).
+   * Three rows: free, pro, power — seed via planCatalog/seed:seedPlanCatalog.
+   */
+  planCatalog: defineTable({
+    tier: Plan,
+    name: v.string(),
+    features: v.array(v.string()),
+    cta: v.string(),
+    popular: v.optional(v.boolean()),
+    monthlyPriceId: v.optional(v.string()),
+    yearlyPriceId: v.optional(v.string()),
+    sortOrder: v.number(),
+    isActive: v.boolean(),
+  })
+    .index("by_tier_active", ["tier", "isActive"])
+    .index("by_monthly_price_id", ["monthlyPriceId"])
+    .index("by_yearly_price_id", ["yearlyPriceId"]),
+
+  /**
+   * Stripe subscription rows (pro/power). At most one `isActive: true` per clerk;
+   * older rows stay in the table with `isActive: false` for history.
+   */
+  userSubscriptions: defineTable({
+    clerkId: v.string(),
+    stripeCustomerId: v.string(),
+    stripeSubscriptionId: v.string(),
+    tier: v.union(v.literal("pro"), v.literal("power")),
+    planType: v.union(v.literal("monthly"), v.literal("yearly")),
+    subscriptionStatus: v.union(
+      v.literal("active"),
+      v.literal("canceled"),
+      v.literal("past_due"),
+      v.literal("trialing"),
+    ),
+    currentPeriodStart: v.number(),
+    currentPeriodEnd: v.number(),
+    stripePriceId: v.optional(v.string()),
+    /** Stripe `cancel_at_period_end` while subscription is still active until period end. */
+    cancelAtPeriodEnd: v.optional(v.boolean()),
+    isActive: v.boolean(),
+  })
+    .index("by_clerk_id", ["clerkId"])
+    .index("by_clerk_id_active", ["clerkId", "isActive"])
+    .index("by_stripe_subscription_id", ["stripeSubscriptionId"]),
 
   onboardingQuestions: defineTable({
     step: v.number(),

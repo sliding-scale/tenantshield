@@ -53,9 +53,12 @@ export type PaidPlanId = Exclude<PlanId, "free">
 
 export type BillingPeriod = "monthly" | "yearly"
 
+export type CheckoutSource = "onboarding" | "billing"
+
 export type SelectPaidPlanInput = {
   plan: PaidPlanId
   planType: BillingPeriod
+  checkoutSource: CheckoutSource
 }
 
 export type PricingPlan = {
@@ -65,6 +68,56 @@ export type PricingPlan = {
   cta: string
   popular?: boolean
   trial?: string
+}
+
+/** Convex `planCatalog` rows mapped by tier for UI copy (names, feature bullets, CTAs). */
+export type PlanCatalogLite = Record<
+  PlanId,
+  { name: string; features: string[]; cta: string; popular?: boolean }
+>
+
+export function buildPlanCatalogLite(
+  rows: Array<{
+    tier: PlanId
+    name: string
+    features: string[]
+    cta: string
+    popular?: boolean
+  }>,
+): PlanCatalogLite | null {
+  if (rows.length === 0) return null
+  const lite = {} as PlanCatalogLite
+  for (const row of rows) {
+    lite[row.tier] = {
+      name: row.name,
+      features: row.features,
+      cta: row.cta,
+      popular: row.popular,
+    }
+  }
+  return lite
+}
+
+/** Ordered free → pro → power; fills missing tiers from static `PRICING_PLANS`. */
+export function pricingPlansListFromCatalog(lite: PlanCatalogLite | null | undefined): PricingPlan[] {
+  const order: PlanId[] = ["free", "pro", "power"]
+  return order.map((id) => {
+    const fromCatalog = lite?.[id]
+    if (fromCatalog) {
+      return {
+        id,
+        name: fromCatalog.name,
+        features: fromCatalog.features,
+        cta: fromCatalog.cta,
+        popular: fromCatalog.popular,
+      }
+    }
+    const fallback = PRICING_PLANS.find((p) => p.id === id)
+    if (!fallback) {
+      throw new Error(`Missing pricing plan for tier: ${id}`)
+    }
+    return fallback
+  })
 }
 
 function formatCost(cost: number) {
@@ -105,16 +158,11 @@ export function getPlanYearlySavingsPercent(planId: PlanId) {
   return Math.round(((annualMonthlyTotal - yearlyCost) / annualMonthlyTotal) * 100)
 }
 
-function planLimitFeatures(
-  limits: (typeof PLAN_LIMITS)[PlanId][BillingPeriod],
-  period: BillingPeriod,
-) {
-  const unit = period === "yearly" ? "per year" : "per month"
-
+function planLimitFeatures(limits: (typeof PLAN_LIMITS)[PlanId][BillingPeriod]) {
   return [
     `${limits.activeCases} active cases`,
-    `${limits.leaseAnalyses} lease analyses ${unit}`,
-    `${limits.letters} letters ${unit}`,
+    `${limits.leaseAnalyses} lease analyses per month`,
+    `${limits.letters} letters per month`,
     "Letter export and priority responses",
   ]
 }
@@ -131,12 +179,12 @@ export function getPricingPlanFeatures(planId: PlanId, period: BillingPeriod) {
 
   return [
     "Unlimited AI tenant guidance",
-    ...planLimitFeatures(PLAN_LIMITS[planId][period], period),
+    ...planLimitFeatures(PLAN_LIMITS[planId][period]),
   ]
 }
 
 function monthlyLimitFeatures(limits: (typeof PLAN_LIMITS)[PlanId]["monthly"]) {
-  return planLimitFeatures(limits, "monthly")
+  return planLimitFeatures(limits)
 }
 
 export const PRICING_PLANS: PricingPlan[] = [
@@ -203,8 +251,8 @@ export type OnboardingPlanOption = {
   cta: string
 }
 
-function planDisplayName(planId: Exclude<PlanId, "free">) {
-  return PRICING_PLANS.find((plan) => plan.id === planId)?.name ?? planId
+function paidPlanDisplayName(planId: Exclude<PlanId, "free">, catalog?: PlanCatalogLite | null) {
+  return catalog?.[planId]?.name ?? PRICING_PLANS.find((plan) => plan.id === planId)?.name ?? planId
 }
 
 function monthlyEquivalentYearlyCost(planId: Exclude<PlanId, "free">) {
@@ -213,7 +261,7 @@ function monthlyEquivalentYearlyCost(planId: Exclude<PlanId, "free">) {
 }
 
 /** Options for the onboarding plans page (original layout, shared pricing model). */
-export function getOnboardingPlanOptions(): OnboardingPlanOption[] {
+export function getOnboardingPlanOptions(catalog?: PlanCatalogLite | null): OnboardingPlanOption[] {
   const proYearlySavings = getPlanYearlySavingsPercent("pro")
   const powerYearlySavings = getPlanYearlySavingsPercent("power")
   const proYearlyPrice = formatPlanPrice("pro", "yearly")
@@ -222,14 +270,18 @@ export function getOnboardingPlanOptions(): OnboardingPlanOption[] {
   const powerMonthlyPrice = formatPlanPrice("power", "monthly")
   const proMonthlyEquiv = monthlyEquivalentYearlyCost("pro")
   const powerMonthlyEquiv = monthlyEquivalentYearlyCost("power")
-  const powerName = planDisplayName("power")
+  const powerName = paidPlanDisplayName("power", catalog)
+  const proName = paidPlanDisplayName("pro", catalog)
+
+  const proCta = catalog?.pro?.cta ?? PRICING_PLANS.find((p) => p.id === "pro")?.cta ?? "Choose Pro"
+  const powerCta = catalog?.power?.cta ?? PRICING_PLANS.find((p) => p.id === "power")?.cta ?? "Choose Ultimate"
 
   return [
     {
       id: "pro-yearly",
       planId: "pro",
       billingPeriod: "yearly",
-      title: `${planDisplayName("pro")} · Yearly`,
+      title: `${proName} · Yearly`,
       kicker: "Annual billing",
       headerLabel: "Yearly — Best value",
       price: proYearlyPrice,
@@ -237,8 +289,8 @@ export function getOnboardingPlanOptions(): OnboardingPlanOption[] {
       description: `${proYearlyPrice}/year · About $${formatCost(proMonthlyEquiv)}/mo`,
       detailDescription: `${proYearlyPrice}/year · About $${formatCost(proMonthlyEquiv)}/mo`,
       badge: proYearlySavings ? `Best Value — Save ${proYearlySavings}%` : "Best Value",
-      features: getPricingPlanFeatures("pro", "yearly"),
-      cta: PRICING_PLANS.find((p) => p.id === "pro")?.cta ?? "Choose Pro",
+      features: catalog?.pro?.features ?? getPricingPlanFeatures("pro", "yearly"),
+      cta: proCta,
     },
     {
       id: "power-yearly",
@@ -252,42 +304,42 @@ export function getOnboardingPlanOptions(): OnboardingPlanOption[] {
       description: `${powerYearlyPrice}/year · About $${formatCost(powerMonthlyEquiv)}/mo`,
       detailDescription: `${powerYearlyPrice}/year · About $${formatCost(powerMonthlyEquiv)}/mo · Highest limits`,
       badge: powerYearlySavings ? `Save ${powerYearlySavings}%` : "Highest limits",
-      features: getPricingPlanFeatures("power", "yearly"),
-      cta: PRICING_PLANS.find((p) => p.id === "power")?.cta ?? "Choose Ultimate",
+      features: catalog?.power?.features ?? getPricingPlanFeatures("power", "yearly"),
+      cta: powerCta,
     },
     {
       id: "pro-monthly",
       planId: "pro",
       billingPeriod: "monthly",
-      title: `${planDisplayName("pro")} · Monthly`,
+      title: `${proName} · Monthly`,
       kicker: "Pay monthly",
       headerLabel: "Monthly",
       price: proMonthlyPrice,
       suffix: "/mo",
-      description: `${planDisplayName("pro")} · Cancel anytime`,
-      detailDescription: `${planDisplayName("pro")} · Cancel anytime`,
-      features: getPricingPlanFeatures("pro", "monthly"),
-      cta: PRICING_PLANS.find((p) => p.id === "pro")?.cta ?? "Choose Pro",
+      description: `${proName} · Cancel anytime`,
+      detailDescription: `${proName} · Cancel anytime`,
+      features: catalog?.pro?.features ?? getPricingPlanFeatures("pro", "monthly"),
+      cta: proCta,
     },
     {
       id: "power-monthly",
       planId: "power",
       billingPeriod: "monthly",
-      title: planDisplayName("power"),
+      title: powerName,
       kicker: "Pay monthly",
-      headerLabel: planDisplayName("power"),
+      headerLabel: powerName,
       price: powerMonthlyPrice,
       suffix: "/mo",
       description: `Highest limits · Cancel anytime`,
       detailDescription: `Highest limits · Cancel anytime`,
-      features: getPricingPlanFeatures("power", "monthly"),
-      cta: PRICING_PLANS.find((p) => p.id === "power")?.cta ?? "Choose Ultimate",
+      features: catalog?.power?.features ?? getPricingPlanFeatures("power", "monthly"),
+      cta: powerCta,
     },
   ]
 }
 
-export function getOnboardingPlanOption(id: OnboardingPlanSelectionId) {
-  const option = getOnboardingPlanOptions().find((entry) => entry.id === id)
+export function getOnboardingPlanOption(id: OnboardingPlanSelectionId, catalog?: PlanCatalogLite | null) {
+  const option = getOnboardingPlanOptions(catalog).find((entry) => entry.id === id)
   if (!option) {
     throw new Error(`Unknown onboarding plan: ${id}`)
   }
@@ -313,8 +365,9 @@ export function onboardingSelectionMatchesActivePlan(
   selectionId: OnboardingPlanSelectionId,
   planId: PlanId,
   planType: BillingPeriod | null | undefined,
+  catalog?: PlanCatalogLite | null,
 ) {
   if (!isPaidPlan(planId) || !planType) return false
-  const option = getOnboardingPlanOption(selectionId)
+  const option = getOnboardingPlanOption(selectionId, catalog)
   return option.planId === planId && option.billingPeriod === planType
 }

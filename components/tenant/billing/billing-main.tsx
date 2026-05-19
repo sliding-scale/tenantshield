@@ -8,6 +8,7 @@ import { api } from "@/convex/_generated/api"
 import { MOBILE_TAB_BAR_PAGE_PADDING } from "@/lib/nav/mobile-chrome"
 import { resolvePlanId } from "@/lib/plans/plan-access"
 import type { BillingPeriod } from "@/lib/plans/pricing"
+import { subscriptionCancellationMessage } from "@/lib/plans/subscription-display"
 import { cn } from "@/lib/utils"
 
 export function BillingMain() {
@@ -26,6 +27,11 @@ export function BillingMain() {
 
     return planUsage?.planType ?? "monthly"
   }, [clerkUser, convexUser?.plan, isLoading, planUsage])
+
+  const cancellationBanner =
+    planUsage?.cancelAtPeriodEnd && planUsage.currentPeriodEnd !== undefined
+      ? subscriptionCancellationMessage(true, planUsage.currentPeriodEnd)
+      : null
 
   return (
     <main
@@ -48,10 +54,20 @@ export function BillingMain() {
           </p>
         </div>
 
+        {cancellationBanner ? (
+          <div
+            role="status"
+            className="mx-auto mb-6 max-w-2xl rounded-2xl border border-cream-border bg-cream-surface px-4 py-3 text-center text-sm leading-relaxed text-ink-warm sm:text-base"
+          >
+            {cancellationBanner}
+          </div>
+        ) : null}
+
         <PricingPlansSection
           id="billing-plans"
           hideHeader
           audience="billing"
+          checkoutSource="billing"
           showBillingPeriodToggle
           defaultBillingPeriod={defaultBillingPeriod}
           className="bg-transparent px-0 py-10 sm:px-0 md:py-12"

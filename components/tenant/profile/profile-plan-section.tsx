@@ -1,35 +1,45 @@
 import Link from "next/link"
-import { useMutation, useQuery } from "convex/react"
+import { useAction, useQuery } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
 import { Button } from "@/components/ui/button"
-import { PRICING_PLANS, getPricingPlanFeatures } from "@/lib/plans/pricing"
+import { PRICING_PLANS, buildPlanCatalogLite, getPricingPlanFeatures } from "@/lib/plans/pricing"
+import { subscriptionCancellationMessage } from "@/lib/plans/subscription-display"
 import { useState } from "react"
-import { BrandedAlertDialog } from "@/components/ui/branded-alert-dialog"
 
 export function ProfilePlanSection() {
   const { convexUser, isLoading: userLoading } = useCurrentUser()
   const planUsage = useQuery(api.planUsage.queries.current, {})
-  const cancelPlan = useMutation(api.planUsage.mutations.cancelPlanForCurrentUser)
-  const [isCancelling, setIsCancelling] = useState(false)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const catalogRows = useQuery(api.planCatalog.queries.list, {})
+  const openBillingPortal = useAction(api.stripe.node.createBillingPortalSession)
+  const [portalLoading, setPortalLoading] = useState(false)
 
   const planId = convexUser?.plan ?? "free"
   const planType = planUsage?.planType ?? "monthly"
+  const catalogLite = buildPlanCatalogLite(catalogRows ?? [])
+  const fromCatalog = catalogLite?.[planId]
   const pricingPlan = PRICING_PLANS.find((p) => p.id === planId)
-  const planName = pricingPlan?.name ?? "Basic Shield"
-  const features = getPricingPlanFeatures(planId, planType)
+  const planName = fromCatalog?.name ?? pricingPlan?.name ?? "Basic Shield"
+  const features = fromCatalog?.features ?? getPricingPlanFeatures(planId, planType)
+  const cancellationNotice =
+    planUsage?.cancelAtPeriodEnd && planUsage.currentPeriodEnd !== undefined
+      ? subscriptionCancellationMessage(true, planUsage.currentPeriodEnd)
+      : null
 
-  const handleCancelPlan = async () => {
-    setIsCancelling(true)
+  const handleManageBilling = async () => {
+    setPortalLoading(true)
     try {
-      await cancelPlan()
-      setIsDialogOpen(false)
+      const { url } = await openBillingPortal({})
+      window.location.assign(url)
     } catch (error) {
-      console.error("Failed to cancel plan:", error)
-      alert("Failed to cancel plan. Please try again.")
+      console.error("Failed to open billing portal:", error)
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Could not open billing portal. Try again or use Billing from the menu.",
+      )
     } finally {
-      setIsCancelling(false)
+      setPortalLoading(false)
     }
   }
 
@@ -60,43 +70,31 @@ export function ProfilePlanSection() {
             <p className="mt-2 max-w-3xl text-sm leading-relaxed text-cream-surface-deep dark:text-ink-warm-muted md:text-base lg:text-lg">
               {features.join(" · ")}
             </p>
+            {cancellationNotice ? (
+              <p className="mt-3 max-w-3xl rounded-xl border border-cream-border bg-cream-page/40 px-3 py-2 text-sm leading-relaxed text-cream-surface-deep dark:text-ink-warm-muted">
+                {cancellationNotice}
+              </p>
+            ) : null}
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            {isPaid && (
-              <>
-                <Button
-                  variant="destructive"
-                  size="lg"
-                  disabled={isCancelling}
-                  onClick={() => setIsDialogOpen(true)}
-                  className="h-11 w-full shrink-0 rounded-xl sm:h-12 sm:w-auto sm:min-w-[7.5rem]"
-                >
-                  Cancel Plan
-                </Button>
-                <BrandedAlertDialog
-                  open={isDialogOpen}
-                  onOpenChange={setIsDialogOpen}
-                  title="Cancel your paid plan?"
-                  description="This will immediately revert your account to the free tier. You will lose access to premium features like unlimited AI tenant guidance and Case analyses."
-                  eyebrow="Sensitive Action"
-                  eyebrowVariant="destructive"
-                  iconVariant="destructive"
-                  cancelLabel="Keep my plan"
-                  actionLabel="Yes, cancel plan"
-                  actionVariant="destructive"
-                  onAction={handleCancelPlan}
-                  isActionLoading={isCancelling}
-                />
-              </>
-            )}
+            {isPaid ? (
+              <Button
+                type="button"
+                variant="secondary"
+                size="lg"
+                disabled={portalLoading}
+                onClick={() => void handleManageBilling()}
+                className="h-11 w-full shrink-0 rounded-xl sm:h-12 sm:w-auto sm:min-w-[7.5rem]"
+              >
+                {portalLoading ? "Opening…" : "Manage billing"}
+              </Button>
+            ) : null}
             <Button
               asChild
               size="lg"
               className="h-11 w-full shrink-0 rounded-xl sm:h-12 sm:w-auto sm:min-w-[7.5rem]"
             >
-              <Link href="/billing">
-                {isPaid ? "Manage" : "Upgrade"}
-              </Link>
+              <Link href="/billing">{isPaid ? "Compare plans" : "Upgrade"}</Link>
             </Button>
           </div>
         </div>
