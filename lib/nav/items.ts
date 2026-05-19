@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react"
 import {
   Briefcase,
+  Building2,
   CreditCard,
   FileSearch,
   FileText,
@@ -125,4 +126,23 @@ export const MOBILE_MORE_NAV_ITEMS: AppNavItem[] = [
 export function isMobileMoreNavActive(pathname: string) {
   return MOBILE_MORE_NAV_ITEMS.some((item) => item.matches(pathname))
 }
+
+/** Admin mobile tab bar — matches desktop navbar admin links. */
+export const ADMIN_NAV_ITEMS: AppNavItem[] = [
+  {
+    href: "/admin/users",
+    label: "Users",
+    Icon: UserRound,
+    matches: (pathname) =>
+      pathname === "/admin/users" || pathname.startsWith("/admin/users/"),
+  },
+  {
+    href: "/admin/properties",
+    label: "Properties",
+    Icon: Building2,
+    matches: (pathname) =>
+      pathname === "/admin/properties" ||
+      pathname.startsWith("/admin/properties/"),
+  },
+]
 

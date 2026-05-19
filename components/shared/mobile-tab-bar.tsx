@@ -5,8 +5,11 @@ import { Menu, X } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
+import useCurrentUser from "@/app/hooks/useCurrentUser"
 import {
+  ADMIN_NAV_ITEMS,
   APP_NAV_ITEMS,
+  type AppNavItem,
   isMobileMoreNavActive,
   MOBILE_MORE_NAV_ITEMS,
 } from "@/lib/nav/items"
@@ -22,7 +25,7 @@ function NavTab({
 }: {
   href: string
   label: string
-  Icon: (typeof APP_NAV_ITEMS)[number]["Icon"]
+  Icon: AppNavItem["Icon"]
   active: boolean
   onNavigate?: () => void
 }) {
@@ -51,12 +54,19 @@ function NavTab({
 export default function MobileTabBar() {
   const pathname = usePathname() ?? ""
   const { isSignedIn, isLoaded } = useAuth()
+  const { role } = useCurrentUser()
+  const isAdmin = role === "admin"
+  const tabItems = isAdmin ? ADMIN_NAV_ITEMS : APP_NAV_ITEMS.filter((item) => !item.hideOnMobile)
   const [menuOpen, setMenuOpen] = useState(false)
-  const moreActive = isMobileMoreNavActive(pathname)
+  const moreActive = !isAdmin && isMobileMoreNavActive(pathname)
 
   useEffect(() => {
     setMenuOpen(false)
   }, [pathname])
+
+  useEffect(() => {
+    if (isAdmin) setMenuOpen(false)
+  }, [isAdmin])
 
   useEffect(() => {
     if (!menuOpen) return
@@ -76,7 +86,7 @@ export default function MobileTabBar() {
   return (
     <>
       <TabBarSpacer />
-      {menuOpen ? (
+      {menuOpen && !isAdmin ? (
         <button
           type="button"
           className="fixed inset-0 z-[110] bg-foreground/20 md:hidden"
@@ -84,7 +94,7 @@ export default function MobileTabBar() {
           onClick={closeMenu}
         />
       ) : null}
-      {menuOpen ? (
+      {menuOpen && !isAdmin ? (
         <div
           id="mobile-more-menu"
           role="dialog"
@@ -135,17 +145,16 @@ export default function MobileTabBar() {
         aria-label="Main"
       >
         <div className="mx-auto flex max-w-lg items-stretch justify-around px-1 pt-1">
-          {APP_NAV_ITEMS.filter((item) => !item.hideOnMobile).map(
-            ({ href, label, Icon, matches }) => (
-              <NavTab
-                key={href}
-                href={href}
-                label={label}
-                Icon={Icon}
-                active={matches(pathname)}
-              />
-            ),
-          )}
+          {tabItems.map(({ href, label, Icon, matches }) => (
+            <NavTab
+              key={href}
+              href={href}
+              label={label}
+              Icon={Icon}
+              active={matches(pathname)}
+            />
+          ))}
+          {!isAdmin ? (
           <button
             type="button"
             onClick={() => setMenuOpen((open) => !open)}
@@ -173,6 +182,7 @@ export default function MobileTabBar() {
             )}
             <span className="truncate">More</span>
           </button>
+          ) : null}
         </div>
       </nav>
     </>

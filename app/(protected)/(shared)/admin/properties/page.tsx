@@ -14,6 +14,56 @@ const PAGE_SIZE = 10
 const SEARCH_DEBOUNCE_MS = 400
 const PLACEHOLDER = "/placeholder-property.svg"
 
+type PropertyRow = {
+  _id: Id<"properties">
+  name: string
+  imageUrl: string | undefined
+  ratingCount: number
+  avgRating: number | null
+  enabled: boolean
+}
+
+function PropertyImage({ imageUrl, name }: { imageUrl: string | undefined; name: string }) {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element -- Convex signed URL
+    <img
+      src={imageUrl?.trim() ? imageUrl.trim() : PLACEHOLDER}
+      alt={name}
+      className="size-14 shrink-0 rounded-lg border border-border object-cover sm:size-12"
+      loading="lazy"
+      onError={(e) => {
+        e.currentTarget.src = PLACEHOLDER
+      }}
+    />
+  )
+}
+
+function EnabledToggle({
+  row,
+  pendingId,
+  onToggle,
+}: {
+  row: PropertyRow
+  pendingId: Id<"properties"> | null
+  onToggle: (propertyId: Id<"properties">, enabled: boolean) => void
+}) {
+  return (
+    <label className="inline-flex cursor-pointer items-center gap-2 text-foreground">
+      <input
+        type="checkbox"
+        className="size-4 rounded border-border accent-foreground"
+        checked={row.enabled}
+        disabled={pendingId === row._id}
+        onChange={(e) => onToggle(row._id, e.target.checked)}
+      />
+      <span className="sr-only">Enable or disable {row.name}</span>
+      <span className="text-xs text-muted-foreground" aria-hidden>
+        {row.enabled ? "On" : "Off"}
+      </span>
+    </label>
+  )
+}
+
 function AdminPropertiesResults({ searchName }: { searchName: string }) {
   const [pageIndex, setPageIndex] = useState(0)
   const [cursorStack, setCursorStack] = useState<(string | null)[]>([null])
@@ -61,10 +111,54 @@ function AdminPropertiesResults({ searchName }: { searchName: string }) {
     }
   }
 
+  const propertyRows = rows as PropertyRow[]
+
   return (
     <>
-      <div className="overflow-x-auto rounded-xl border border-border bg-popover shadow-sm">
-        <table className="w-full min-w-[720px] border-collapse text-left text-sm">
+      {loading ? (
+        <div className="flex justify-center rounded-xl border border-border bg-popover py-12 shadow-sm md:hidden">
+          <ShieldLoader variant="admin" embedded label="Loading properties…" />
+        </div>
+      ) : propertyRows.length === 0 ? (
+        <p className="rounded-xl border border-border bg-popover px-4 py-10 text-center text-sm text-muted-foreground shadow-sm md:hidden">
+          No properties match this search.
+        </p>
+      ) : (
+        <ul className="flex flex-col gap-3 md:hidden">
+          {propertyRows.map((row) => (
+            <li
+              key={row._id}
+              className="rounded-xl border border-border bg-popover p-4 shadow-sm"
+            >
+              <div className="flex gap-3">
+                <PropertyImage imageUrl={row.imageUrl} name={row.name} />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-medium text-foreground">{row.name}</p>
+                  <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs">
+                    <dt className="text-muted-foreground">Ratings</dt>
+                    <dd className="tabular-nums text-foreground">{row.ratingCount}</dd>
+                    <dt className="text-muted-foreground">Avg. rating</dt>
+                    <dd className="tabular-nums text-foreground">
+                      {row.avgRating === null ? "—" : row.avgRating.toFixed(1)}
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+              <div className="mt-3 flex items-center justify-between gap-3 border-t border-border pt-3">
+                <span className="text-sm font-medium text-foreground">Enabled</span>
+                <EnabledToggle
+                  row={row}
+                  pendingId={pendingId}
+                  onToggle={(id, enabled) => void toggleEnabled(id, enabled)}
+                />
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="hidden overflow-x-auto rounded-xl border border-border bg-popover shadow-sm md:block">
+        <table className="w-full border-collapse text-left text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/40">
               <th className="px-4 py-3 font-semibold text-foreground">Name</th>
@@ -83,46 +177,29 @@ function AdminPropertiesResults({ searchName }: { searchName: string }) {
                   </div>
                 </td>
               </tr>
-            ) : rows.length === 0 ? (
+            ) : propertyRows.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-4 py-10 text-center text-muted-foreground">
                   No properties match this search.
                 </td>
               </tr>
             ) : (
-              rows.map((row) => (
+              propertyRows.map((row) => (
                 <tr key={row._id} className="border-b border-border last:border-0 hover:bg-muted/30">
                   <td className="px-4 py-3 font-medium text-foreground">{row.name}</td>
                   <td className="px-4 py-3">
-                    {/* eslint-disable-next-line @next/next/no-img-element -- Convex signed URL */}
-                    <img
-                      src={row.imageUrl?.trim() ? row.imageUrl.trim() : PLACEHOLDER}
-                      alt=""
-                      className="size-12 rounded-lg border border-border object-cover"
-                      loading="lazy"
-                      onError={(e) => {
-                        e.currentTarget.src = PLACEHOLDER
-                      }}
-                    />
+                    <PropertyImage imageUrl={row.imageUrl} name={row.name} />
                   </td>
                   <td className="px-4 py-3 tabular-nums text-foreground">{row.ratingCount}</td>
                   <td className="px-4 py-3 tabular-nums text-foreground">
                     {row.avgRating === null ? "—" : row.avgRating.toFixed(1)}
                   </td>
                   <td className="px-4 py-3">
-                    <label className="inline-flex cursor-pointer items-center gap-2 text-foreground">
-                      <input
-                        type="checkbox"
-                        className="size-4 rounded border-border accent-foreground"
-                        checked={row.enabled}
-                        disabled={pendingId === row._id}
-                        onChange={(e) => void toggleEnabled(row._id, e.target.checked)}
-                      />
-                      <span className="sr-only">Enable or disable {row.name}</span>
-                      <span className="text-xs text-muted-foreground" aria-hidden>
-                        {row.enabled ? "On" : "Off"}
-                      </span>
-                    </label>
+                    <EnabledToggle
+                      row={row}
+                      pendingId={pendingId}
+                      onToggle={(id, enabled) => void toggleEnabled(id, enabled)}
+                    />
                   </td>
                 </tr>
               ))
@@ -131,7 +208,7 @@ function AdminPropertiesResults({ searchName }: { searchName: string }) {
         </table>
       </div>
 
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <p className="text-sm text-muted-foreground">
           Page {pageIndex + 1}
           {!loading && rows.length > 0 ? ` · ${rows.length} row${rows.length === 1 ? "" : "s"}` : null}
@@ -181,7 +258,7 @@ export default function AdminPropertiesPage() {
         </p>
       </div>
 
-      <div className="relative max-w-md">
+      <div className="relative w-full max-w-md">
         <Search
           className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
           aria-hidden
