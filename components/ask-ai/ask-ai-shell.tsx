@@ -20,6 +20,10 @@ import { GavelLoader } from "@/components/shared/gavel-loader";
 export default function AskAiShell() {
   const { isLoaded, userId } = useAuth();
   const { convexUser } = useCurrentUser();
+  const planUsage = useQuery(
+    api.planUsage.queries.current,
+    isLoaded && userId ? {} : "skip",
+  );
   const createConversation = useMutation(api.chat.mutations.createConversation);
 
   const conversations = useQuery(
@@ -36,7 +40,7 @@ export default function AskAiShell() {
   const creatingFirstConversationRef = useRef(false);
   const didInitStateFromProfile = useRef(false);
 
-  const plan = resolvePlanId(convexUser?.plan);
+  const plan = resolvePlanId(planUsage?.plan ?? convexUser?.plan);
 
   useEffect(() => {
     if (didInitStateFromProfile.current || selectedStateCode !== null) return

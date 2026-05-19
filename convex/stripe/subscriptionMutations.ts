@@ -3,6 +3,7 @@ import { v } from "convex/values"
 import { syncFirstPaidPlanEntitlements } from "../planUsage/entitlements"
 import type { PaidPlanId } from "../planUsage/types"
 import { usageMonthKeyEastern } from "../planUsage/usageMonthKey"
+import { letterLeaseCountsForSameStripeSubscription } from "../../lib/stripe/usageCounterCarryover"
 
 function mapStripeStatus(
   status: string,
@@ -26,15 +27,6 @@ function mapStripeStatus(
   }
 }
 
-function grantsPaidAccess(status: string): boolean {
-  return (
-    status === "active" ||
-    status === "trialing" ||
-    status === "past_due" ||
-    status === "paused"
-  )
-}
-
 export const applyStripeSubscription = internalMutation({
   args: {
     clerkId: v.string(),
@@ -47,6 +39,8 @@ export const applyStripeSubscription = internalMutation({
     currentPeriodStartMs: v.number(),
     currentPeriodEndMs: v.number(),
     cancelAtPeriodEnd: v.boolean(),
+    /** Derived in the Stripe action using server `Date.now()` and billing period end — do not infer inside the mutation. */
+    shouldHavePaidPlan: v.boolean(),
   },
   handler: async (ctx, args) => {
     if (!Number.isFinite(args.currentPeriodStartMs) || !Number.isFinite(args.currentPeriodEndMs)) {
@@ -69,7 +63,7 @@ export const applyStripeSubscription = internalMutation({
     }
 
     const mapped = mapStripeStatus(args.stripeStatus)
-    const shouldHavePaidPlan = grantsPaidAccess(args.stripeStatus)
+    const shouldHavePaidPlan = args.shouldHavePaidPlan
 
     const subscriptionRowFields = {
       clerkId: args.clerkId,
@@ -171,13 +165,15 @@ export const applyStripeSubscription = internalMutation({
       usedLetters = ent.usedLetters
     } else if (sameStripeSubscription) {
       usedActiveCases = existingPlanUsage.usedActiveCases
-      if (periodChanged) {
-        usedLeaseAnalyses = 0
-        usedLetters = 0
-      } else {
-        usedLeaseAnalyses = existingPlanUsage.usedLeaseAnalyses
-        usedLetters = existingPlanUsage.usedLetters
-      }
+      const { usedLetters: ul, usedLeaseAnalyses: ula } = letterLeaseCountsForSameStripeSubscription({
+        existingPlan: existingPlanUsage.plan,
+        incomingPlan: plan,
+        periodChanged,
+        usedLetters: existingPlanUsage.usedLetters,
+        usedLeaseAnalyses: existingPlanUsage.usedLeaseAnalyses,
+      })
+      usedLetters = ul
+      usedLeaseAnalyses = ula
     } else {
       usedActiveCases = existingPlanUsage.usedActiveCases
       usedLeaseAnalyses = 0

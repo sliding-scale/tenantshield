@@ -22,7 +22,7 @@ export function BillingMain() {
     if (!clerkUser || isLoading) return undefined
     if (planUsage === undefined) return undefined
 
-    const plan = resolvePlanId(convexUser?.plan)
+    const plan = planUsage ? planUsage.plan : resolvePlanId(convexUser?.plan)
     if (plan !== "pro" && plan !== "power") return "monthly"
 
     return planUsage?.planType ?? "monthly"

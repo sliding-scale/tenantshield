@@ -15,8 +15,6 @@ export const list = query({
       features: r.features,
       cta: r.cta,
       popular: r.popular,
-      monthlyPriceId: r.monthlyPriceId,
-      yearlyPriceId: r.yearlyPriceId,
     }))
   },
 })

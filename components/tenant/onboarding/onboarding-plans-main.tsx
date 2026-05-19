@@ -10,7 +10,6 @@ import { useSelectPaidPlan } from "@/app/hooks/useSelectPaidPlan"
 import { ShieldLoader } from "@/components/shared/shield-loader"
 import { Button } from "@/components/ui/button"
 import { api } from "@/convex/_generated/api"
-import { resolvePlanId } from "@/lib/plans/plan-access"
 import {
   buildPlanCatalogLite,
   getOnboardingPlanOption,
@@ -243,7 +242,8 @@ export function OnboardingPlansMain() {
 
   const catalogLite = useMemo(() => buildPlanCatalogLite(catalogRows ?? []), [catalogRows])
 
-  const activePlanId = clerkUser && !isUserLoading ? resolvePlanId(convexUser?.plan) : null
+  const activePlanId =
+    clerkUser && !isUserLoading && planUsage != null ? planUsage.plan : null
   const activePlanType = planUsage?.planType ?? null
 
   const selected = useMemo(

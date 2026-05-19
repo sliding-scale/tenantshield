@@ -1,5 +1,5 @@
 import type { MutationCtx } from "../_generated/server"
-import type { Id } from "../_generated/dataModel"
+import type { Doc, Id } from "../_generated/dataModel"
 import {
   PLAN_LIMITS,
   getActiveCaseLimit,
@@ -22,11 +22,33 @@ export async function getPlanUsageForUser(ctx: MutationCtx, clerkId: string) {
     ctx.db.query("users").withIndex("by_clerk_id", (q) => q.eq("clerkId", clerkId)).unique(),
     ctx.db.query("planUsage").withIndex("by_clerk_id", (q) => q.eq("clerkId", clerkId)).first(),
   ])
+  const activeSubscription = await ctx.db
+    .query("userSubscriptions")
+    .withIndex("by_clerk_id_active", (q) => q.eq("clerkId", clerkId).eq("isActive", true))
+    .first()
 
-  const plan = (user?.plan ?? "free") as PlanId
-  const planType = (planUsage?.planType ?? "monthly") as BillingPeriod
+  const effectivePlan = (planUsage?.plan ??
+    activeSubscription?.tier ??
+    user?.plan ??
+    "free") as PlanId
 
-  return { plan, planType, planUsage }
+  let plan: PlanId = effectivePlan
+  if ((effectivePlan === "pro" || effectivePlan === "power") && !planUsage && !activeSubscription) {
+    plan = "free"
+  }
+
+  const planType = (planUsage?.planType ?? activeSubscription?.planType ?? "monthly") as BillingPeriod
+
+  return { plan, planType, planUsage, activeSubscription }
+}
+
+const SUBSCRIPTION_SYNCING =
+  "Your subscription is still syncing. Please wait a moment and try again."
+
+function assertPaidHasUsageRow(plan: PlanId, planUsage: Doc<"planUsage"> | null) {
+  if (plan !== "free" && planUsage === null) {
+    throw new Error(SUBSCRIPTION_SYNCING)
+  }
 }
 
 /** Lazy reset for letter/lease quotas only (yearly: NY calendar month; monthly: Stripe period). */
@@ -79,7 +101,9 @@ export async function assertCanCreateCase(ctx: MutationCtx, clerkId: string) {
     return
   }
 
-  const used = planUsage?.usedActiveCases ?? 0
+  assertPaidHasUsageRow(plan, planUsage)
+
+  const used = planUsage!.usedActiveCases
   const limit = getActiveCaseLimit(plan, planType)
   if (used >= limit) throw new Error(ACTIVE_CASE_LIMIT_REACHED)
 }
@@ -91,7 +115,10 @@ export async function assertCanActivateCase(
 ) {
   void caseId
   const { plan, planType, planUsage } = await getPlanUsageForUser(ctx, clerkId)
-  const used = planUsage?.usedActiveCases ?? 0
+  if (plan !== "free") {
+    assertPaidHasUsageRow(plan, planUsage)
+  }
+  const used = plan !== "free" ? planUsage!.usedActiveCases : (planUsage?.usedActiveCases ?? 0)
   const limit = getActiveCaseLimit(plan, planType)
   if (used >= limit) throw new Error(ACTIVE_CASE_LIMIT_REACHED)
 }
@@ -100,7 +127,8 @@ export async function assertCanCreateLetter(ctx: MutationCtx, clerkId: string) {
   await ensureLetterLeaseQuotaWindow(ctx, clerkId)
   const { plan, planType, planUsage } = await getPlanUsageForUser(ctx, clerkId)
   if (plan === "free") return
-  const used = planUsage?.usedLetters ?? 0
+  assertPaidHasUsageRow(plan, planUsage)
+  const used = planUsage!.usedLetters
   const limit = PLAN_LIMITS[plan][planType].letters
   if (used >= limit) throw new Error(LETTER_LIMIT_REACHED)
 }
@@ -109,7 +137,8 @@ export async function assertCanCreateLeaseAnalysis(ctx: MutationCtx, clerkId: st
   await ensureLetterLeaseQuotaWindow(ctx, clerkId)
   const { plan, planType, planUsage } = await getPlanUsageForUser(ctx, clerkId)
   if (plan === "free") return
-  const used = planUsage?.usedLeaseAnalyses ?? 0
+  assertPaidHasUsageRow(plan, planUsage)
+  const used = planUsage!.usedLeaseAnalyses
   const limit = PLAN_LIMITS[plan][planType].leaseAnalyses
   if (used >= limit) throw new Error(LEASE_ANALYSIS_LIMIT_REACHED)
 }

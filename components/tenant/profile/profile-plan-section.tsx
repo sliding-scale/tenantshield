@@ -14,7 +14,7 @@ export function ProfilePlanSection() {
   const openBillingPortal = useAction(api.stripe.node.createBillingPortalSession)
   const [portalLoading, setPortalLoading] = useState(false)
 
-  const planId = convexUser?.plan ?? "free"
+  const planId = planUsage?.plan ?? convexUser?.plan ?? "free"
   const planType = planUsage?.planType ?? "monthly"
   const catalogLite = buildPlanCatalogLite(catalogRows ?? [])
   const fromCatalog = catalogLite?.[planId]

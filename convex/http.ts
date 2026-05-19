@@ -143,7 +143,14 @@ const handleStripeWebhook = httpAction(async (ctx, request) => {
     })
   } catch (err) {
     console.error("Stripe webhook failed:", err)
-    return new Response("Webhook handler failed", { status: 400 })
+    const message = err instanceof Error ? err.message : String(err)
+    if (
+      message.includes("Invalid Stripe webhook signature") ||
+      message.includes("webhook signature")
+    ) {
+      return new Response("Invalid Stripe webhook signature", { status: 400 })
+    }
+    return new Response("Webhook handler failed", { status: 500 })
   }
 
   return new Response(null, { status: 200 })

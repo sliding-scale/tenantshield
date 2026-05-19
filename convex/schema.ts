@@ -103,6 +103,11 @@ export default defineSchema({
     .index("by_clerk_id_active", ["clerkId", "isActive"])
     .index("by_stripe_subscription_id", ["stripeSubscriptionId"]),
 
+  /** Idempotency for Stripe webhooks — one row per processed `event.id`. */
+  stripeWebhookEvents: defineTable({
+    eventId: v.string(),
+  }).index("by_event_id", ["eventId"]),
+
   onboardingQuestions: defineTable({
     step: v.number(),
     title: v.string(),
