@@ -148,24 +148,38 @@ export function createTenantChatTools(
       const stateClause = stateLabel ? ` in ${stateLabel}` : "";
       const exaQuery = `tenant rights laws regarding ${issue}${stateClause} usa`;
 
-      try {
-        return await withRetriesOnResult(
-          async () => {
-            const exa = new Exa(apiKey);
-            const response = await withRetries(() =>
-              exa.search(exaQuery, {
-                numResults: 5,
-                contents: { highlights: true },
-              }),
-            );
-            return JSON.stringify(response.results);
-          },
-          shouldRetryExaResult,
-        );
-      } catch (error) {
-        console.error("[research_state_laws]", error);
-        return RETRIEVAL_ERROR;
+      console.log("[research_state_laws] query:", exaQuery);
+      const maxAttempts = 3;
+      let lastError: unknown;
+
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        try {
+          const exa = new Exa(apiKey);
+          const response = await exa.search(exaQuery, {
+            numResults: 5,
+            contents: { highlights: true },
+          });
+          const results = response.results;
+          if (results && results.length > 0) {
+            return JSON.stringify(results);
+          }
+          // Empty results — retry with a broader query on next attempt
+          if (attempt < maxAttempts - 1) {
+            await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+            continue;
+          }
+          return `[NO_DATA] No relevant state law results found for "${issue}" in ${stateLabel || "the US"}. The user can try the "Research State Laws" page for pre-generated state law summaries.`;
+        } catch (error) {
+          lastError = error;
+          console.error(`[research_state_laws] attempt ${attempt + 1}/${maxAttempts}:`, error);
+          if (attempt < maxAttempts - 1) {
+            await new Promise((r) => setTimeout(r, 1200 * (attempt + 1)));
+          }
+        }
       }
+
+      console.error("[research_state_laws] all attempts failed:", lastError);
+      return RETRIEVAL_ERROR;
     },
     {
       name: "research_state_laws",

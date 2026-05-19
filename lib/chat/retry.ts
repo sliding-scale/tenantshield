@@ -1,6 +1,6 @@
 export function isTransientError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
-  return /UNAVAILABLE|503|429|high demand|RESOURCE_EXHAUSTED|ETIMEDOUT|ECONNRESET|fetch failed|network|timeout|rate limit|overloaded|internal error|502|504/i.test(
+  return /UNAVAILABLE|503|429|high demand|RESOURCE_EXHAUSTED|ETIMEDOUT|ECONNRESET|fetch failed|network|timeout|rate limit|overloaded|internal error|502|504|ENOTFOUND|socket hang up|aborted|ERR_/i.test(
     message,
   );
 }

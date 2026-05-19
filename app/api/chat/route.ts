@@ -144,21 +144,12 @@ export async function POST(req: Request) {
       );
     }
 
-    // ---- Primary model with fallback ----
-    let model: ChatGoogleGenerativeAI;
-    try {
-      model = new ChatGoogleGenerativeAI({
-        model: "gemini-2.5-flash",
-        apiKey,
-        temperature: 0,
-      });
-    } catch {
-      model = new ChatGoogleGenerativeAI({
-        model: "gemini-2.5-pro",
-        apiKey,
-        temperature: 0,
-      });
-    }
+    // ---- Primary model ----
+    const model = new ChatGoogleGenerativeAI({
+      model: "gemini-2.5-flash",
+      apiKey,
+      temperature: 0,
+    });
 
     const summaryModel = new ChatGoogleGenerativeAI({
       model: "gemini-2.0-flash",
@@ -247,42 +238,50 @@ ${selectedStateCode ? `- CRITICAL: The user has ALREADY selected "${selectedStat
     // ---- Convert UI messages to LangChain format and stream ----
     const langchainMessages = await toBaseMessages(messages);
 
-    let eventStream;
-    try {
-      eventStream = await agent.streamEvents(
-        { messages: langchainMessages },
-        { version: "v2", recursionLimit: 20 },
-      );
-    } catch (streamError) {
-      // Fallback: if the primary model fails, retry with gemini-2.5-pro
-      console.warn("Primary model failed, falling back to gemini-2.5-pro:", streamError);
+    const models = ["gemini-2.5-flash", "gemini-2.5-pro"] as const;
+    let eventStream: ReturnType<typeof agent.streamEvents> | undefined;
 
-      const fallbackModel = new ChatGoogleGenerativeAI({
-        model: "gemini-2.5-pro",
-        apiKey,
-        temperature: 0,
-      });
+    for (const modelName of models) {
+      try {
+        const agentForAttempt =
+          modelName === "gemini-2.5-flash"
+            ? agent
+            : createAgent({
+                model: new ChatGoogleGenerativeAI({
+                  model: modelName,
+                  apiKey,
+                  temperature: 0,
+                }),
+                tools,
+                systemPrompt,
+                middleware: [
+                  modelCallLimitMiddleware({ runLimit: 4 }),
+                  summarizationMiddleware({
+                    model: summaryModel,
+                    trigger: { messages: 50 },
+                    keep: { messages: 24 },
+                    summaryPrompt:
+                      "Summarize the following tenant/legal assistant conversation for context. Preserve important facts: dates, amounts, state, party names, and any commitments or deadlines. Omit small talk.",
+                  }),
+                ],
+              });
 
-      const fallbackAgent = createAgent({
-        model: fallbackModel,
-        tools,
-        systemPrompt,
-        middleware: [
-          modelCallLimitMiddleware({ runLimit: 4 }),
-          summarizationMiddleware({
-            model: summaryModel,
-            trigger: { messages: 50 },
-            keep: { messages: 24 },
-            summaryPrompt:
-              "Summarize the following tenant/legal assistant conversation for context. Preserve important facts: dates, amounts, state, party names, and any commitments or deadlines. Omit small talk.",
-          }),
-        ],
-      });
+        eventStream = await agentForAttempt.streamEvents(
+          { messages: langchainMessages },
+          { version: "v2", recursionLimit: 20 },
+        );
+        console.log(`[Chat API] Streaming with model: ${modelName}`);
+        break;
+      } catch (err) {
+        console.warn(`[Chat API] Model ${modelName} failed to start stream:`, err);
+        if (modelName === models[models.length - 1]) {
+          throw err;
+        }
+      }
+    }
 
-      eventStream = await fallbackAgent.streamEvents(
-        { messages: langchainMessages },
-        { version: "v2", recursionLimit: 20 },
-      );
+    if (!eventStream) {
+      throw new Error("All models failed to start streaming");
     }
 
     // ---- Build streaming response ----
