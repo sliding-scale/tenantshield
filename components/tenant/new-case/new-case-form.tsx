@@ -106,7 +106,7 @@ export function NewCaseForm({
   const { convexUser } = useCurrentUser()
   const counts = useQuery(api.dashboard.queries.countsForCurrentUser, {})
   const planUsage = useQuery(api.planUsage.queries.current, {})
-  const plan = resolvePlanId(convexUser?.plan)
+  const plan = resolvePlanId(planUsage?.plan ?? convexUser?.plan)
   const billingPeriod = planUsage?.planType ?? "monthly"
   const usedActiveCases = planUsage?.usedActiveCases ?? 0
   const activeCaseLimit = getActiveCaseLimit(plan, billingPeriod)

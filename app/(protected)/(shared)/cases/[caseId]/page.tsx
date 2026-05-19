@@ -72,7 +72,7 @@ export default function CaseDetailsPage() {
     )
   }
 
-  const plan = resolvePlanId(convexUser?.plan)
+  const plan = resolvePlanId(planUsage?.plan ?? convexUser?.plan)
   const billingPeriod = planUsage?.planType ?? "monthly"
   const usedActiveCases = planUsage?.usedActiveCases ?? 0
   const activeCaseLimit = getActiveCaseLimit(plan, billingPeriod)

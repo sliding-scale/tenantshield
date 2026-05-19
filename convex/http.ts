@@ -125,4 +125,41 @@ http.route({
   handler: handleClerkWebhook,
 })
 
+const handleStripeWebhook = httpAction(async (ctx, request) => {
+  if (request.method !== "POST") {
+    return new Response("Method not allowed", { status: 405 })
+  }
+
+  const signature = request.headers.get("stripe-signature")
+  if (!signature) {
+    return new Response("Missing stripe-signature header", { status: 400 })
+  }
+
+  const rawBody = await request.text()
+  try {
+    await ctx.runAction(internal.stripe.node.processWebhook, {
+      rawBody,
+      signature,
+    })
+  } catch (err) {
+    console.error("Stripe webhook failed:", err)
+    const message = err instanceof Error ? err.message : String(err)
+    if (
+      message.includes("Invalid Stripe webhook signature") ||
+      message.includes("webhook signature")
+    ) {
+      return new Response("Invalid Stripe webhook signature", { status: 400 })
+    }
+    return new Response("Webhook handler failed", { status: 500 })
+  }
+
+  return new Response(null, { status: 200 })
+})
+
+http.route({
+  path: "/stripe/webhook",
+  method: "POST",
+  handler: handleStripeWebhook,
+})
+
 export default http

@@ -1,31 +1,33 @@
 "use client"
 
 import { useCallback, useState } from "react"
-import { useMutation } from "convex/react"
+import { useAction } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import type { SelectPaidPlanInput } from "@/lib/plans/pricing"
 
 /**
- * Subscribes the current user to a paid plan — same Convex path as billing:
- * `planUsage.mutations.selectPlanForCurrentUser` (updates `users.plan` + `planUsage`).
+ * Starts Stripe Checkout for a paid plan — Convex `stripe.node.createCheckoutSession`.
+ * User returns to `/dashboard` on success; cancel URL depends on `checkoutSource`.
  */
 export function useSelectPaidPlan() {
-  const selectPlanMutation = useMutation(api.planUsage.mutations.selectPlanForCurrentUser)
+  const checkoutAction = useAction(api.stripe.node.createCheckoutSession)
   const [isSelecting, setIsSelecting] = useState(false)
 
   const selectPaidPlan = useCallback(
     async (input: SelectPaidPlanInput) => {
       setIsSelecting(true)
       try {
-        return await selectPlanMutation({
+        const { url } = await checkoutAction({
           plan: input.plan,
           planType: input.planType,
+          checkoutSource: input.checkoutSource,
         })
+        window.location.assign(url)
       } finally {
         setIsSelecting(false)
       }
     },
-    [selectPlanMutation],
+    [checkoutAction],
   )
 
   return { selectPaidPlan, isSelecting }

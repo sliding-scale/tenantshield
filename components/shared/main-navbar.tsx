@@ -1,11 +1,13 @@
 "use client";
 
-import { Show, UserButton } from "@clerk/nextjs";
+import { Show, UserButton, useUser } from "@clerk/nextjs"
+import { useQuery } from "convex/react"
 import { Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import useCurrentUser from "@/app/hooks/useCurrentUser";
+import useCurrentUser from "@/app/hooks/useCurrentUser"
+import { api } from "@/convex/_generated/api";
 import { APP_NAV_ITEMS } from "@/lib/nav/items";
 import { planDisplayLabel } from "@/lib/plans/plan-access";
 import { cn } from "@/lib/utils";
@@ -16,9 +18,13 @@ const APP_LOGO_SRC =
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { user: clerkUser } = useUser();
+  const billing = useQuery(api.planUsage.queries.current, clerkUser ? {} : "skip");
   const { convexUser, isLoading, role } = useCurrentUser();
   const planLabel =
-    role === "admin" ? "Admin" : planDisplayLabel(convexUser?.plan);
+    role === "admin"
+      ? "Admin"
+      : planDisplayLabel(billing?.plan ?? convexUser?.plan);
 
   if (isAuthPagePath(pathname)) {
     return null;

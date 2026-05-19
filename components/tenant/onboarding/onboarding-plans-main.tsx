@@ -10,8 +10,8 @@ import { useSelectPaidPlan } from "@/app/hooks/useSelectPaidPlan"
 import { ShieldLoader } from "@/components/shared/shield-loader"
 import { Button } from "@/components/ui/button"
 import { api } from "@/convex/_generated/api"
-import { resolvePlanId } from "@/lib/plans/plan-access"
 import {
+  buildPlanCatalogLite,
   getOnboardingPlanOption,
   getOnboardingSelectionIdForPlan,
   isPaidPlan,
@@ -233,24 +233,32 @@ export function OnboardingPlansMain() {
   const router = useRouter()
   const { clerkUser, convexUser, isLoading: isUserLoading } = useCurrentUser()
   const planUsage = useQuery(api.planUsage.queries.current, clerkUser ? {} : "skip")
+  const catalogRows = useQuery(api.planCatalog.queries.list, clerkUser ? {} : "skip")
   const { selectPaidPlan, isSelecting: isSelectingPlan } = useSelectPaidPlan()
   const [selectedId, setSelectedId] = useState<OnboardingPlanSelectionId>("pro-yearly")
   const [isContinuing, setIsContinuing] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const isSubmitting = isSelectingPlan || isContinuing
 
-  const activePlanId = clerkUser && !isUserLoading ? resolvePlanId(convexUser?.plan) : null
+  const catalogLite = useMemo(() => buildPlanCatalogLite(catalogRows ?? []), [catalogRows])
+
+  const activePlanId =
+    clerkUser && !isUserLoading && planUsage != null ? planUsage.plan : null
   const activePlanType = planUsage?.planType ?? null
 
-  const selected = useMemo(() => getOnboardingPlanOption(selectedId), [selectedId])
+  const selected = useMemo(
+    () => getOnboardingPlanOption(selectedId, catalogLite),
+    [selectedId, catalogLite],
+  )
 
   const isCurrentSelection = useMemo(() => {
     if (!activePlanId) return false
-    return onboardingSelectionMatchesActivePlan(selectedId, activePlanId, activePlanType)
-  }, [activePlanId, activePlanType, selectedId])
+    return onboardingSelectionMatchesActivePlan(selectedId, activePlanId, activePlanType, catalogLite)
+  }, [activePlanId, activePlanType, selectedId, catalogLite])
 
   useEffect(() => {
-    if (isUserLoading || !clerkUser || planUsage === undefined || !activePlanId) return
+    if (isUserLoading || !clerkUser || planUsage === undefined || catalogRows === undefined || !activePlanId)
+      return
 
     if (isPaidPlan(activePlanId)) {
       router.replace("/billing")
@@ -261,7 +269,7 @@ export function OnboardingPlansMain() {
     if (matchedSelection) {
       setSelectedId(matchedSelection)
     }
-  }, [activePlanId, activePlanType, clerkUser, isUserLoading, planUsage, router])
+  }, [activePlanId, activePlanType, catalogRows, clerkUser, isUserLoading, planUsage, router])
 
   const applySelectedPlan = async () => {
     setSubmitError(null)
@@ -271,7 +279,9 @@ export function OnboardingPlansMain() {
         await selectPaidPlan({
           plan: selected.planId,
           planType: selected.billingPeriod,
+          checkoutSource: "onboarding",
         })
+        return
       }
       router.push("/dashboard")
     } catch (error) {
@@ -289,7 +299,7 @@ export function OnboardingPlansMain() {
   }
 
   const renderPlan = (id: OnboardingPlanSelectionId, variant: "compact" | "featured") => {
-    const option = getOnboardingPlanOption(id)
+    const option = getOnboardingPlanOption(id, catalogLite)
     return (
       <div key={id} className={cn(variant === "compact" && "h-full min-h-0")}>
         <PlanOptionCard
@@ -297,7 +307,7 @@ export function OnboardingPlansMain() {
           selected={selectedId === id}
           isCurrentPlan={
             activePlanId !== null &&
-            onboardingSelectionMatchesActivePlan(id, activePlanId, activePlanType)
+            onboardingSelectionMatchesActivePlan(id, activePlanId, activePlanType, catalogLite)
           }
           isSelecting={isSubmitting && selectedId === id}
           onSelect={() => handlePlanSelect(id)}
@@ -311,6 +321,7 @@ export function OnboardingPlansMain() {
     isUserLoading ||
     !clerkUser ||
     planUsage === undefined ||
+    catalogRows === undefined ||
     (activePlanId !== null && isPaidPlan(activePlanId))
   ) {
     return <ShieldLoader variant="onboarding" fullPage className="min-h-[100dvh]" />

@@ -120,7 +120,7 @@ export function NewLetterForm({
   const { convexUser } = useCurrentUser()
   const counts = useQuery(api.dashboard.queries.countsForCurrentUser, {})
   const planUsage = useQuery(api.planUsage.queries.current, {})
-  const plan = resolvePlanId(convexUser?.plan)
+  const plan = resolvePlanId(planUsage?.plan ?? convexUser?.plan)
   const billingPeriod = planUsage?.planType ?? "monthly"
   const generatedLetterCount = counts?.letters ?? 0
   const usedLetters = planUsage?.usedLetters ?? 0

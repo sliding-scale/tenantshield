@@ -13,6 +13,18 @@ export const getPlanByClerkId = internalQuery({
   },
 })
 
+export const getUserContactByClerkId = internalQuery({
+  args: { clerkId: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
+      .unique()
+    if (!user) return null
+    return { email: user.email, name: user.name }
+  },
+})
+
 export const current = query({
   args: {},
   handler: async (ctx) => {
