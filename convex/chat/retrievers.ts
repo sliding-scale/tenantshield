@@ -2,18 +2,36 @@ import { action } from "../_generated/server";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { GoogleGenAI } from "@google/genai";
+import { isTransientError, withRetries } from "../../lib/chat/retry";
 
 // Shared helper: generate an embedding vector for a search query
 async function embedQuery(query: string): Promise<number[]> {
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY as string });
-  const embedResult = await ai.models.embedContent({
-    model: "gemini-embedding-001",
-    config: { outputDimensionality: 768 },
-    contents: query,
+  return withRetries(async () => {
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY as string });
+    const embedResult = await ai.models.embedContent({
+      model: "gemini-embedding-001",
+      config: { outputDimensionality: 768 },
+      contents: query,
+    });
+    const vector = embedResult.embeddings?.[0]?.values;
+    if (!vector) throw new Error("Failed to generate embedding");
+    return vector;
   });
-  const vector = embedResult.embeddings?.[0]?.values;
-  if (!vector) throw new Error("Failed to generate embedding");
-  return vector;
+}
+
+async function vectorSearchWithRetry<T extends string>(
+  search: () => Promise<Array<{ _id: T }>>,
+): Promise<Array<{ _id: T }>> {
+  try {
+    return await withRetries(search);
+  } catch (error) {
+    if (isTransientError(error)) {
+      throw new Error(
+        `[RETRIEVAL_ERROR] Vector search failed after retries: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+    throw error;
+  }
 }
 
 // ==============================================
@@ -32,19 +50,17 @@ export const searchMyCases = action({
 
     const vector = await embedQuery(args.query);
 
-    const results = await ctx.vectorSearch(
-      "caseEmbeddings",
-      "by_user_case_chunk_embedding",
-      {
+    const results = await vectorSearchWithRetry(() =>
+      ctx.vectorSearch("caseEmbeddings", "by_user_case_chunk_embedding", {
         vector,
-        limit: 3,
+        limit: 5,
         filter: (q) => q.eq("userId", userId),
-      },
+      }),
     );
 
     const chunkIds = results.map((r) => r._id);
     if (chunkIds.length === 0)
-      return "No relevant case documents found for this user. Ask the user to submit a case first through the 'New Case' feature so you can analyze it.";
+      return "[NO_DATA] No relevant case documents found for this user. The user has not submitted cases yet — suggest the 'New Case' feature.";
 
     const chunks: string[] = await ctx.runQuery(internal.chat.queries.getCaseChunks, { ids: chunkIds });
     return chunks.join("\n\n---\n\n");
@@ -67,15 +83,17 @@ export const searchMyLeases = action({
 
     const vector = await embedQuery(args.query);
 
-    const results = await ctx.vectorSearch("leaseEmbeddings", "by_user_lease_chunk_embedding", {
-      vector,
-      limit: 3,
-      filter: (q) => q.eq("userId", userId),
-    });
+    const results = await vectorSearchWithRetry(() =>
+      ctx.vectorSearch("leaseEmbeddings", "by_user_lease_chunk_embedding", {
+        vector,
+        limit: 5,
+        filter: (q) => q.eq("userId", userId),
+      }),
+    );
 
     const chunkIds = results.map((r) => r._id);
     if (chunkIds.length === 0)
-      return "No lease documents or embeddings found for this user. Let the user know you don't have their lease information yet and ask them to upload their lease through the 'Analyze Lease' feature.";
+      return "[NO_DATA] No lease documents or embeddings found for this user. The user has not uploaded a lease yet — suggest the 'Analyze Lease' feature.";
 
     const chunks: string[] = await ctx.runQuery(internal.chat.queries.getLeaseChunks, { ids: chunkIds });
     return chunks.join("\n\n---\n\n");
@@ -98,15 +116,17 @@ export const searchMyLetters = action({
 
     const vector = await embedQuery(args.query);
 
-    const results = await ctx.vectorSearch("letterEmbeddings", "by_user_letter_chunk_embedding", {
-      vector,
-      limit: 3,
-      filter: (q) => q.eq("userId", userId),
-    });
+    const results = await vectorSearchWithRetry(() =>
+      ctx.vectorSearch("letterEmbeddings", "by_user_letter_chunk_embedding", {
+        vector,
+        limit: 5,
+        filter: (q) => q.eq("userId", userId),
+      }),
+    );
 
     const chunkIds = results.map((r) => r._id);
     if (chunkIds.length === 0)
-      return "No relevant letters found for this user. Let the user know you don't have any of their letters yet and ask them to draft one through the 'Write Letter' feature.";
+      return "[NO_DATA] No relevant letters found for this user. The user has not drafted letters yet — suggest the 'Write Letter' feature.";
 
     const chunks: string[] = await ctx.runQuery(internal.chat.queries.getLetterChunks, { ids: chunkIds });
     return chunks.join("\n\n---\n\n");

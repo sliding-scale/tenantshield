@@ -3,21 +3,68 @@ import { z } from "zod";
 import type { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
 import Exa from "exa-js";
+import { US_STATE_NAMES, type USStateAbbr } from "@/lib/constants/us-states";
+import { ASK_AI_DEFAULT_STATE_CODE } from "@/lib/chat/ask-ai-state";
+import {
+  isRetrievalFailureResult,
+  withRetries,
+  withRetriesOnResult,
+} from "@/lib/chat/retry";
+
+const RETRIEVAL_ERROR =
+  "[RETRIEVAL_ERROR] Could not load data after several attempts. Tell the user to tap Retry or ask again in a moment — do NOT say you don't have their data.";
+
+function resolveStateLabel(
+  stateArg: string | undefined,
+  selectedStateCode: string | null | undefined,
+): string | undefined {
+  const code = (
+    stateArg?.trim() ||
+    selectedStateCode?.trim() ||
+    ASK_AI_DEFAULT_STATE_CODE
+  ).toUpperCase();
+  if (!code) return undefined;
+  const name = US_STATE_NAMES[code as USStateAbbr];
+  return name ? `${name} (${code})` : code;
+}
+
+function shouldRetryConvexResult(result: string): boolean {
+  return isRetrievalFailureResult(result);
+}
+
+function shouldRetryExaResult(result: string): boolean {
+  if (isRetrievalFailureResult(result)) return true;
+  try {
+    const parsed = JSON.parse(result) as unknown;
+    return Array.isArray(parsed) && parsed.length === 0;
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Convex-backed tools for the chat agent. The client must call
  * `convex.setAuth(jwt)` before invoking so actions use `ctx.auth`.
  */
-export function createTenantChatTools(convex: ConvexHttpClient) {
+export function createTenantChatTools(
+  convex: ConvexHttpClient,
+  options?: { selectedStateCode?: string | null },
+) {
+  const selectedStateCode = options?.selectedStateCode ?? null;
+
   const searchCasesTool = tool(
     async ({ query }) => {
       try {
-        return await convex.action(api.chat.retrievers.searchMyCases, {
-          query,
-        });
+        return await withRetriesOnResult(
+          () =>
+            convex.action(api.chat.retrievers.searchMyCases, {
+              query,
+            }),
+          shouldRetryConvexResult,
+        );
       } catch (error) {
-        console.error(error);
-        return "Failed to retrieve cases. Inform the user there was a database error.";
+        console.error("[search_my_cases]", error);
+        return RETRIEVAL_ERROR;
       }
     },
     {
@@ -37,12 +84,16 @@ export function createTenantChatTools(convex: ConvexHttpClient) {
   const searchLeasesTool = tool(
     async ({ query }) => {
       try {
-        return await convex.action(api.chat.retrievers.searchMyLeases, {
-          query,
-        });
+        return await withRetriesOnResult(
+          () =>
+            convex.action(api.chat.retrievers.searchMyLeases, {
+              query,
+            }),
+          shouldRetryConvexResult,
+        );
       } catch (error) {
-        console.error(error);
-        return "Failed to retrieve leases.";
+        console.error("[search_my_leases]", error);
+        return RETRIEVAL_ERROR;
       }
     },
     {
@@ -62,12 +113,16 @@ export function createTenantChatTools(convex: ConvexHttpClient) {
   const searchLettersTool = tool(
     async ({ query }) => {
       try {
-        return await convex.action(api.chat.retrievers.searchMyLetters, {
-          query,
-        });
+        return await withRetriesOnResult(
+          () =>
+            convex.action(api.chat.retrievers.searchMyLetters, {
+              query,
+            }),
+          shouldRetryConvexResult,
+        );
       } catch (error) {
-        console.error(error);
-        return "Failed to retrieve letters.";
+        console.error("[search_my_letters]", error);
+        return RETRIEVAL_ERROR;
       }
     },
     {
@@ -84,29 +139,38 @@ export function createTenantChatTools(convex: ConvexHttpClient) {
 
   const researchLawsTool = tool(
     async ({ issue, state }) => {
+      const apiKey = process.env.EXA_API_KEY;
+      if (!apiKey) {
+        return "[RETRIEVAL_ERROR] Web research is not configured on the server.";
+      }
+
+      const stateLabel = resolveStateLabel(state, selectedStateCode);
+      const stateClause = stateLabel ? ` in ${stateLabel}` : "";
+      const exaQuery = `tenant rights laws regarding ${issue}${stateClause} usa`;
+
       try {
-        const exa = new Exa(process.env.EXA_API_KEY!);
-
-        // Build query — state is optional; if missing the agent should
-        // have asked the user in a prior turn (per system prompt instructions).
-        const stateClause = state ? ` in ${state}` : "";
-        const exaQuery = `tenant rights laws regarding ${issue}${stateClause} usa`;
-
-        const response = await exa.search(exaQuery, {
-          numResults: 3,
-          contents: { highlights: true },
-        });
-
-        return JSON.stringify(response.results);
+        return await withRetriesOnResult(
+          async () => {
+            const exa = new Exa(apiKey);
+            const response = await withRetries(() =>
+              exa.search(exaQuery, {
+                numResults: 5,
+                contents: { highlights: true },
+              }),
+            );
+            return JSON.stringify(response.results);
+          },
+          shouldRetryExaResult,
+        );
       } catch (error) {
-        console.error(error);
-        return "Failed to retrieve state laws from the web.";
+        console.error("[research_state_laws]", error);
+        return RETRIEVAL_ERROR;
       }
     },
     {
       name: "research_state_laws",
       description:
-        "Use this to search the web for general state laws and statutes. ONLY use this if the answer cannot be found in the user's lease or cases, OR if the user asks a general legal question. If the user has not mentioned their US state, do NOT guess — ask them first before calling this tool.",
+        "Use this to search the web for general state laws and statutes. ONLY use this if the answer cannot be found in the user's lease or cases, OR if the user asks a general legal question. Always pass the user's US state when known.",
       schema: z.object({
         issue: z
           .string()
@@ -117,7 +181,7 @@ export function createTenantChatTools(convex: ConvexHttpClient) {
           .string()
           .optional()
           .describe(
-            "The US State the user is asking about. Leave empty if the user hasn't specified one yet.",
+            "The US state code (e.g. CA, NY). Use the state already selected in the app when available.",
           ),
       }),
     },

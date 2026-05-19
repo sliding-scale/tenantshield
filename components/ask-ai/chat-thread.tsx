@@ -7,7 +7,9 @@ import type { UIMessage } from "ai";
 import type { Id } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Loader2, SendHorizontal, Square, Sparkles } from "lucide-react";
+import { Loader2, RefreshCw, SendHorizontal, Square, Sparkles } from "lucide-react";
+import { resolveAskAiStateForApi } from "@/lib/chat/ask-ai-state";
+import { isLikelyRetrievalFailureResponse } from "@/lib/chat/response-utils";
 import { chatMessagesToUIMessages } from "./map-documents-to-ui-messages";
 import type { ChatMessageDoc } from "./map-documents-to-ui-messages";
 import { AssistantMarkdown } from "./assistant-markdown";
@@ -33,6 +35,43 @@ function hasEnoughAssistantContent(text: string): boolean {
   if (t.length >= MIN_ASSISTANT_CHARS) return true;
   const words = t.split(/\s+/).filter(Boolean);
   return words.length >= MIN_ASSISTANT_WORDS;
+}
+
+function ChatRetryBanner({
+  onRetry,
+  retrying,
+  onDismiss,
+  message = "We couldn't load an answer. This is usually temporary.",
+}: {
+  onRetry: () => void;
+  retrying: boolean;
+  onDismiss?: () => void;
+  message?: string;
+}) {
+  return (
+    <div className="border-cream-border bg-cream-surface/80 flex flex-wrap items-center gap-3 rounded-xl border px-4 py-3 text-sm">
+      <span className="text-ink-warm-muted min-w-0 flex-1">{message}</span>
+      <Button
+        type="button"
+        size="sm"
+        className="gap-1.5"
+        disabled={retrying}
+        onClick={onRetry}
+      >
+        {retrying ? (
+          <Loader2 className="size-3.5 animate-spin" aria-hidden />
+        ) : (
+          <RefreshCw className="size-3.5" aria-hidden />
+        )}
+        {retrying ? "Retrying…" : "Retry"}
+      </Button>
+      {onDismiss ? (
+        <Button type="button" variant="ghost" size="sm" onClick={onDismiss}>
+          Dismiss
+        </Button>
+      ) : null}
+    </div>
+  );
 }
 
 function shouldHideInProgressAssistantRow(
@@ -122,14 +161,20 @@ function ChatThreadLoaded({
 
   const scrollEndRef = useRef<HTMLDivElement>(null);
 
-  const { messages, sendMessage, status, stop, error, clearError } = useChat({
-    id: conversationId,
-    messages: initialMessages,
-    transport,
-  });
+  const { messages, sendMessage, status, stop, error, clearError, regenerate } =
+    useChat({
+      id: conversationId,
+      messages: initialMessages,
+      transport,
+    });
 
   const busy = status === "streaming" || status === "submitted";
+  const [retrying, setRetrying] = useState(false);
   const [draft, setDraft] = useState("");
+  const stateCodeForApi = useMemo(
+    () => resolveAskAiStateForApi(selectedStateCode),
+    [selectedStateCode],
+  );
 
   const userMessageCount = useMemo(
     () => messages.filter((m) => m.role === "user").length,
@@ -148,6 +193,30 @@ function ChatThreadLoaded({
       last?.role === "user" ||
       deferringAssistantBubble);
 
+  const lastAssistantMessage = [...messages]
+    .reverse()
+    .find((m) => m.role === "assistant");
+  const showRetryForResponse =
+    !busy &&
+    !error &&
+    lastAssistantMessage != null &&
+    isLikelyRetrievalFailureResponse(
+      assistantTextFromParts(lastAssistantMessage),
+    );
+
+  async function handleRetryLast() {
+    if (busy || retrying) return;
+    setRetrying(true);
+    clearError();
+    try {
+      await regenerate({
+        body: { conversationId, selectedStateCode: stateCodeForApi },
+      });
+    } finally {
+      setRetrying(false);
+    }
+  }
+
   useEffect(() => {
     const end = scrollEndRef.current;
     if (!end) return;
@@ -165,7 +234,7 @@ function ChatThreadLoaded({
     await sendMessage(
       { text },
       {
-        body: { conversationId, selectedStateCode },
+        body: { conversationId, selectedStateCode: stateCodeForApi },
       },
     );
   }
@@ -238,6 +307,15 @@ function ChatThreadLoaded({
                   Thinking…
                 </li>
               ) : null}
+              {showRetryForResponse ? (
+                <li className="mx-auto w-full max-w-3xl">
+                  <ChatRetryBanner
+                    onRetry={() => void handleRetryLast()}
+                    retrying={retrying}
+                    message="The answer may not have loaded fully. Tap Retry to try again."
+                  />
+                </li>
+              ) : null}
               {isLimitReached && !busy && (
                 <li className="mt-4">
                   <div className="rounded-3xl border border-primary/20 bg-primary/5 p-6 text-center shadow-sm">
@@ -271,16 +349,13 @@ function ChatThreadLoaded({
         </div>
 
         {error ? (
-          <div className="border-destructive/30 bg-destructive/10 mx-auto mb-2 flex max-w-3xl flex-wrap items-center gap-3 rounded-xl border px-4 py-3 text-sm">
-            <span className="text-destructive shrink">{error.message}</span>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => clearError()}
-            >
-              Dismiss
-            </Button>
+          <div className="mx-auto mb-2 max-w-3xl px-4 md:px-8">
+            <ChatRetryBanner
+              onRetry={() => void handleRetryLast()}
+              retrying={retrying}
+              onDismiss={() => clearError()}
+              message={error.message}
+            />
           </div>
         ) : null}
 

@@ -4,6 +4,7 @@ import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { createAgent, summarizationMiddleware, modelCallLimitMiddleware } from "langchain";
 import { ConvexHttpClient } from "convex/browser";
 import { createUIMessageStream, createUIMessageStreamResponse, type UIMessage } from "ai";
+import { resolveAskAiStateForApi } from "@/lib/chat/ask-ai-state";
 import { createTenantChatTools } from "@/lib/chat/tools";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -106,7 +107,8 @@ export async function POST(req: Request) {
       conversationId?: string;
       selectedStateCode?: string | null;
     };
-    const { messages, conversationId, selectedStateCode } = body;
+    const { messages, conversationId, selectedStateCode: selectedStateFromClient } = body;
+    const selectedStateCode = resolveAskAiStateForApi(selectedStateFromClient);
     // console.log("[Chat API] body keys:", Object.keys(body));
     // console.log("[Chat API] selectedStateCode:", selectedStateCode);
     // console.log("[Chat API] conversationId:", conversationId);
@@ -164,7 +166,7 @@ export async function POST(req: Request) {
       temperature: 0,
     });
 
-    const tools = createTenantChatTools(convex);
+    const tools = createTenantChatTools(convex, { selectedStateCode });
 
     const systemPrompt = `You are the Tenant Shield AI Legal Assistant.
 Your job is to answer the user's questions about their tenancy, lease, past cases, and state laws.
@@ -174,7 +176,8 @@ TOOL USAGE RULES (MANDATORY — follow exactly):
 2. NEVER call the same tool twice for the same question — even with a different query.
 3. Use at most 2 tool calls total per user message. After that, answer with whatever you have.
 4. If a tool returns data, use it to answer right away. Do NOT call additional tools "just to be thorough".
-5. If a tool returns no data, tell the user immediately and suggest the right Tenant Shield feature.
+5. If a tool returns [NO_DATA], tell the user they have not uploaded that content yet and suggest the right Tenant Shield feature.
+6. If a tool returns [RETRIEVAL_ERROR], apologize briefly and ask them to retry — do NOT say you don't have their data.
 
 TOOL SELECTION (pick the first match):
 - Lease questions ("Am I allowed to…", "Does my lease say…") → search_my_leases
@@ -189,10 +192,13 @@ RESPONSE RULES:
 - Do not ask the user for their user id — retrieval is already scoped to their signed-in account.
 - Keep answers concise and actionable.
 
-WHEN TOOLS RETURN NO DATA:
-- Tell the user clearly: "I don't have that data yet."
-- Suggest the feature: "Upload your lease via Analyze Lease", "Submit a case via New Case", or "Draft a letter via Write Letter".
-- Do NOT retry the tool or try alternative queries. Just inform the user and stop.
+WHEN TOOLS RETURN [NO_DATA] (confirmed empty — user has not uploaded that content):
+- Explain what is missing and point them to Analyze Lease, New Case, or Write Letter as appropriate.
+- Do NOT use the phrase "I don't have that data yet" unless the tool message explicitly says [NO_DATA].
+
+WHEN TOOLS RETURN [RETRIEVAL_ERROR] (temporary failure):
+- Say: "I'm having trouble loading that right now. Please tap Retry or ask again in a moment."
+- Do NOT claim the user has no documents or laws available.
 
 JURISDICTION & FOLLOW-UP RULES:
 ${selectedStateCode ? `- CRITICAL: The user has ALREADY selected "${selectedStateCode}" as their US state. Use this for all legal questions.

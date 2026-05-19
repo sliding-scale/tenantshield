@@ -12,6 +12,11 @@ import ChatSidebar, { ChatSidebarMobileToggle } from "./chat-sidebar";
 import ChatStatePicker from "./chat-state-picker";
 import ChatThread from "./chat-thread";
 import useCurrentUser from "@/app/hooks/useCurrentUser";
+import {
+  ASK_AI_DEFAULT_STATE_CODE,
+  readAskAiStoredState,
+  writeAskAiStoredState,
+} from "@/lib/chat/ask-ai-state";
 import { normalizeUserStateAbbr } from "@/lib/constants/us-states";
 import { resolvePlanId, shouldPromptFreePlanChatUpgrade } from "@/lib/plans/plan-access";
 import { PlanUpgradeDialog } from "@/components/tenant/free-plan-upgrade-dialog";
@@ -19,7 +24,7 @@ import { GavelLoader } from "@/components/shared/gavel-loader";
 
 export default function AskAiShell() {
   const { isLoaded, userId } = useAuth();
-  const { convexUser } = useCurrentUser();
+  const { convexUser, isLoading: userLoading } = useCurrentUser();
   const planUsage = useQuery(
     api.planUsage.queries.current,
     isLoaded && userId ? {} : "skip",
@@ -35,21 +40,32 @@ export default function AskAiShell() {
     useState<Id<"chatConversations"> | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
-  /** Client-only; wire to chat API / system prompt later */
-  const [selectedStateCode, setSelectedStateCode] = useState<string | null>(null);
+  const [selectedStateCode, setSelectedStateCode] = useState<string>(
+    ASK_AI_DEFAULT_STATE_CODE,
+  );
   const creatingFirstConversationRef = useRef(false);
-  const didInitStateFromProfile = useRef(false);
+  const didInitState = useRef(false);
 
   const plan = resolvePlanId(planUsage?.plan ?? convexUser?.plan);
 
   useEffect(() => {
-    if (didInitStateFromProfile.current || selectedStateCode !== null) return
-    const fromProfile = normalizeUserStateAbbr(convexUser?.state)
-    if (fromProfile) {
-      setSelectedStateCode(fromProfile)
-      didInitStateFromProfile.current = true
+    if (didInitState.current || userLoading) return;
+    didInitState.current = true;
+
+    const stored = readAskAiStoredState();
+    if (stored) {
+      setSelectedStateCode(stored);
+      return;
     }
-  }, [convexUser?.state, selectedStateCode])
+
+    const fromProfile = normalizeUserStateAbbr(convexUser?.state);
+    setSelectedStateCode(fromProfile || ASK_AI_DEFAULT_STATE_CODE);
+  }, [convexUser?.state, userLoading]);
+
+  const handleStateChange = useCallback((stateCode: string) => {
+    setSelectedStateCode(stateCode);
+    writeAskAiStoredState(stateCode);
+  }, []);
 
   const fallbackFirst =
     conversations && conversations.length > 0 ? conversations[0]._id : null;
@@ -137,7 +153,7 @@ export default function AskAiShell() {
             </div>
             <ChatStatePicker
               value={selectedStateCode}
-              onChange={setSelectedStateCode}
+              onChange={handleStateChange}
               className="shrink-0"
             />
           </header>
@@ -145,7 +161,7 @@ export default function AskAiShell() {
             <ChatStatePicker
               id="ask-ai-state-desktop"
               value={selectedStateCode}
-              onChange={setSelectedStateCode}
+              onChange={handleStateChange}
             />
           </div>
           <ChatThread

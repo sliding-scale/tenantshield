@@ -7,10 +7,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ASK_AI_DEFAULT_STATE_CODE } from "@/lib/chat/ask-ai-state";
 import { US_STATE_NAMES, US_STATES } from "@/lib/constants/us-states";
 import { cn } from "@/lib/utils";
-
-const STATE_SELECT_NONE = "__none__";
 
 const US_STATE_CODES_SORTED = [...US_STATES].sort((a, b) => a.localeCompare(b));
 
@@ -20,7 +19,7 @@ const DROPDOWN_W =
 
 export type ChatStatePickerProps = {
   value: string | null;
-  onChange: (stateCode: string | null) => void;
+  onChange: (stateCode: string) => void;
   className?: string;
   id?: string;
 };
@@ -31,7 +30,7 @@ const itemClass = cn(
 );
 
 /**
- * Client-only US state selector for Ask AI. Wire to API / prompts later.
+ * US state selector for Ask AI. Defaults to FL when unset.
  */
 export default function ChatStatePicker({
   value,
@@ -39,15 +38,14 @@ export default function ChatStatePicker({
   className,
   id = "ask-ai-state",
 }: ChatStatePickerProps) {
+  const displayValue = value ?? ASK_AI_DEFAULT_STATE_CODE;
+
   return (
     <div className={cn("shrink-0", DROPDOWN_W, className)}>
       <label htmlFor={id} className="sr-only">
         State for legal context (US abbreviation)
       </label>
-      <Select
-        value={value ?? STATE_SELECT_NONE}
-        onValueChange={(v) => onChange(v === STATE_SELECT_NONE ? null : v)}
-      >
+      <Select value={displayValue} onValueChange={onChange}>
         <SelectTrigger
           id={id}
           size="sm"
@@ -62,7 +60,7 @@ export default function ChatStatePicker({
           )}
           aria-label="Select US state (two-letter code) for tenant law context"
         >
-          <SelectValue placeholder="—" />
+          <SelectValue />
         </SelectTrigger>
         <SelectContent
           position="popper"
@@ -77,9 +75,6 @@ export default function ChatStatePicker({
             "[&_[data-slot=select-scroll-down-button]]:bg-cream-page dark:[&_[data-slot=select-scroll-down-button]]:bg-cream-surface-soft",
           )}
         >
-          <SelectItem value={STATE_SELECT_NONE} className={cn(itemClass, "text-ink-warm-muted")}>
-            —
-          </SelectItem>
           {US_STATE_CODES_SORTED.map((code) => (
             <SelectItem
               key={code}
