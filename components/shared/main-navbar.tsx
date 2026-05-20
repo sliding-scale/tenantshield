@@ -3,8 +3,8 @@
 import { Show, UserButton, useUser } from "@clerk/nextjs"
 import { useQuery } from "convex/react"
 import { Sparkles } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
+import { NavbarLogo } from "@/components/shared/navbar-logo";
 import { usePathname } from "next/navigation";
 import useCurrentUser from "@/app/hooks/useCurrentUser"
 import { api } from "@/convex/_generated/api";
@@ -12,9 +12,7 @@ import { APP_NAV_ITEMS } from "@/lib/nav/items";
 import { planDisplayLabel } from "@/lib/plans/plan-access";
 import { cn } from "@/lib/utils";
 import { isAuthPagePath } from "@/lib/nav/visibility";
-
-const APP_LOGO_SRC =
-  "/vecteezy_stylized-yellow-shield-icon-flat-design_54786290.png";
+import LandingNavbar from "@/components/shared/landing-navbar";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -30,23 +28,16 @@ export default function Navbar() {
     return null;
   }
 
+  if (pathname === "/") {
+    return <LandingNavbar />;
+  }
+
   return (
     <header className="sticky top-0 z-50 border-b border-amber-200 bg-white shadow-sm">
-      <div className="flex h-16 items-center justify-between gap-4 px-4 sm:gap-6 sm:px-6">
+      <div className="flex min-h-16 items-center justify-between gap-4 px-4 py-2 sm:min-h-[4.25rem] sm:gap-6 sm:px-6 lg:min-h-[4.5rem]">
         <div className="flex min-w-0 flex-1 items-center gap-4 sm:gap-8">
-          <Link
-            href="/"
-            className="inline-flex shrink-0 items-center gap-2 font-heading text-lg font-bold tracking-tight text-gray-900 sm:gap-2.5 sm:text-xl"
-          >
-            <Image
-              src={APP_LOGO_SRC}
-              alt=""
-              width={32}
-              height={32}
-              className="size-8 shrink-0 object-contain sm:size-9"
-              priority
-            />
-            <span>TenantShield</span>
+          <Link href="/" className="inline-flex shrink-0 items-center">
+            <NavbarLogo priority />
           </Link>
           <Show when="signed-in">
             <nav className="ml-1 hidden items-center gap-1 lg:flex">

@@ -152,8 +152,10 @@ export default function LeaseDetailPage() {
           />
         </div>
 
-        <aside className="hidden lg:block lg:w-72 lg:pl-6">
-          <div className="sticky top-6">{pdfCard}</div>
+        <aside className="hidden self-start lg:block lg:w-72 lg:pl-6">
+          <div className="sticky top-[calc(var(--navbar-height)+1.5rem)]">
+            {pdfCard}
+          </div>
         </aside>
       </div>
     </main>

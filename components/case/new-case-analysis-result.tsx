@@ -155,6 +155,18 @@ export function NewCaseAnalysisResult({
   const collapsedDescription = isDescriptionLong ? `${descriptionWords.slice(0, 10).join(" ")}...` : descriptionText || "—"
   const displayedDescription = showFullDescription ? descriptionText || "—" : collapsedDescription
 
+  const letterHref = {
+    pathname: "/write-letters",
+    query: {
+      ...(caseId ? { caseId } : {}),
+      issueType: details.issueType,
+      issue: details.description || details.title,
+      state: details.state || "",
+      landlord: details.landlord || "",
+      propertyAddress: details.propertyAddress || "",
+    },
+  } as const
+
   return (
     <div className="flex w-full flex-1 flex-col">
       <header className="mb-6 grid grid-cols-[2.75rem_1fr_auto] items-center gap-2 sm:gap-3">
@@ -173,7 +185,7 @@ export function NewCaseAnalysisResult({
         <div className="flex min-h-11 min-w-0 justify-end">{headerTrailing ?? <span className="w-11 shrink-0" aria-hidden />}</div>
       </header>
 
-      <div className="space-y-6 md:space-y-8 lg:max-w-4xl lg:mx-auto w-full">
+      <div className="w-full space-y-6 pb-[calc(5.75rem+env(safe-area-inset-bottom,0px))] md:space-y-8 lg:mx-auto lg:max-w-4xl">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">{metaLine}</p>
           <h2 className="mt-2 font-heading text-3xl font-semibold leading-tight text-ink-warm text-balance sm:text-4xl md:text-5xl">
@@ -250,39 +262,30 @@ export function NewCaseAnalysisResult({
           </div>
         </div>
 
-        {attachedLetterId ? (
-          <Button
-            asChild
-            variant="outline"
-            className="h-14 w-full rounded-2xl border-cream-border bg-cream-surface-deep px-6 text-lg font-semibold text-ink-warm hover:bg-cream-surface md:text-xl"
-          >
-            <Link href={`/letters/${attachedLetterId}`} className="inline-flex items-center justify-center gap-2">
-              <FileText className="size-5 shrink-0" aria-hidden />
-              Attached letter
-            </Link>
-          </Button>
-        ) : (
-          <Button
-            asChild
-            className="h-14 w-full rounded-2xl bg-surface-strong px-6 text-lg font-semibold text-white hover:bg-surface-strong-hover md:text-xl"
-          >
-            <Link
-              href={{
-                pathname: "/write-letters",
-                query: {
-                  ...(caseId ? { caseId } : {}),
-                  issueType: details.issueType,
-                  issue: details.description || details.title,
-                  state: details.state || "",
-                  landlord: details.landlord || "",
-                  propertyAddress: details.propertyAddress || "",
-                },
-              }}
+      </div>
+
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-cream-border bg-cream-page/95 px-4 pb-[max(1rem,calc(0.75rem+env(safe-area-inset-bottom,0px)))] pt-3 backdrop-blur-md sm:px-6 md:px-10 lg:px-14 xl:px-16">
+        <div className="mx-auto w-full lg:max-w-4xl">
+          {attachedLetterId ? (
+            <Button
+              asChild
+              variant="outline"
+              className="h-14 w-full rounded-2xl border-cream-border bg-cream-surface-deep px-6 text-lg font-semibold text-ink-warm hover:bg-cream-surface md:text-xl"
             >
-              Generate a letter
-            </Link>
-          </Button>
-        )}
+              <Link href={`/letters/${attachedLetterId}`} className="inline-flex items-center justify-center gap-2">
+                <FileText className="size-5 shrink-0" aria-hidden />
+                Attached letter
+              </Link>
+            </Button>
+          ) : (
+            <Button
+              asChild
+              className="h-14 w-full rounded-2xl bg-surface-strong px-6 text-lg font-semibold text-white hover:bg-surface-strong-hover md:text-xl"
+            >
+              <Link href={letterHref}>Generate a letter</Link>
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   )

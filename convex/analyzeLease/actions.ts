@@ -1,6 +1,7 @@
 import { action } from "../_generated/server";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
+import { leaseCouldNotReadFileMessage } from "../../lib/lease/analyze-lease-errors";
 import { ensureLeaseDocument } from "../lease/validation";
 import type { Id } from "../_generated/dataModel";
 import { initSync, WasmPdfDocument } from "pdf-oxide-wasm/web";
@@ -61,7 +62,9 @@ export const extractLeaseText = action({
 
     if (!leaseText.trim()) {
       throw new Error(
-        "Could not extract any text from the PDF. The file may be scanned or image-based.",
+        leaseCouldNotReadFileMessage(
+          "Could not extract any text from the PDF. The file may be scanned or image-based.",
+        ),
       );
     }
 

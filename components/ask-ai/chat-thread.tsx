@@ -159,7 +159,7 @@ function ChatThreadLoaded({
     [],
   );
 
-  const scrollEndRef = useRef<HTMLDivElement>(null);
+  const messageListRef = useRef<HTMLDivElement>(null);
 
   const { messages, sendMessage, status, stop, error, clearError, regenerate } =
     useChat({
@@ -218,10 +218,10 @@ function ChatThreadLoaded({
   }
 
   useEffect(() => {
-    const end = scrollEndRef.current;
-    if (!end) return;
+    const list = messageListRef.current;
+    if (!list) return;
     const id = requestAnimationFrame(() => {
-      end.scrollIntoView({ block: "end", behavior: "auto" });
+      list.scrollTop = list.scrollHeight;
     });
     return () => cancelAnimationFrame(id);
   }, [messages, status, showThinkingRow]);
@@ -240,9 +240,11 @@ function ChatThreadLoaded({
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-6 md:px-8">
+    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+      <div
+        ref={messageListRef}
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-6 pb-4 max-md:pb-[calc(5.75rem+env(safe-area-inset-bottom,0px))] md:px-8"
+      >
           {messages.length === 0 ? (
             <div className="mx-auto flex max-w-2xl flex-col gap-3 py-12 text-center">
               <h3 className="font-heading text-2xl text-foreground md:text-3xl">
@@ -341,28 +343,23 @@ function ChatThreadLoaded({
               )}
             </ul>
           )}
-          <div
-            ref={scrollEndRef}
-            className="h-px w-full shrink-0"
-            aria-hidden
+      </div>
+
+      {error ? (
+        <div className="mx-auto mb-2 max-w-3xl shrink-0 px-4 max-md:pb-2 md:px-8">
+          <ChatRetryBanner
+            onRetry={() => void handleRetryLast()}
+            retrying={retrying}
+            onDismiss={() => clearError()}
+            message={error.message}
           />
         </div>
+      ) : null}
 
-        {error ? (
-          <div className="mx-auto mb-2 max-w-3xl px-4 md:px-8">
-            <ChatRetryBanner
-              onRetry={() => void handleRetryLast()}
-              retrying={retrying}
-              onDismiss={() => clearError()}
-              message={error.message}
-            />
-          </div>
-        ) : null}
-
-        <form
-          onSubmit={handleSubmit}
-          className="border-cream-border bg-cream-page/90 sticky bottom-0 z-10 mt-auto shrink-0 border-t px-4 pt-4 pb-[max(1rem,calc(0.75rem+env(safe-area-inset-bottom,0px)))] backdrop-blur-md dark:bg-background/90 md:static md:z-0 md:px-8 md:pb-4"
-        >
+      <form
+        onSubmit={handleSubmit}
+        className="border-cream-border bg-cream-page/95 max-md:fixed max-md:inset-x-0 max-md:bottom-0 max-md:z-30 shrink-0 border-t px-4 pt-4 pb-[max(1rem,calc(0.75rem+env(safe-area-inset-bottom,0px)))] backdrop-blur-md dark:bg-background/95 md:relative md:z-0 md:px-8 md:pb-4"
+      >
           <div className="mx-auto flex max-w-3xl items-center gap-2">
             <textarea
               value={draft}
@@ -406,8 +403,7 @@ function ChatThreadLoaded({
               </Button>
             )}
           </div>
-        </form>
-      </div>
+      </form>
     </div>
   );
 }
