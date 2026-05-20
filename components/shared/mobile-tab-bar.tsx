@@ -9,7 +9,7 @@ import useCurrentUser from "@/app/hooks/useCurrentUser"
 import { useSidebar } from "@/components/ui/sidebar"
 import {
   ADMIN_NAV_ITEMS,
-  APP_NAV_ITEMS,
+  MOBILE_TAB_BAR_ITEMS,
   type AppNavItem,
   isMobileMoreNavActive,
 } from "@/lib/nav/items"
@@ -58,7 +58,7 @@ export default function MobileTabBar() {
   const { role } = useCurrentUser()
   const { toggleSidebar, openMobile, setOpenMobile } = useSidebar()
   const isAdmin = role === "admin"
-  const tabItems = isAdmin ? ADMIN_NAV_ITEMS : APP_NAV_ITEMS.filter((item) => !item.hideOnMobile)
+  const tabItems = isAdmin ? ADMIN_NAV_ITEMS : MOBILE_TAB_BAR_ITEMS
   const moreActive = !isAdmin && (isMobileMoreNavActive(pathname) || openMobile)
 
   useEffect(() => {

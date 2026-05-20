@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, MessageSquarePlus, PanelLeftClose } from "lucide-react";
+import { MessageSquarePlus, MessagesSquare, PanelLeftClose } from "lucide-react";
 import type { Doc } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -131,10 +131,10 @@ export function ChatSidebarMobileToggle({
       variant="outline"
       size="icon-sm"
       className="border-border shrink-0 md:hidden"
-      aria-label="Open conversation list"
+      aria-label="Open chat history"
       onClick={onClick}
     >
-      <Menu className="size-4" />
+      <MessagesSquare className="size-4" />
     </Button>
   );
 }

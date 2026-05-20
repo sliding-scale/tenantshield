@@ -5,9 +5,10 @@ import { DefaultChatTransport } from "ai";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { UIMessage } from "ai";
 import type { Id } from "@/convex/_generated/dataModel";
+import { AskAiEmptyState } from "@/components/ask-ai/ask-ai-empty-state";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Loader2, RefreshCw, SendHorizontal, Square, Sparkles } from "lucide-react";
+import { ArrowUp, Loader2, RefreshCw, Square, Sparkles } from "lucide-react";
 import { resolveAskAiStateForApi } from "@/lib/chat/ask-ai-state";
 import { isLikelyRetrievalFailureResponse } from "@/lib/chat/response-utils";
 import { chatMessagesToUIMessages } from "./map-documents-to-ui-messages";
@@ -226,6 +227,16 @@ function ChatThreadLoaded({
     return () => cancelAnimationFrame(id);
   }, [messages, status, showThinkingRow]);
 
+  async function handleSuggestion(text: string) {
+    if (busy || isLimitReached) return;
+    await sendMessage(
+      { text },
+      {
+        body: { conversationId, selectedStateCode: stateCodeForApi },
+      },
+    );
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const text = draft.trim();
@@ -242,18 +253,13 @@ function ChatThreadLoaded({
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-6 md:px-8">
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-4 md:px-6">
           {messages.length === 0 ? (
-            <div className="mx-auto flex max-w-2xl flex-col gap-3 py-12 text-center">
-              <h3 className="font-heading text-2xl text-foreground md:text-3xl">
-                Tenant Shield Assistant
-              </h3>
-              <p className="text-muted-foreground text-base leading-relaxed">
-                Ask about your lease, past cases, letters you&apos;ve drafted,
-                or tenant rights. Answers use your saved documents when
-                available.
-              </p>
-            </div>
+            <AskAiEmptyState
+              selectedStateCode={selectedStateCode}
+              disabled={busy || isLimitReached}
+              onSuggestion={(text) => void handleSuggestion(text)}
+            />
           ) : (
             <ul className="mx-auto flex w-full max-w-3xl flex-col gap-5">
               {messages.map((m, idx) => {
@@ -332,7 +338,8 @@ function ChatThreadLoaded({
                     </p>
                     <Button
                       asChild
-                      className="mt-5 h-11 rounded-xl bg-foreground px-6 text-sm font-semibold text-white shadow-sm hover:bg-foreground/90"
+                      variant="cta"
+                      className="mt-5 h-11 rounded-xl px-6 text-sm font-semibold"
                     >
                       <Link href="/billing">Upgrade to continue</Link>
                     </Button>
@@ -361,19 +368,19 @@ function ChatThreadLoaded({
 
         <form
           onSubmit={handleSubmit}
-          className="border-border bg-background/90 sticky bottom-0 z-10 mt-auto shrink-0 border-t px-4 pt-4 pb-[max(1rem,calc(0.75rem+env(safe-area-inset-bottom,0px)))] backdrop-blur-md dark:bg-background/90 md:static md:z-0 md:px-8 md:pb-4"
+          className="mt-auto shrink-0 border-t border-border bg-background px-4 py-3 md:px-6 md:py-4"
         >
-          <div className="mx-auto flex max-w-3xl items-center gap-2">
+          <div className="mx-auto flex max-w-lg items-end gap-2">
             <textarea
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               placeholder={
-                isLimitReached ? "Chat limit reached" : "Message Tenant Shield…"
+                isLimitReached ? "Chat limit reached" : "Ask about your rights…"
               }
               rows={1}
               disabled={busy || isLimitReached}
               className={cn(
-                "border-input bg-background placeholder:text-muted-foreground focus-visible:ring-ring max-h-40 min-h-11 flex-1 resize-none rounded-xl border px-4 py-2.5 text-[15px] leading-snug shadow-sm outline-none transition-[box-shadow] focus-visible:ring-3 disabled:opacity-60",
+                "max-h-32 min-h-11 flex-1 resize-none rounded-2xl border-0 bg-muted px-4 py-3 text-[15px] leading-snug text-foreground placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60",
               )}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
@@ -388,7 +395,7 @@ function ChatThreadLoaded({
                 type="button"
                 variant="secondary"
                 size="icon-lg"
-                className="size-11 shrink-0 rounded-xl"
+                className="size-11 shrink-0 rounded-full"
                 aria-label="Stop generating"
                 onClick={() => void stop()}
               >
@@ -398,11 +405,12 @@ function ChatThreadLoaded({
               <Button
                 type="submit"
                 size="icon-lg"
-                className="size-11 shrink-0 rounded-xl"
+                variant={draft.trim() && !isLimitReached ? "cta" : "secondary"}
+                className="size-11 shrink-0 rounded-full"
                 disabled={!draft.trim() || isLimitReached}
                 aria-label="Send message"
               >
-                <SendHorizontal className="size-4" />
+                <ArrowUp className="size-4" />
               </Button>
             )}
           </div>

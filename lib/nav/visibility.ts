@@ -27,7 +27,6 @@ export function isSharedPagePath(pathname: string | null) {
   if (!pathname) return false
   const p = pathname.toLowerCase()
   return (
-    p.startsWith("/ask-ai") ||
     p.startsWith("/analyze-lease") ||
     p.startsWith("/letters/") ||
     p.startsWith("/cases/") ||
