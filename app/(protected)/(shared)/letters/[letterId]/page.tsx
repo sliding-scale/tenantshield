@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { useMutation, useQuery } from "convex/react"
@@ -13,7 +13,6 @@ import {
   type LetterTipTapEditorHandle,
 } from "@/components/tenant/write-letter/letter-tiptap-editor"
 import { Button } from "@/components/ui/button"
-import { US_STATE_NAMES, type USStateAbbr } from "@/lib/constants/us-states"
 import { shouldBlurFreeLetterPreview } from "@/lib/plans/plan-access"
 
 export default function LetterDetailPage() {
@@ -29,12 +28,6 @@ export default function LetterDetailPage() {
   const [isSaving, setIsSaving] = useState(false)
   const editorRef = useRef<LetterTipTapEditorHandle>(null)
 
-  const stateName = useMemo(() => {
-    if (!row) return ""
-    const abbr = row.inputData.state
-    return abbr && abbr in US_STATE_NAMES ? US_STATE_NAMES[abbr as USStateAbbr] : abbr
-  }, [row])
-
   const onCopy = async () => {
     if (!row) return
     const text = isEditing ? editorRef.current?.getPlainText() ?? "" : row.fullLetterText
@@ -42,7 +35,7 @@ export default function LetterDetailPage() {
     try {
       await navigator.clipboard.writeText(text)
       setDidCopy(true)
-      setTimeout(() => setDidCopy(false), 1800)
+      setTimeout(() => setDidCopy(false), 2000)
       return
     } catch {
       try {
@@ -56,7 +49,7 @@ export default function LetterDetailPage() {
         const ok = document.execCommand("copy")
         document.body.removeChild(el)
         setDidCopy(ok)
-        if (ok) setTimeout(() => setDidCopy(false), 1800)
+        if (ok) setTimeout(() => setDidCopy(false), 2000)
       } catch {
         setDidCopy(false)
       }
@@ -110,14 +103,13 @@ export default function LetterDetailPage() {
       caseId={row.caseId}
       createdUnderPlan={row.createdUnderPlan}
       letterType={row.inputData.letterType}
-      stateName={stateName}
       landlordName={row.inputData.landlordName}
       didCopy={didCopy}
       letterBodyOverride={isEditing ? undefined : row.fullLetterText}
       heroTitle={isEditing ? "Edit your letter" : undefined}
       heroSubtitle={
         isEditing
-          ? "Edit the body below, then save. Copy uses the editor text while you’re editing."
+          ? "Edit the body below, then save. Copy uses the editor text while you're editing."
           : undefined
       }
       onEditLetter={isEditing || blurLetter ? undefined : () => setIsEditing(true)}
@@ -143,7 +135,7 @@ export default function LetterDetailPage() {
                   setSaveError(null)
                   setIsEditing(false)
                 }}
-                className="h-12 rounded-2xl border-border bg-background sm:h-14 sm:min-w-[7.5rem]"
+                className="h-11 rounded-2xl border-border bg-background sm:min-w-28"
               >
                 Cancel
               </Button>
@@ -151,7 +143,7 @@ export default function LetterDetailPage() {
                 type="button"
                 disabled={isSaving}
                 onClick={() => void handleSave()}
-                className="h-12 rounded-2xl bg-foreground px-6 text-base font-semibold text-white hover:bg-foreground/90 sm:h-14 sm:flex-1 sm:max-w-xs"
+                className="h-11 rounded-2xl bg-foreground px-6 text-sm font-semibold text-background hover:bg-foreground/90 sm:flex-1 sm:max-w-xs"
               >
                 {isSaving ? "Saving…" : "Save letter"}
               </Button>
@@ -164,13 +156,11 @@ export default function LetterDetailPage() {
       headerBeforeCopy={
         <Button
           size="sm"
-          className="h-10 max-w-[10.5rem] truncate rounded-xl border-0 bg-foreground px-3 text-xs font-semibold text-white shadow-sm hover:bg-foreground/90 sm:max-w-none sm:px-4 sm:text-sm"
+          variant="outline"
+          className="hidden h-10 max-w-40 truncate rounded-xl border-border bg-background px-3 text-xs font-semibold sm:inline-flex sm:max-w-none sm:px-4 sm:text-sm"
           asChild
         >
-          <Link href="/ratings">
-            <span className="sm:hidden">Rate</span>
-            <span className="hidden sm:inline">Rate your experience</span>
-          </Link>
+          <Link href="/ratings">Rate your experience</Link>
         </Button>
       }
     />

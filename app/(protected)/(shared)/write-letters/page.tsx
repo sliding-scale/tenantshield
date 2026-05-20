@@ -1,36 +1,33 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useAction, useQuery } from "convex/react"
 import type { Id } from "@/convex/_generated/dataModel"
 import { api } from "@/convex/_generated/api"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
+import { NewLetterForm } from "@/components/tenant/write-letter/new-letter-form"
 import {
   DEFAULT_ISSUE_TYPE,
   isIssueTypeValue,
   type IssueTypeValue,
 } from "@/lib/constants/issue-types"
-import { filterUSStates, type USStateAbbr } from "@/lib/constants/us-states"
 import { usePrefilledUSState } from "@/app/hooks/usePrefilledUSState"
-import { NewLetterForm } from "../../../../components/tenant/write-letter/new-letter-form"
 
 export default function WriteLettersPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { clerkUser } = useCurrentUser()
   const generateLetter = useAction(api.letters.actions.generateTenantLetter)
-  const stateChipRefs = useRef<Map<string, HTMLButtonElement>>(new Map())
   const caseIdParam = searchParams.get("caseId")?.trim() ?? ""
   const caseId = caseIdParam ? (caseIdParam as Id<"cases">) : undefined
   const attachedLetterId = useQuery(
     api.letters.queries.getLetterIdByCaseForCurrentUser,
     caseId ? { caseId } : "skip",
   )
-  const { state, setState } = usePrefilledUSState(searchParams.get("state"))
+  const { state, setState, isProfileStateLoading } = usePrefilledUSState(searchParams.get("state"))
   const [letterType, setLetterType] = useState<IssueTypeValue>(DEFAULT_ISSUE_TYPE)
-  const [stateSearch, setStateSearch] = useState("")
   const [fullName, setFullName] = useState("")
   const [landlordName, setLandlordName] = useState("")
   const [propertyAddress, setPropertyAddress] = useState("")
@@ -47,15 +44,6 @@ export default function WriteLettersPage() {
     const parts = [clerkUser?.firstName, clerkUser?.lastName].filter(Boolean)
     return parts.join(" ").trim()
   }, [clerkUser?.firstName, clerkUser?.lastName])
-
-  const filteredStates = useMemo(() => filterUSStates(stateSearch), [stateSearch])
-
-  const chipsToShow = useMemo(() => {
-    if (!state) return filteredStates
-    const sel = state as USStateAbbr
-    if (filteredStates.includes(sel)) return filteredStates
-    return [sel, ...filteredStates]
-  }, [filteredStates, state])
 
   useEffect(() => {
     if (!fullName && inferredName) {
@@ -86,16 +74,6 @@ export default function WriteLettersPage() {
     }
   }, [description, landlordName, propertyAddress, searchParams])
 
-  useEffect(() => {
-    const el = stateChipRefs.current.get(state)
-    el?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" })
-  }, [state])
-
-  const selectionHiddenBySearch =
-    Boolean(state) &&
-    stateSearch.trim().length > 0 &&
-    !filteredStates.includes(state as USStateAbbr)
-
   const caseAlreadyHasLetter = Boolean(caseId && attachedLetterId)
 
   const canSubmit = Boolean(
@@ -111,6 +89,7 @@ export default function WriteLettersPage() {
       !isSubmitting &&
       !caseAlreadyHasLetter,
   )
+
   const onSubmit = async () => {
     if (!canSubmit) return
     setError(null)
@@ -130,7 +109,6 @@ export default function WriteLettersPage() {
         deadlineDays: deadlineDays.trim(),
         ...(caseId ? { caseId } : {}),
       })
-      console.log("generateTenantLetter response", result)
       router.push(`/letters/${result.letterId}`)
     } catch (e) {
       const message = e instanceof Error ? e.message : "Failed to generate letter"
@@ -141,7 +119,7 @@ export default function WriteLettersPage() {
     }
   }
 
-  const caseLetterBanner =
+  const topBanner =
     caseId && attachedLetterId ? (
       <div className="mb-4 rounded-2xl border border-border bg-muted px-4 py-3 text-sm text-foreground">
         This case already has a letter.{" "}
@@ -152,18 +130,11 @@ export default function WriteLettersPage() {
     ) : null
 
   return (
-    <>
-      {caseLetterBanner}
-      <NewLetterForm
+    <NewLetterForm
       letterType={letterType}
       setLetterType={setLetterType}
       state={state}
       setState={setState}
-      stateSearch={stateSearch}
-      setStateSearch={setStateSearch}
-      chipsToShow={chipsToShow}
-      selectionHiddenBySearch={selectionHiddenBySearch}
-      filteredStatesCount={filteredStates.length}
       fullName={fullName}
       setFullName={setFullName}
       landlordName={landlordName}
@@ -184,10 +155,9 @@ export default function WriteLettersPage() {
       success={success}
       canSubmit={canSubmit}
       isSubmitting={isSubmitting}
+      isStateReady={!isProfileStateLoading}
+      topBanner={topBanner}
       onSubmit={() => void onSubmit()}
-      onClose={() => router.back()}
-      stateChipRefs={stateChipRefs}
     />
-    </>
   )
 }

@@ -3,12 +3,20 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useMutation } from "convex/react"
-import { FileText, Trash2 } from "lucide-react"
+import { ChevronRight, EllipsisVertical, Trash2 } from "lucide-react"
 import type { Id } from "@/convex/_generated/dataModel"
 import { api } from "@/convex/_generated/api"
+import { letterDisplayTitle } from "@/lib/letters/display-title"
+import { IssueTypeIcon } from "@/components/shared/issue-type-icon"
 import { ListRowPill } from "@/components/shared/list-row-pill"
-import { Button } from "@/components/ui/button"
 import { BrandedAlertDialog } from "@/components/ui/branded-alert-dialog"
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 type LetterListItem = {
   _id: Id<"letters">
@@ -29,7 +37,7 @@ export function LetterListRow({ item }: { item: LetterListItem }) {
   const [isDeleting, setIsDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const title = item.letterData?.header?.subjectLine || "Demand Letter"
+  const title = letterDisplayTitle(item.letterData?.header?.subjectLine)
 
   const handleDelete = async () => {
     setError(null)
@@ -46,47 +54,57 @@ export function LetterListRow({ item }: { item: LetterListItem }) {
 
   return (
     <>
-      <article className="flex items-stretch gap-2 rounded-3xl border border-border bg-card transition hover:bg-accent sm:gap-3">
-        <Link
-          href={`/letters/${item._id}`}
-          className="min-w-0 flex-1 p-4 sm:p-5 md:p-5"
-        >
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-              {item.inputData.state} · {item.inputData.letterType}
-            </p>
-            <ListRowPill tone="muted">
-              Recipient · {item.inputData.landlordName || "Landlord"}
-            </ListRowPill>
-          </div>
-          <h2 className="mt-1.5 line-clamp-2 break-words text-balance font-heading text-xl font-semibold leading-snug text-foreground sm:text-2xl">
+      <article className="group relative rounded-3xl border border-border bg-card transition hover:bg-accent">
+        <div className="absolute right-3 top-3 z-10 sm:right-4 sm:top-4">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label={`Letter options: ${title}`}
+                className="size-9 rounded-xl text-muted-foreground hover:bg-background hover:text-foreground"
+              >
+                <EllipsisVertical className="size-4" aria-hidden />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-40">
+              <DropdownMenuItem
+                variant="destructive"
+                disabled={isDeleting}
+                onSelect={(event) => {
+                  event.preventDefault()
+                  setError(null)
+                  setConfirmOpen(true)
+                }}
+              >
+                <Trash2 aria-hidden />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        <Link href={`/letters/${item._id}`} className="flex flex-col p-4 sm:p-5 md:p-5">
+          <h2 className="w-full line-clamp-2 wrap-break-word text-balance pr-10 font-heading text-xl font-semibold leading-snug text-foreground sm:text-2xl">
             {title}
           </h2>
-          <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+          <p className="mt-2 w-full line-clamp-2 text-sm leading-relaxed text-muted-foreground">
             {item.preview}
           </p>
-          <div className="mt-3 flex items-center gap-2 text-sm font-medium text-foreground">
-            <FileText className="size-4" />
-            View letter
+          <div className="mt-3 flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-2">
+              <IssueTypeIcon issueType={item.inputData.letterType} />
+              <ListRowPill tone="muted">
+                Recipient · {item.inputData.landlordName || "Landlord"}
+              </ListRowPill>
+            </div>
+            <ChevronRight
+              className="size-5 shrink-0 text-muted-foreground transition group-hover:text-foreground sm:size-6"
+              aria-hidden
+            />
           </div>
         </Link>
-
-        <div className="flex shrink-0 flex-col items-end justify-start p-3 sm:p-4">
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            aria-label={`Delete letter: ${title}`}
-            disabled={isDeleting}
-            onClick={() => {
-              setError(null)
-              setConfirmOpen(true)
-            }}
-            className="size-10 rounded-xl border-border bg-background text-muted-foreground hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive sm:size-11"
-          >
-            <Trash2 className="size-4" />
-          </Button>
-        </div>
       </article>
 
       <BrandedAlertDialog
