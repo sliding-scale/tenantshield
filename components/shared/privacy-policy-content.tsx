@@ -1,8 +1,15 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import {
+  LegalCallout,
+  LegalHighlightBox,
+  LegalSection,
+  LegalToc,
+} from "@/components/shared/legal-document-primitives";
 import { SUPPORT_EMAIL } from "@/lib/legal-contact";
 
-const supportEmailClass = "font-medium text-amber-800 underline underline-offset-2";
+const supportEmailClass =
+  "font-medium text-primary underline underline-offset-2 hover:text-primary/80";
 
 function SupportEmail({ className }: { className?: string }) {
   return (
@@ -12,73 +19,16 @@ function SupportEmail({ className }: { className?: string }) {
   );
 }
 
-type CalloutVariant = "red" | "green" | "gold" | "orange";
-
-const calloutStyles: Record<CalloutVariant, string> = {
-  red: "border-red-200 bg-red-50 text-red-950",
-  green: "border-emerald-200 bg-emerald-50 text-emerald-950",
-  gold: "border-amber-200 bg-amber-50 text-amber-950",
-  orange: "border-orange-200 bg-orange-50 text-orange-950",
-};
-
-function Callout({
-  variant,
-  icon,
-  children,
-}: {
-  variant: CalloutVariant;
-  icon: string;
-  children: ReactNode;
-}) {
-  return (
-    <div
-      className={`mt-6 flex gap-3 rounded-2xl border-2 p-4 text-sm leading-6 sm:p-5 sm:text-base ${calloutStyles[variant]}`}
-    >
-      <span className="shrink-0 text-lg" aria-hidden>
-        {icon}
-      </span>
-      <div className="min-w-0 [&_strong]:font-semibold">{children}</div>
-    </div>
-  );
-}
-
-function PolicySection({
-  id,
-  sectionNum,
-  title,
-  children,
-}: {
-  id: string;
-  sectionNum: string;
-  title: string;
-  children: ReactNode;
-}) {
-  return (
-    <section
-      id={id}
-      className="scroll-mt-24 border-t border-amber-100 pt-10 first:border-t-0 first:pt-0"
-    >
-      <p className="text-xs font-semibold uppercase tracking-wider text-amber-600">
-        {sectionNum}
-      </p>
-      <h2 className="mt-2 text-xl font-bold text-gray-900 sm:text-2xl">{title}</h2>
-      <div className="mt-4 space-y-4 text-sm leading-7 text-gray-700 sm:text-base">
-        {children}
-      </div>
-    </section>
-  );
-}
-
 function DefGrid({ rows }: { rows: { term: string; meaning: ReactNode }[] }) {
   return (
-    <dl className="mt-4 divide-y divide-amber-100 rounded-2xl border border-amber-100 bg-amber-50/40">
+    <dl className="mt-4 divide-y divide-border rounded-2xl border border-border bg-muted/30">
       {rows.map((row) => (
         <div
           key={row.term}
           className="grid gap-1 px-4 py-3 sm:grid-cols-[minmax(8rem,11rem)_1fr] sm:gap-4 sm:py-4"
         >
-          <dt className="text-sm font-semibold text-gray-900">{row.term}</dt>
-          <dd className="text-sm leading-6 text-gray-700">{row.meaning}</dd>
+          <dt className="text-sm font-semibold text-foreground">{row.term}</dt>
+          <dd className="text-sm leading-6 text-muted-foreground">{row.meaning}</dd>
         </div>
       ))}
     </dl>
@@ -93,14 +43,14 @@ function DataTable({
   rows: string[][];
 }) {
   return (
-    <div className="mt-4 overflow-x-auto rounded-2xl border border-amber-100">
+    <div className="mt-4 overflow-x-auto rounded-2xl border border-border">
       <table className="w-full min-w-[32rem] border-collapse text-left text-sm">
         <thead>
-          <tr className="bg-amber-50/80">
+          <tr className="bg-muted">
             {headers.map((header) => (
               <th
                 key={header}
-                className="border-b border-amber-100 px-4 py-3 font-semibold text-gray-900"
+                className="border-b border-border px-4 py-3 font-semibold text-foreground"
               >
                 {header}
               </th>
@@ -109,9 +59,9 @@ function DataTable({
         </thead>
         <tbody>
           {rows.map((row, i) => (
-            <tr key={i} className="border-b border-amber-50 last:border-b-0">
+            <tr key={i} className="border-b border-border last:border-b-0">
               {row.map((cell, j) => (
-                <td key={j} className="px-4 py-3 align-top text-gray-700">
+                <td key={j} className="px-4 py-3 align-top text-muted-foreground">
                   {cell}
                 </td>
               ))}
@@ -145,36 +95,19 @@ const tocItems = [
 export function PrivacyPolicyContent() {
   return (
   <>
-      <Callout variant="red" icon="⚠️">
+      <LegalCallout variant="neutral" docVariant="page">
         <p>
-          <strong>Important Notice:</strong> TenantShield is not a law firm and does
-          not provide legal advice. This Privacy Policy governs how we collect, use,
-          and protect your personal information. For questions about this policy,
-          contact us at <SupportEmail className="font-semibold underline underline-offset-2" />
+          <strong>Before you continue:</strong> TenantShield is not a law firm and does
+          not provide legal advice. This Privacy Policy explains how we collect, use,
+          and protect your personal information. Questions? Email{" "}
+          <SupportEmail className="font-semibold underline underline-offset-2" />.
         </p>
-      </Callout>
+      </LegalCallout>
 
-      <nav
-        aria-label="Table of contents"
-        className="mt-8 rounded-2xl border-2 border-amber-100 bg-amber-50/50 p-5 sm:p-6"
-      >
-        <p className="text-sm font-bold text-gray-900">Table of Contents</p>
-        <ol className="mt-3 columns-1 gap-x-8 space-y-1.5 text-sm sm:columns-2">
-          {tocItems.map((item) => (
-            <li key={item.href}>
-              <a
-                href={item.href}
-                className="text-amber-800 underline-offset-2 hover:text-amber-950 hover:underline"
-              >
-                {item.label}
-              </a>
-            </li>
-          ))}
-        </ol>
-      </nav>
+      <LegalToc items={tocItems} docVariant="page" />
 
       <div className="mt-10 space-y-10">
-        <PolicySection id="pp-1" sectionNum="Section 01" title="Who We Are">
+        <LegalSection docVariant="page" id="pp-1" sectionNum="Section 01" title="Who We Are">
           <p>
             TenantShield, Inc. (&quot;TenantShield,&quot; &quot;we,&quot; &quot;us,&quot;
             or &quot;our&quot;) operates the TenantShield platform, including our website
@@ -216,14 +149,14 @@ export function PrivacyPolicyContent() {
             Website:{" "}
             <Link
               href="/privacy-policy"
-              className="font-medium text-amber-800 underline underline-offset-2"
+              className="font-medium text-primary underline underline-offset-2 hover:text-primary/80"
             >
               www.tenantshieldusa.com/privacy-policy
             </Link>
           </p>
-        </PolicySection>
+        </LegalSection>
 
-        <PolicySection id="pp-2" sectionNum="Section 02" title="Definitions">
+        <LegalSection docVariant="page" id="pp-2" sectionNum="Section 02" title="Definitions">
           <DefGrid
             rows={[
               {
@@ -268,14 +201,14 @@ export function PrivacyPolicyContent() {
               },
             ]}
           />
-        </PolicySection>
+        </LegalSection>
 
-        <PolicySection
+        <LegalSection docVariant="page"
           id="pp-3"
           sectionNum="Section 03"
           title="Information We Collect"
         >
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-semibold text-foreground">
             3.1 Information You Provide Directly
           </h3>
           <ul className="list-disc space-y-2 pl-6">
@@ -312,7 +245,7 @@ export function PrivacyPolicyContent() {
             </li>
           </ul>
 
-          <h3 className="pt-2 text-lg font-semibold text-gray-900">
+          <h3 className="pt-2 text-lg font-semibold text-foreground">
             3.2 Information We Collect Automatically
           </h3>
           <ul className="list-disc space-y-2 pl-6">
@@ -337,10 +270,10 @@ export function PrivacyPolicyContent() {
             </li>
           </ul>
 
-          <h3 className="pt-2 text-lg font-semibold text-gray-900">
+          <h3 className="pt-2 text-lg font-semibold text-foreground">
             3.3 Information We Do NOT Collect
           </h3>
-          <Callout variant="green" icon="✅">
+          <LegalCallout docVariant="page" variant="green" icon="✅">
             <p>
               TenantShield does <strong>not</strong> collect: Social Security Numbers,
               government-issued ID numbers, biometric data, financial account numbers,
@@ -349,9 +282,9 @@ export function PrivacyPolicyContent() {
               real-time geolocation. We do not track your location beyond the
               state-level information you choose to provide.
             </p>
-          </Callout>
+          </LegalCallout>
 
-          <h3 className="pt-2 text-lg font-semibold text-gray-900">
+          <h3 className="pt-2 text-lg font-semibold text-foreground">
             3.4 Information from Third Parties
           </h3>
           <p>
@@ -361,9 +294,9 @@ export function PrivacyPolicyContent() {
             only the information necessary to create your account and attribute the
             referral.
           </p>
-        </PolicySection>
+        </LegalSection>
 
-        <PolicySection
+        <LegalSection docVariant="page"
           id="pp-4"
           sectionNum="Section 04"
           title="How We Use Your Information"
@@ -428,7 +361,7 @@ export function PrivacyPolicyContent() {
               ],
             ]}
           />
-          <Callout variant="red" icon="🚫">
+          <LegalCallout docVariant="page" variant="red" icon="🚫">
             <p>
               <strong>We will NEVER:</strong> Sell your personal data to any third
               party. Share your individual case details, documents, or dispute
@@ -437,15 +370,15 @@ export function PrivacyPolicyContent() {
               advertising. Train AI models on your identifiable personal data without
               your explicit opt-in consent.
             </p>
-          </Callout>
-        </PolicySection>
+          </LegalCallout>
+        </LegalSection>
 
-        <PolicySection
+        <LegalSection docVariant="page"
           id="pp-5"
           sectionNum="Section 05"
           title="AI & Automated Processing Disclosures"
         >
-          <Callout variant="gold" icon="🤖">
+          <LegalCallout docVariant="page" variant="gold" icon="🤖">
             <p>
               <strong>
                 Required Disclosure under California CCPA ADMT Regulations (Effective
@@ -456,9 +389,9 @@ export function PrivacyPolicyContent() {
               questions. This section explains how that processing works, what data it
               uses, and your rights regarding it.
             </p>
-          </Callout>
+          </LegalCallout>
 
-          <h3 className="text-lg font-semibold text-gray-900">5.1 How Our AI Works</h3>
+          <h3 className="text-lg font-semibold text-foreground">5.1 How Our AI Works</h3>
           <p>
             TenantShield uses Google&apos;s Gemini API to process your inputs and
             generate informational responses. When you submit a case description,
@@ -484,7 +417,7 @@ export function PrivacyPolicyContent() {
             </li>
           </ol>
 
-          <h3 className="pt-2 text-lg font-semibold text-gray-900">
+          <h3 className="pt-2 text-lg font-semibold text-foreground">
             5.2 What Our AI Does NOT Do
           </h3>
           <ul className="list-disc space-y-2 pl-6">
@@ -503,7 +436,7 @@ export function PrivacyPolicyContent() {
             </li>
           </ul>
 
-          <h3 className="pt-2 text-lg font-semibold text-gray-900">
+          <h3 className="pt-2 text-lg font-semibold text-foreground">
             5.3 Your Rights Regarding Automated Processing
           </h3>
           <p>
@@ -533,7 +466,7 @@ export function PrivacyPolicyContent() {
             </li>
           </ul>
 
-          <h3 className="pt-2 text-lg font-semibold text-gray-900">5.4 AI Training Data</h3>
+          <h3 className="pt-2 text-lg font-semibold text-foreground">5.4 AI Training Data</h3>
           <p>
             TenantShield does not use your personally identifiable case data, documents,
             or communications to train AI models without your explicit opt-in consent.
@@ -542,7 +475,7 @@ export function PrivacyPolicyContent() {
             re-identified from this aggregated data.
           </p>
 
-          <h3 className="pt-2 text-lg font-semibold text-gray-900">
+          <h3 className="pt-2 text-lg font-semibold text-foreground">
             5.5 Google Gemini Data Processing
           </h3>
           <p>
@@ -555,7 +488,7 @@ export function PrivacyPolicyContent() {
               href="https://policies.google.com/privacy"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-medium text-amber-800 underline underline-offset-2"
+              className="font-medium text-primary underline underline-offset-2 hover:text-primary/80"
             >
               policies.google.com/privacy
             </a>{" "}
@@ -564,20 +497,20 @@ export function PrivacyPolicyContent() {
               href="https://ai.google.dev/gemini-api/terms"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-medium text-amber-800 underline underline-offset-2"
+              className="font-medium text-primary underline underline-offset-2 hover:text-primary/80"
             >
               ai.google.dev/gemini-api/terms
             </a>
             .
           </p>
-        </PolicySection>
+        </LegalSection>
 
-        <PolicySection
+        <LegalSection docVariant="page"
           id="pp-6"
           sectionNum="Section 06"
           title="How We Share Your Information"
         >
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-semibold text-foreground">
             6.1 We Do Not Sell Your Data
           </h3>
           <p>
@@ -587,7 +520,7 @@ export function PrivacyPolicyContent() {
             case information, documents, and behavioral data.
           </p>
 
-          <h3 className="pt-2 text-lg font-semibold text-gray-900">
+          <h3 className="pt-2 text-lg font-semibold text-foreground">
             6.2 Service Providers (Data Processors)
           </h3>
           <p>
@@ -610,7 +543,7 @@ export function PrivacyPolicyContent() {
                       href="https://policies.google.com/privacy"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-medium text-amber-800 underline underline-offset-2"
+                      className="font-medium text-primary underline underline-offset-2 hover:text-primary/80"
                     >
                       policies.google.com/privacy
                     </a>
@@ -627,7 +560,7 @@ export function PrivacyPolicyContent() {
                       href="https://stripe.com/privacy"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-medium text-amber-800 underline underline-offset-2"
+                      className="font-medium text-primary underline underline-offset-2 hover:text-primary/80"
                     >
                       stripe.com/privacy
                     </a>
@@ -647,7 +580,7 @@ export function PrivacyPolicyContent() {
             ]}
           />
 
-          <h3 className="pt-2 text-lg font-semibold text-gray-900">6.3 Legal Disclosures</h3>
+          <h3 className="pt-2 text-lg font-semibold text-foreground">6.3 Legal Disclosures</h3>
           <p>
             We may disclose your personal data if required to do so by law, regulation,
             legal process, or governmental request, including valid subpoenas, court
@@ -655,7 +588,7 @@ export function PrivacyPolicyContent() {
             the extent permitted by law and challenge overbroad or unclear demands.
           </p>
 
-          <h3 className="pt-2 text-lg font-semibold text-gray-900">6.4 Business Transfers</h3>
+          <h3 className="pt-2 text-lg font-semibold text-foreground">6.4 Business Transfers</h3>
           <p>
             If TenantShield is involved in a merger, acquisition, asset sale, or
             bankruptcy proceeding, your personal data may be transferred as part of that
@@ -665,7 +598,7 @@ export function PrivacyPolicyContent() {
             data prior to any such transfer.
           </p>
 
-          <h3 className="pt-2 text-lg font-semibold text-gray-900">
+          <h3 className="pt-2 text-lg font-semibold text-foreground">
             6.5 Aggregated & De-Identified Data
           </h3>
           <p>
@@ -675,7 +608,7 @@ export function PrivacyPolicyContent() {
             be used to identify you individually.
           </p>
 
-          <h3 className="pt-2 text-lg font-semibold text-gray-900">
+          <h3 className="pt-2 text-lg font-semibold text-foreground">
             6.6 Landlord Report Card (Future Feature)
           </h3>
           <p>
@@ -685,9 +618,9 @@ export function PrivacyPolicyContent() {
             rating. You will be informed of these specific terms at the time you submit a
             rating, and you will have the ability to delete your rating at any time.
           </p>
-        </PolicySection>
+        </LegalSection>
 
-        <PolicySection id="pp-7" sectionNum="Section 07" title="Data Retention">
+        <LegalSection docVariant="page" id="pp-7" sectionNum="Section 07" title="Data Retention">
           <p>
             We retain your personal data only as long as necessary for the purposes
             described in this policy, or as required by law. Our specific retention
@@ -740,9 +673,9 @@ export function PrivacyPolicyContent() {
             irreversibly anonymize it. You may request earlier deletion of your data as
             described in Section 9.
           </p>
-        </PolicySection>
+        </LegalSection>
 
-        <PolicySection id="pp-8" sectionNum="Section 08" title="Security">
+        <LegalSection docVariant="page" id="pp-8" sectionNum="Section 08" title="Security">
           <p>
             We implement industry-standard technical and organizational security measures
             to protect your personal data against unauthorized access, disclosure,
@@ -779,7 +712,7 @@ export function PrivacyPolicyContent() {
               never transmit or store raw payment card data on our servers.
             </li>
           </ul>
-          <Callout variant="orange" icon="🔔">
+          <LegalCallout docVariant="page" variant="orange" icon="🔔">
             <p>
               <strong>Data Breach Notification:</strong> In the event of a data breach
               that poses a risk to your rights and freedoms, we will notify you and
@@ -787,15 +720,15 @@ export function PrivacyPolicyContent() {
               to the extent required by applicable law. Notification will be sent to the
               email address associated with your account.
             </p>
-          </Callout>
+          </LegalCallout>
           <p>
             No security system is impenetrable. We cannot guarantee absolute security of
             your data, but we continuously work to protect it using best practices and
             promptly investigate and address any security incidents.
           </p>
-        </PolicySection>
+        </LegalSection>
 
-        <PolicySection id="pp-9" sectionNum="Section 09" title="Your Rights — All Users">
+        <LegalSection docVariant="page" id="pp-9" sectionNum="Section 09" title="Your Rights — All Users">
           <p>
             Regardless of where you are located, TenantShield provides the following
             rights to all users:
@@ -850,23 +783,23 @@ export function PrivacyPolicyContent() {
             for complex requests with notice). We may need to verify your identity before
             fulfilling requests. We will not charge a fee for reasonable requests.
           </p>
-        </PolicySection>
+        </LegalSection>
 
-        <PolicySection
+        <LegalSection docVariant="page"
           id="pp-10"
           sectionNum="Section 10"
           title="California Residents — CCPA / CPRA"
         >
-          <Callout variant="green" icon="🌴">
+          <LegalCallout docVariant="page" variant="green" icon="🌴">
             <p>
               <strong>This section applies to California residents</strong> and describes
               your rights under the California Consumer Privacy Act (CCPA) as amended by
               the California Privacy Rights Act (CPRA), and California&apos;s Automated
               Decision-Making Technology (ADMT) regulations effective January 1, 2026.
             </p>
-          </Callout>
+          </LegalCallout>
 
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-semibold text-foreground">
             10.1 Categories of Personal Information Collected
           </h3>
           <p>
@@ -906,7 +839,7 @@ export function PrivacyPolicyContent() {
             such information in your case descriptions.
           </p>
 
-          <h3 className="pt-2 text-lg font-semibold text-gray-900">
+          <h3 className="pt-2 text-lg font-semibold text-foreground">
             10.2 California Privacy Rights
           </h3>
           <p>
@@ -937,7 +870,7 @@ export function PrivacyPolicyContent() {
             </li>
           </ul>
 
-          <h3 className="pt-2 text-lg font-semibold text-gray-900">
+          <h3 className="pt-2 text-lg font-semibold text-foreground">
             10.3 California ADMT Rights (Effective January 1, 2026)
           </h3>
           <p>
@@ -962,7 +895,7 @@ export function PrivacyPolicyContent() {
             </li>
           </ul>
 
-          <h3 className="pt-2 text-lg font-semibold text-gray-900">
+          <h3 className="pt-2 text-lg font-semibold text-foreground">
             10.4 Submitting Requests
           </h3>
           <p>
@@ -973,23 +906,23 @@ export function PrivacyPolicyContent() {
             You may designate an authorized agent to make requests on your behalf by
             providing written authorization.
           </p>
-        </PolicySection>
+        </LegalSection>
 
-        <PolicySection
+        <LegalSection docVariant="page"
           id="pp-11"
           sectionNum="Section 11"
           title="EU & UK Residents — GDPR"
         >
-          <Callout variant="green" icon="🇪🇺">
+          <LegalCallout docVariant="page" variant="green" icon="🇪🇺">
             <p>
               This section applies to residents of the European Union, European Economic
               Area, and United Kingdom whose personal data is processed by TenantShield. We
               process your data in compliance with the General Data Protection Regulation
               (GDPR) and UK GDPR.
             </p>
-          </Callout>
+          </LegalCallout>
 
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-semibold text-foreground">
             11.1 Legal Bases for Processing
           </h3>
           <ul className="list-disc space-y-2 pl-6">
@@ -1013,7 +946,7 @@ export function PrivacyPolicyContent() {
             </li>
           </ul>
 
-          <h3 className="pt-2 text-lg font-semibold text-gray-900">
+          <h3 className="pt-2 text-lg font-semibold text-foreground">
             11.2 International Data Transfers
           </h3>
           <p>
@@ -1024,7 +957,7 @@ export function PrivacyPolicyContent() {
             SCCs is available upon request.
           </p>
 
-          <h3 className="pt-2 text-lg font-semibold text-gray-900">
+          <h3 className="pt-2 text-lg font-semibold text-foreground">
             11.3 Data Protection Officer
           </h3>
           <p>
@@ -1033,7 +966,7 @@ export function PrivacyPolicyContent() {
             protection supervisory authority.
           </p>
 
-          <h3 className="pt-2 text-lg font-semibold text-gray-900">
+          <h3 className="pt-2 text-lg font-semibold text-foreground">
             11.4 Automated Decision-Making Rights (Art. 22)
           </h3>
           <p>
@@ -1043,9 +976,9 @@ export function PrivacyPolicyContent() {
             to automated processing, and obtain an explanation of the logic behind any
             specific analysis.
           </p>
-        </PolicySection>
+        </LegalSection>
 
-        <PolicySection id="pp-12" sectionNum="Section 12" title="Children's Privacy">
+        <LegalSection docVariant="page" id="pp-12" sectionNum="Section 12" title="Children's Privacy">
           <p>
             TenantShield&apos;s Services are intended for individuals who are 18 years of
             age or older. We do not knowingly collect personal information from anyone
@@ -1058,14 +991,14 @@ export function PrivacyPolicyContent() {
             you believe we may have collected information from a child under 18, please
             contact us immediately at {SUPPORT_EMAIL}.
           </p>
-        </PolicySection>
+        </LegalSection>
 
-        <PolicySection
+        <LegalSection docVariant="page"
           id="pp-13"
           sectionNum="Section 13"
           title="Cookies & Tracking Technologies"
         >
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-semibold text-foreground">
             13.1 Types of Cookies We Use
           </h3>
           <DefGrid
@@ -1088,7 +1021,7 @@ export function PrivacyPolicyContent() {
             ]}
           />
 
-          <h3 className="pt-2 text-lg font-semibold text-gray-900">
+          <h3 className="pt-2 text-lg font-semibold text-foreground">
             13.2 What We Do NOT Use
           </h3>
           <p>
@@ -1098,23 +1031,23 @@ export function PrivacyPolicyContent() {
             cookies on our Services.
           </p>
 
-          <h3 className="pt-2 text-lg font-semibold text-gray-900">13.3 Managing Cookies</h3>
+          <h3 className="pt-2 text-lg font-semibold text-foreground">13.3 Managing Cookies</h3>
           <p>
             You can control cookies through your browser settings. Disabling essential
             cookies will impair your ability to log in and use the Services. You may opt
             out of analytics cookies at any time via account Settings → Privacy.
           </p>
 
-          <h3 className="pt-2 text-lg font-semibold text-gray-900">13.4 Do Not Track</h3>
+          <h3 className="pt-2 text-lg font-semibold text-foreground">13.4 Do Not Track</h3>
           <p>
             We respect browser-level &quot;Do Not Track&quot; signals and global privacy
             controls (GPC) as required by California law. When we detect a GPC signal, we
             treat it as a request to opt out of any data sharing for purposes beyond
             service provision.
           </p>
-        </PolicySection>
+        </LegalSection>
 
-        <PolicySection
+        <LegalSection docVariant="page"
           id="pp-14"
           sectionNum="Section 14"
           title="Third-Party Services & Links"
@@ -1131,9 +1064,9 @@ export function PrivacyPolicyContent() {
             what information is shared for that referral. You will have the opportunity
             to review and consent before any referral information is shared.
           </p>
-        </PolicySection>
+        </LegalSection>
 
-        <PolicySection
+        <LegalSection docVariant="page"
           id="pp-15"
           sectionNum="Section 15"
           title="Changes to This Policy"
@@ -1160,14 +1093,11 @@ export function PrivacyPolicyContent() {
             policy constitutes acceptance of the updated policy. If you disagree with the
             changes, you may close your account before the effective date.
           </p>
-        </PolicySection>
+        </LegalSection>
 
-        <PolicySection id="pp-16" sectionNum="Section 16" title="Contact Us">
-          <div className="rounded-2xl border-2 border-amber-200 bg-amber-50/60 p-5 sm:p-6">
-            <h3 className="text-base font-bold text-gray-900">
-              Privacy Inquiries & Rights Requests
-            </h3>
-            <p className="mt-2 text-sm leading-6 text-gray-700 sm:text-base">
+        <LegalSection docVariant="page" id="pp-16" sectionNum="Section 16" title="Contact Us">
+          <LegalHighlightBox title="Privacy Inquiries & Rights Requests" docVariant="page">
+            <p>
               Email: <SupportEmail />
               <br />
               Subject line format: &quot;[Right/Request Type] — [Your Name]&quot;
@@ -1182,8 +1112,8 @@ export function PrivacyPolicyContent() {
               <br />
               Miami, FL 33131
             </p>
-          </div>
-        </PolicySection>
+          </LegalHighlightBox>
+        </LegalSection>
       </div>
     </>
   );

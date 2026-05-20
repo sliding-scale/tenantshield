@@ -11,6 +11,7 @@ alwaysApply: false
 - **Mobile first:** Base styles target the smallest viewport (narrow phone). Add complexity with **`sm:`**, **`md:`**, **`lg:`**, **`xl:`** (Tailwind defaults) — never rely only on `max-*` unless there is a specific exception.
 - **Fully responsive:** Layouts must work from ~320px wide up to large desktops — no horizontal scroll for main content, no clipped text or controls at small widths.
 - **Touch-friendly:** Interactive targets (buttons, links in toolbars, icon buttons) should be at least **~44×44px** (`min-h-11` / `min-w-11` or `size-11`) where practical; avoid tiny hit areas on mobile.
+- **Mobile viewport height:** Use **`svh`** (small viewport height) for full-screen mobile layouts — `min-h-svh`, `h-svh` — not `dvh` or `100vh`. Import `PAGE_MIN_HEIGHT` / `APP_SHELL_HEIGHT` from `@/lib/nav/mobile-chrome` for page shells. Desktop may use `md:min-h-[calc(100vh-4rem)]`.
 
 ## Layout & typography
 

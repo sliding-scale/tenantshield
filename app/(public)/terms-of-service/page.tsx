@@ -1,36 +1,43 @@
 import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 import { TermsOfServiceContent } from "@/components/shared/terms-of-service-content";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 export default function TermsOfServicePage() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-amber-50 via-white to-emerald-50 px-4 py-12 sm:px-6 lg:px-8">
+    <main className="min-h-svh bg-background px-4 py-10 sm:px-6 md:py-14 lg:px-8">
       <div className="mx-auto max-w-4xl">
-        <div className="rounded-3xl border-2 border-amber-200 bg-white/95 p-6 shadow-xl shadow-amber-100/50 sm:p-10">
-          
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            Terms of Service
-          </h1>
-          <p className="mt-3 text-sm text-gray-500">Last Updated: May 15, 2026</p>
+        <Button variant="ghost" size="sm" className="-ml-2 mb-6 gap-1 rounded-full" asChild>
+          <Link href="/">
+            <ChevronLeft className="size-4" aria-hidden />
+            Back
+          </Link>
+        </Button>
 
-          <TermsOfServiceContent variant="page" />
+        <Card className="gap-0 rounded-3xl border border-border py-0 shadow-none ring-0">
+          <div className="p-6 sm:p-10">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              Legal
+            </p>
+            <h1 className="mt-2 font-heading text-3xl font-semibold text-foreground sm:text-4xl">
+              Terms of Service
+            </h1>
+            <p className="mt-3 text-sm text-muted-foreground">Last Updated: May 15, 2026</p>
 
-          <div className="mt-10 flex flex-col gap-3 border-t border-amber-100 pt-8 sm:flex-row sm:items-center sm:justify-between">
-            <Link
-              href="/"
-              className="inline-flex items-center justify-center rounded-full border-2 border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-800 transition-colors duration-200 hover:border-amber-400 hover:text-amber-700"
-            >
-              Back to Home
-            </Link>
-            <Link
-              href="/privacy-policy"
-              className="inline-flex items-center justify-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-amber-600"
-            >
-              Read Privacy Policy
-            </Link>
+            <TermsOfServiceContent variant="page" />
+
+            <div className="mt-10 flex flex-col gap-3 border-t border-border pt-8 sm:flex-row sm:items-center sm:justify-between">
+              <Button variant="outline" className="rounded-xl" asChild>
+                <Link href="/">Back to home</Link>
+              </Button>
+              <Button variant="default" className="rounded-xl" asChild>
+                <Link href="/privacy-policy">Privacy Policy</Link>
+              </Button>
+            </div>
           </div>
-        </div>
+        </Card>
       </div>
     </main>
   );
 }
-

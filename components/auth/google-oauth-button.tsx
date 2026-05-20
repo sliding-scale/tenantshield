@@ -3,6 +3,7 @@
 import { useClerk, useSignIn, useSignUp } from "@clerk/nextjs"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Google } from "@/components/ui/svgs/google"
 
 const SSO_CALLBACK = "/sso-callback"
 const AFTER_AUTH = "/dashboard"
@@ -142,19 +143,8 @@ export function GoogleOAuthButton(props: GoogleAuthButtonSignIn | GoogleAuthButt
       onClick={() => void onClick()}
       className="h-12 w-full gap-2 rounded-full border-border bg-popover px-4 text-base font-medium text-foreground shadow-sm hover:bg-accent hover:text-accent-foreground sm:text-base"
     >
-      <GoogleGlyph />
+      <Google className="size-5 shrink-0" aria-hidden />
       {pending ? "Connecting…" : "Continue with Google"}
     </Button>
-  )
-}
-
-function GoogleGlyph() {
-  return (
-    <span
-      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-background text-sm font-semibold text-foreground ring-1 ring-border"
-      aria-hidden
-    >
-      G
-    </span>
   )
 }

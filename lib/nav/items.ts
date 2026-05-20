@@ -80,7 +80,24 @@ export const APP_NAV_ITEMS: AppNavItem[] = [
     label: "Profile",
     Icon: UserRound,
     matches: (pathname) => pathname.startsWith("/profile"),
+    hideOnMobile: true,
   },
+]
+
+function pickNavItem(href: string, labelOverride?: string): AppNavItem {
+  const item = APP_NAV_ITEMS.find((entry) => entry.href === href)
+  if (!item) {
+    throw new Error(`Unknown nav item: ${href}`)
+  }
+  return labelOverride ? { ...item, label: labelOverride } : item
+}
+
+/** Primary mobile tab bar — Home, Cases, AI (center), Letters; More is rendered separately. */
+export const MOBILE_TAB_BAR_ITEMS: AppNavItem[] = [
+  pickNavItem("/dashboard"),
+  pickNavItem("/cases"),
+  pickNavItem("/ask-ai", "AI"),
+  pickNavItem("/letters"),
 ]
 
 /** Overflow links opened from the mobile tab bar hamburger menu. */
@@ -120,6 +137,12 @@ export const MOBILE_MORE_NAV_ITEMS: AppNavItem[] = [
     label: "Billing",
     Icon: CreditCard,
     matches: (pathname) => pathname.startsWith("/billing"),
+  },
+  {
+    href: "/profile",
+    label: "Profile",
+    Icon: UserRound,
+    matches: (pathname) => pathname.startsWith("/profile"),
   },
 ]
 

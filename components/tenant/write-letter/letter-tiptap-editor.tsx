@@ -62,7 +62,7 @@ export const LetterTipTapEditor = forwardRef<LetterTipTapEditorHandle, LetterTip
       editorProps: {
         attributes: {
           class: [
-            "min-h-[min(24rem,50dvh)] w-full max-w-none rounded-xl px-3 py-3 text-base leading-relaxed text-foreground",
+            "min-h-[min(24rem,50svh)] w-full max-w-none rounded-xl px-3 py-3 text-base leading-relaxed text-foreground",
             "outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
             "[&_p]:mb-3 [&_p:last-child]:mb-0",
             className ?? "",
@@ -81,7 +81,7 @@ export const LetterTipTapEditor = forwardRef<LetterTipTapEditorHandle, LetterTip
 
     if (!editor) {
       return (
-        <div className="min-h-[min(24rem,50dvh)] animate-pulse rounded-xl border border-border bg-muted/30" />
+        <div className="min-h-[min(24rem,50svh)] animate-pulse rounded-xl border border-border bg-muted/30" />
       )
     }
 

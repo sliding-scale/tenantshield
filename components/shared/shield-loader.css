@@ -1,3 +1,8 @@
+.shield-loader {
+  --shield-surface: hsl(38 55% 92%);
+  --shield-border: hsl(38 30% 80%);
+}
+
 .shield-loader__dots span {
   width: 5px;
   height: 5px;
@@ -30,7 +35,7 @@
 
 .shield-loader__bg {
   fill: var(--shield-surface);
-  stroke: var(--cream-border);
+  stroke: var(--shield-border);
   stroke-width: 1.5;
 }
 

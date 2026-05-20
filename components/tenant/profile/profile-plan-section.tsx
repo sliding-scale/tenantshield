@@ -1,11 +1,15 @@
+"use client"
+
 import Link from "next/link"
 import { useAction, useQuery } from "convex/react"
+import { useState } from "react"
 import { api } from "@/convex/_generated/api"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
 import { Button } from "@/components/ui/button"
-import { PRICING_PLANS, buildPlanCatalogLite, getPricingPlanFeatures } from "@/lib/plans/pricing"
+import { Card } from "@/components/ui/card"
+import { PRICING_PLANS, buildPlanCatalogLite, getPricingPlanFeatures, isPaidPlan } from "@/lib/plans/pricing"
 import { subscriptionCancellationMessage } from "@/lib/plans/subscription-display"
-import { useState } from "react"
+import { cn } from "@/lib/utils"
 
 export function ProfilePlanSection() {
   const { convexUser, isLoading: userLoading } = useCurrentUser()
@@ -45,60 +49,58 @@ export function ProfilePlanSection() {
 
   if (userLoading) {
     return (
-      <section className="mt-8 md:mt-10 animate-pulse">
-        <div className="h-40 rounded-2xl bg-surface-strong/20 md:rounded-3xl" />
+      <section className="mt-6 animate-pulse md:mt-8" aria-hidden>
+        <div className="h-36 rounded-2xl bg-primary/30 md:rounded-3xl" />
       </section>
     )
   }
 
-  const isPaid = planId === "pro" || planId === "power"
+  const isPaid = isPaidPlan(planId)
 
   return (
-    <section aria-labelledby="profile-plan-heading" className="mt-8 md:mt-10">
+    <section aria-labelledby="profile-plan-heading" className="mt-6 md:mt-8">
       <h2 id="profile-plan-heading" className="sr-only">
         Plan
       </h2>
-      <div className="rounded-2xl border border-surface-strong-hover bg-surface-strong p-5 shadow-sm sm:p-6 md:rounded-3xl md:p-7 lg:p-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cream-surface-deep dark:text-ink-warm-muted">
-          Plan
-        </p>
-        <div className="mt-3 flex flex-col gap-5 sm:mt-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 lg:gap-8">
+      <Card
+        className={cn(
+          "gap-0 overflow-hidden rounded-2xl border-0 bg-primary p-5 text-primary-foreground shadow-none ring-0 md:rounded-3xl md:p-6",
+        )}
+        size="sm"
+      >
+        <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
-            <p className="font-heading text-2xl font-semibold leading-tight text-cream-surface-soft dark:text-ink-warm md:text-3xl lg:text-4xl">
-              {planName}
-            </p>
-            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-cream-surface-deep dark:text-ink-warm-muted md:text-base lg:text-lg">
+            <p className="font-heading text-2xl font-semibold leading-tight md:text-3xl">{planName}</p>
+            <p className="mt-2 text-sm leading-relaxed text-primary-foreground/90 md:text-base">
               {features.join(" · ")}
             </p>
             {cancellationNotice ? (
-              <p className="mt-3 max-w-3xl rounded-xl border border-cream-border bg-cream-page/40 px-3 py-2 text-sm leading-relaxed text-cream-surface-deep dark:text-ink-warm-muted">
+              <p className="mt-3 rounded-xl bg-primary-foreground/10 px-3 py-2 text-sm leading-relaxed text-primary-foreground/90">
                 {cancellationNotice}
               </p>
             ) : null}
           </div>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            {isPaid ? (
-              <Button
-                type="button"
-                variant="secondary"
-                size="lg"
-                disabled={portalLoading}
-                onClick={() => void handleManageBilling()}
-                className="h-11 w-full shrink-0 rounded-xl sm:h-12 sm:w-auto sm:min-w-[7.5rem]"
-              >
-                {portalLoading ? "Opening…" : "Manage billing"}
-              </Button>
-            ) : null}
+          {isPaid ? (
+            <Button
+              type="button"
+              variant="cta"
+              disabled={portalLoading}
+              onClick={() => void handleManageBilling()}
+              className="h-10 shrink-0 rounded-xl px-4 text-sm font-semibold sm:h-11 sm:px-5"
+            >
+              {portalLoading ? "Opening…" : "Manage"}
+            </Button>
+          ) : (
             <Button
               asChild
-              size="lg"
-              className="h-11 w-full shrink-0 rounded-xl sm:h-12 sm:w-auto sm:min-w-[7.5rem]"
+              variant="cta"
+              className="h-10 shrink-0 rounded-xl px-4 text-sm font-semibold sm:h-11 sm:px-5"
             >
-              <Link href="/billing">{isPaid ? "Compare plans" : "Upgrade"}</Link>
+              <Link href="/billing">Upgrade</Link>
             </Button>
-          </div>
+          )}
         </div>
-      </div>
+      </Card>
     </section>
   )
 }

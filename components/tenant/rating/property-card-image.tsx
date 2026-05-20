@@ -24,7 +24,7 @@ export function PropertyCardImage({ imageUrl, propertyId }: Props) {
 
   return (
     <div
-      className="relative w-full shrink-0 overflow-hidden border-b border-cream-border bg-cream-surface-soft"
+      className="relative w-full shrink-0 overflow-hidden border-b border-border bg-accent"
       style={{ aspectRatio: "16 / 10", minHeight: 176 }}
     >
       <img

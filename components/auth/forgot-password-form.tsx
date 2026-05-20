@@ -4,11 +4,10 @@ import { useSignIn } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { firstClerkErrorCode, firstClerkErrorMessage } from "@/lib/auth/clerk-errors"
+import { AuthPasswordInput } from "@/components/auth/auth-password-input"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-
-const authFieldClass =
-  "h-12 rounded-full border-border bg-popover px-5 text-base shadow-sm placeholder:text-muted-foreground md:text-sm"
+import { authFieldClass } from "@/lib/ui/auth-field-styles"
 
 type Props = {
   initialEmail?: string
@@ -228,10 +227,9 @@ export function ForgotPasswordForm({ initialEmail = "", onBack }: Props) {
               <label htmlFor="forgot-password-new" className="sr-only">
                 New password
               </label>
-              <Input
+              <AuthPasswordInput
                 id="forgot-password-new"
                 name="password"
-                type="password"
                 autoComplete="new-password"
                 value={password}
                 onChange={(ev) => setPassword(ev.target.value)}

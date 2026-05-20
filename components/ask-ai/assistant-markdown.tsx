@@ -22,7 +22,7 @@ const components: Components = {
     </strong>
   ),
   em: ({ children, className, ...props }) => (
-    <em {...props} className={cn("italic text-ink-warm", className)}>
+    <em {...props} className={cn("italic text-foreground", className)}>
       {children}
     </em>
   ),
@@ -71,7 +71,7 @@ const components: Components = {
     <h1
       {...props}
       className={cn(
-        "font-heading mb-2 text-xl font-semibold text-ink-warm first:mt-0",
+        "font-heading mb-2 text-xl font-semibold text-foreground first:mt-0",
         className,
       )}
     >
@@ -82,7 +82,7 @@ const components: Components = {
     <h2
       {...props}
       className={cn(
-        "font-heading mb-2 mt-4 text-lg font-semibold text-ink-warm first:mt-0",
+        "font-heading mb-2 mt-4 text-lg font-semibold text-foreground first:mt-0",
         className,
       )}
     >
@@ -93,7 +93,7 @@ const components: Components = {
     <h3
       {...props}
       className={cn(
-        "mb-2 mt-3 text-base font-semibold text-ink-warm first:mt-0",
+        "mb-2 mt-3 text-base font-semibold text-foreground first:mt-0",
         className,
       )}
     >
@@ -116,7 +116,7 @@ const components: Components = {
       <code
         {...props}
         className={cn(
-          "rounded-md border border-cream-border bg-cream-surface-soft px-1.5 py-0.5 font-mono text-[0.8125rem] text-foreground",
+          "rounded-md border border-border bg-accent px-1.5 py-0.5 font-mono text-[0.8125rem] text-foreground",
           className,
         )}
       >
@@ -128,7 +128,7 @@ const components: Components = {
     <pre
       {...props}
       className={cn(
-        "mb-3 max-w-full overflow-x-auto rounded-xl border border-cream-border bg-cream-surface-soft p-3 text-sm last:mb-0",
+        "mb-3 max-w-full overflow-x-auto rounded-xl border border-border bg-accent p-3 text-sm last:mb-0",
         className,
       )}
     >
@@ -139,7 +139,7 @@ const components: Components = {
     <blockquote
       {...props}
       className={cn(
-        "border-primary/35 text-ink-warm-muted mb-3 border-l-4 pl-3 text-[15px] italic last:mb-0",
+        "border-primary/35 text-muted-foreground mb-3 border-l-4 pl-3 text-[15px] italic last:mb-0",
         className,
       )}
     >
@@ -147,7 +147,7 @@ const components: Components = {
     </blockquote>
   ),
   hr: ({ className, ...props }) => (
-    <hr {...props} className={cn("border-cream-border my-4", className)} />
+    <hr {...props} className={cn("border-border my-4", className)} />
   ),
 };
 

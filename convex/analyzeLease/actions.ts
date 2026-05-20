@@ -35,6 +35,7 @@ export const extractLeaseText = action({
   args: {
     storageId: v.id("_storage"),
     state: v.string(),
+    fileName: v.optional(v.string()),
   },
   handler: async (
     ctx,
@@ -83,6 +84,7 @@ export const extractLeaseText = action({
         state: args.state,
         leaseText,
         pdfFile: args.storageId,
+        pdfFileName: args.fileName?.trim() || undefined,
       },
     );
 

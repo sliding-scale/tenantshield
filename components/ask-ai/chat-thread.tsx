@@ -5,9 +5,10 @@ import { DefaultChatTransport } from "ai";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { UIMessage } from "ai";
 import type { Id } from "@/convex/_generated/dataModel";
+import { AskAiEmptyState } from "@/components/ask-ai/ask-ai-empty-state";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Loader2, RefreshCw, SendHorizontal, Square, Sparkles } from "lucide-react";
+import { ArrowUp, Loader2, RefreshCw, Square, Sparkles } from "lucide-react";
 import { resolveAskAiStateForApi } from "@/lib/chat/ask-ai-state";
 import { isLikelyRetrievalFailureResponse } from "@/lib/chat/response-utils";
 import { chatMessagesToUIMessages } from "./map-documents-to-ui-messages";
@@ -49,8 +50,8 @@ function ChatRetryBanner({
   message?: string;
 }) {
   return (
-    <div className="border-cream-border bg-cream-surface/80 flex flex-wrap items-center gap-3 rounded-xl border px-4 py-3 text-sm">
-      <span className="text-ink-warm-muted min-w-0 flex-1">{message}</span>
+    <div className="border-border bg-card/80 flex flex-wrap items-center gap-3 rounded-xl border px-4 py-3 text-sm">
+      <span className="text-muted-foreground min-w-0 flex-1">{message}</span>
       <Button
         type="button"
         size="sm"
@@ -226,6 +227,16 @@ function ChatThreadLoaded({
     return () => cancelAnimationFrame(id);
   }, [messages, status, showThinkingRow]);
 
+  async function handleSuggestion(text: string) {
+    if (busy || isLimitReached) return;
+    await sendMessage(
+      { text },
+      {
+        body: { conversationId, selectedStateCode: stateCodeForApi },
+      },
+    );
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const text = draft.trim();
@@ -243,19 +254,14 @@ function ChatThreadLoaded({
     <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
       <div
         ref={messageListRef}
-        className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-6 pb-4 max-md:pb-[calc(5.75rem+env(safe-area-inset-bottom,0px))] md:px-8"
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-6 pb-4 max-md:pb-[calc(5.75rem+env(safe-area-inset-bottom,0px))] md:px-6 md:px-8"
       >
           {messages.length === 0 ? (
-            <div className="mx-auto flex max-w-2xl flex-col gap-3 py-12 text-center">
-              <h3 className="font-heading text-2xl text-foreground md:text-3xl">
-                Tenant Shield Assistant
-              </h3>
-              <p className="text-ink-warm-muted text-base leading-relaxed">
-                Ask about your lease, past cases, letters you&apos;ve drafted,
-                or tenant rights. Answers use your saved documents when
-                available.
-              </p>
-            </div>
+            <AskAiEmptyState
+              selectedStateCode={selectedStateCode}
+              disabled={busy || isLimitReached}
+              onSuggestion={(text) => void handleSuggestion(text)}
+            />
           ) : (
             <ul className="mx-auto flex w-full max-w-3xl flex-col gap-5">
               {messages.map((m, idx) => {
@@ -279,15 +285,15 @@ function ChatThreadLoaded({
                       m.role === "user" ? "items-end" : "items-start",
                     )}
                   >
-                    <span className="text-ink-warm-muted mb-0.5 text-xs font-medium uppercase tracking-wide">
+                    <span className="text-muted-foreground mb-0.5 text-xs font-medium uppercase tracking-wide">
                       {m.role === "user" ? "You" : "Assistant"}
                     </span>
                     <div
                       className={cn(
                         "rounded-2xl px-4 py-3 text-[15px] leading-relaxed shadow-sm",
                         m.role === "user"
-                          ? "border-cream-border w-fit max-w-[min(100%,42rem)] border bg-cream-page dark:bg-card/30"
-                          : "border-cream-border mr-auto max-w-[min(100%,48rem)] border bg-background dark:bg-card/50",
+                          ? "border-border w-fit max-w-[min(100%,42rem)] border bg-background dark:bg-card/30"
+                          : "border-border mr-auto max-w-[min(100%,48rem)] border bg-background dark:bg-card/50",
                       )}
                     >
                       {m.role === "assistant" ? (
@@ -304,7 +310,7 @@ function ChatThreadLoaded({
                 );
               })}
               {showThinkingRow ? (
-                <li className="text-ink-warm-muted flex items-center gap-2 text-sm">
+                <li className="text-muted-foreground flex items-center gap-2 text-sm">
                   <Loader2 className="size-4 animate-spin" aria-hidden />
                   Thinking…
                 </li>
@@ -324,17 +330,18 @@ function ChatThreadLoaded({
                     <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4">
                       <Sparkles className="size-6" />
                     </div>
-                    <h4 className="font-heading text-xl font-semibold text-ink-warm">
+                    <h4 className="font-heading text-xl font-semibold text-foreground">
                       Chat limit reached
                     </h4>
-                    <p className="mt-2 text-ink-warm-muted text-sm leading-relaxed max-w-md mx-auto">
+                    <p className="mt-2 text-muted-foreground text-sm leading-relaxed max-w-md mx-auto">
                       You&apos;ve sent 5 messages in this conversation. Upgrade
                       to a paid plan for unlimited AI guidance and deeper legal
                       research.
                     </p>
                     <Button
                       asChild
-                      className="mt-5 h-11 rounded-xl bg-surface-strong px-6 text-sm font-semibold text-white shadow-sm hover:bg-surface-strong-hover"
+                      variant="cta"
+                      className="mt-5 h-11 rounded-xl px-6 text-sm font-semibold"
                     >
                       <Link href="/billing">Upgrade to continue</Link>
                     </Button>
@@ -358,19 +365,19 @@ function ChatThreadLoaded({
 
       <form
         onSubmit={handleSubmit}
-        className="border-cream-border bg-cream-page/95 max-md:fixed max-md:inset-x-0 max-md:bottom-0 max-md:z-30 shrink-0 border-t px-4 pt-4 pb-[max(1rem,calc(0.75rem+env(safe-area-inset-bottom,0px)))] backdrop-blur-md dark:bg-background/95 md:relative md:z-0 md:px-8 md:pb-4"
+        className="max-md:fixed max-md:inset-x-0 max-md:bottom-0 max-md:z-30 shrink-0 border-t border-border bg-background/95 px-4 pt-4 pb-[max(1rem,calc(0.75rem+env(safe-area-inset-bottom,0px)))] backdrop-blur-md md:relative md:z-0 md:px-6 md:py-4 md:pb-4"
       >
-          <div className="mx-auto flex max-w-3xl items-center gap-2">
+        <div className="mx-auto flex max-w-3xl items-end gap-2">
             <textarea
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               placeholder={
-                isLimitReached ? "Chat limit reached" : "Message Tenant Shield…"
+                isLimitReached ? "Chat limit reached" : "Ask about your rights…"
               }
               rows={1}
               disabled={busy || isLimitReached}
               className={cn(
-                "border-input bg-background placeholder:text-muted-foreground focus-visible:ring-ring max-h-40 min-h-11 flex-1 resize-none rounded-xl border px-4 py-2.5 text-[15px] leading-snug shadow-sm outline-none transition-[box-shadow] focus-visible:ring-3 disabled:opacity-60",
+                "max-h-32 min-h-11 flex-1 resize-none rounded-2xl border-0 bg-muted px-4 py-3 text-[15px] leading-snug text-foreground placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60",
               )}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
@@ -385,7 +392,7 @@ function ChatThreadLoaded({
                 type="button"
                 variant="secondary"
                 size="icon-lg"
-                className="size-11 shrink-0 rounded-xl"
+                className="size-11 shrink-0 rounded-full"
                 aria-label="Stop generating"
                 onClick={() => void stop()}
               >
@@ -395,11 +402,12 @@ function ChatThreadLoaded({
               <Button
                 type="submit"
                 size="icon-lg"
-                className="size-11 shrink-0 rounded-xl"
+                variant={draft.trim() && !isLimitReached ? "cta" : "secondary"}
+                className="size-11 shrink-0 rounded-full"
                 disabled={!draft.trim() || isLimitReached}
                 aria-label="Send message"
               >
-                <SendHorizontal className="size-4" />
+                <ArrowUp className="size-4" />
               </Button>
             )}
           </div>
