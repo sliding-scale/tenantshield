@@ -162,8 +162,7 @@ export default function TenantDashboardMain() {
                       </div>
                     ) : (
                       <p className='mt-5 max-w-xl text-sm leading-relaxed text-background/75 sm:mt-4 sm:text-base lg:max-w-2xl'>
-                        Start a case or write a demand letter to build your protection score. We&apos;ll analyze your
-                        disputes, cite the laws that apply, and show you how strong your position is over time.
+                        Start a case or write a demand letter to build your protection score.
                       </p>
                     )}
                   </div>
