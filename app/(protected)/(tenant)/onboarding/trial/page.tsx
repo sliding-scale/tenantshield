@@ -25,7 +25,7 @@ const valuePoints = [
 export default function FreeTrialPage() {
   return (
     <main className="min-h-svh w-full bg-background px-5 pb-10 pt-8 text-foreground md:px-8 lg:px-10">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-10 lg:min-h-[calc(100vh-4rem)] lg:items-center lg:justify-center lg:gap-14">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-10 lg:min-h-svh lg:items-center lg:justify-center lg:gap-14">
         <section className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-stretch xl:gap-12">
           <div className="rounded-[2rem] border border-border bg-white p-6 text-foreground shadow-sm sm:p-8 lg:flex lg:flex-col lg:justify-between lg:p-10">
             <div className="mx-auto flex max-w-2xl flex-col items-center text-center lg:mx-0 lg:items-start lg:text-left">

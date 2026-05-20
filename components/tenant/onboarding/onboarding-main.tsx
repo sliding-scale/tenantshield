@@ -159,7 +159,7 @@ export default function OnboardingMain() {
 
   if (needsStateGate) {
     return (
-      <main className="flex min-h-svh w-full flex-col md:min-h-[calc(100vh-4rem)]">
+      <main className="flex min-h-svh w-full flex-col md:min-h-svh">
         <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-8 pt-8 sm:px-6 lg:max-w-lg lg:px-10 lg:pt-12">
           <p className="text-sm font-semibold tracking-[0.2em] text-primary">Before we start</p>
           <h1 className="mt-3 font-heading text-4xl leading-tight text-foreground lg:text-5xl">
@@ -221,7 +221,7 @@ export default function OnboardingMain() {
   }
 
   return (
-    <main className="flex min-h-svh w-full flex-col md:min-h-[calc(100vh-4rem)]">
+    <main className="flex min-h-svh w-full flex-col md:min-h-svh">
       <div className="flex w-full items-center gap-3 px-4 pb-4 pt-5 sm:px-6 lg:gap-4 lg:px-10">
         <button
           type="button"

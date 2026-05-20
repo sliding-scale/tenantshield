@@ -36,7 +36,7 @@ export function BillingMain() {
   return (
     <main
       className={cn(
-        "min-h-svh bg-background pt-5 md:min-h-[calc(100vh-4rem)] md:pb-10 md:pt-8",
+        "min-h-svh bg-background pt-5 md:min-h-svh md:pb-10 md:pt-8",
         MOBILE_TAB_BAR_PAGE_SHELL,
       )}
     >

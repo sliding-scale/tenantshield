@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import { ClerkProvider } from '@clerk/nextjs';
 import { Geist_Mono, Inter, Playfair_Display } from 'next/font/google';
-import Navbar from '../components/shared/main-navbar';
-import MobileTabBar from '../components/shared/mobile-tab-bar';
+import { AppChrome } from '@/components/shared/app-chrome';
 import './globals.css';
 import Providers from './providers';
 
@@ -36,9 +35,7 @@ export default function RootLayout({
       <body>
         <ClerkProvider>
           <Providers>
-            <Navbar />
-            {children}
-            <MobileTabBar />
+            <AppChrome>{children}</AppChrome>
           </Providers>
         </ClerkProvider>
       </body>

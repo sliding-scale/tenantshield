@@ -50,3 +50,12 @@ export function shouldShowMobileTabBar(pathname: string | null, isSignedIn: bool
 export function shouldHideTopNavbarOnMobile(pathname: string | null, isSignedIn: boolean) {
   return shouldShowMobileTabBar(pathname, isSignedIn)
 }
+
+/** Desktop sidebar for signed-in app routes (replaces top navbar links). */
+export function shouldShowDesktopSidebar(pathname: string | null, isSignedIn: boolean) {
+  if (!isSignedIn || !pathname) return false
+  if (isAuthPagePath(pathname)) return false
+  if (isVerifyEmailPath(pathname)) return false
+  if (isOnboardingQuestionFlowPath(pathname)) return false
+  return true
+}

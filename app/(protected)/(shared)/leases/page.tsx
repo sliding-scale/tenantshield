@@ -26,7 +26,7 @@ export default function LeasesPage() {
   return (
     <main
       className={cn(
-        "min-h-svh bg-background px-4 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10",
+        "min-h-svh bg-background px-4 md:min-h-svh md:px-8 md:py-10",
         MOBILE_TAB_BAR_PAGE_SHELL,
       )}
     >

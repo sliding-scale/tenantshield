@@ -80,7 +80,7 @@ export default function LetterDetailPage() {
 
   if (!params?.letterId) {
     return (
-      <main className="min-h-svh bg-background px-4 py-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10">
+      <main className="min-h-svh bg-background px-4 py-6 md:min-h-svh md:px-8 md:py-10">
         <p className="text-muted-foreground">Invalid letter id.</p>
       </main>
     )
@@ -88,7 +88,7 @@ export default function LetterDetailPage() {
 
   if (row === undefined) {
     return (
-      <main className="min-h-svh bg-background px-4 py-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10">
+      <main className="min-h-svh bg-background px-4 py-6 md:min-h-svh md:px-8 md:py-10">
         <ShieldLoader variant="letter" fullPage />
       </main>
     )
@@ -96,7 +96,7 @@ export default function LetterDetailPage() {
 
   if (!row) {
     return (
-      <main className="min-h-svh bg-background px-4 py-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10">
+      <main className="min-h-svh bg-background px-4 py-6 md:min-h-svh md:px-8 md:py-10">
         <p className="text-muted-foreground">Letter not found.</p>
       </main>
     )

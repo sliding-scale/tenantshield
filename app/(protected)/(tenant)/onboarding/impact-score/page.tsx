@@ -87,7 +87,7 @@ export default function ImpactScorePage() {
   if (!impact) {
     return (
       <main
-        className={`min-h-svh ${pageBgMobile} md:min-h-[calc(100vh-4rem)] dark:bg-background`}
+        className={`min-h-svh ${pageBgMobile} md:min-h-svh dark:bg-background`}
       >
         <div className="mx-auto flex w-full max-w-3xl flex-col justify-center px-5 py-12 sm:px-6 lg:max-w-4xl lg:px-8 lg:py-20">
           <h1 className="font-heading text-3xl font-semibold text-foreground sm:text-4xl">
@@ -116,7 +116,7 @@ export default function ImpactScorePage() {
 
   return (
     <main
-      className={`w-full ${pageBgMobile} dark:bg-background max-lg:min-h-svh lg:flex lg:h-[calc(100vh-4rem)] lg:max-h-[calc(100vh-4rem)] lg:min-h-0 lg:flex-col lg:overflow-hidden lg:bg-stone-50`}
+      className={`w-full ${pageBgMobile} dark:bg-background max-lg:min-h-svh lg:flex lg:h-svh lg:max-h-svh lg:min-h-0 lg:flex-col lg:overflow-hidden lg:bg-stone-50`}
     >
       {/* Mobile: scrollable single column, mock-aligned */}
       <div className="mx-auto w-full max-w-md px-5 pb-14 pt-8 sm:px-6 lg:hidden">

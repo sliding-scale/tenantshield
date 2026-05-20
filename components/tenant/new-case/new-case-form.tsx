@@ -144,7 +144,7 @@ export function NewCaseForm({
   }
 
   return (
-    <main className="flex min-h-svh flex-col bg-background pb-28 pt-5 md:min-h-[calc(100vh-4rem)] md:pb-10 md:pt-6 lg:pt-8">
+    <main className="flex min-h-svh flex-col bg-background pb-28 pt-5 md:min-h-svh md:pb-10 md:pt-6 lg:pt-8">
       <div className="flex w-full flex-1 flex-col px-4 sm:px-6 md:px-10 lg:px-14 xl:px-16">
         <header className="mb-5 flex shrink-0 items-center justify-between md:hidden">
           <Button

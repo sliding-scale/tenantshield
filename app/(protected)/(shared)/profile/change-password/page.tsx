@@ -64,7 +64,7 @@ export default function ChangePasswordPage() {
   return (
     <main
       className={cn(
-        "min-h-svh bg-background px-4 sm:px-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10 md:pt-8 lg:px-10 lg:py-12",
+        "min-h-svh bg-background px-4 sm:px-6 md:min-h-svh md:px-8 md:py-10 md:pt-8 lg:px-10 lg:py-12",
         MOBILE_TAB_BAR_PAGE_SHELL,
       )}
     >

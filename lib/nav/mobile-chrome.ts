@@ -17,13 +17,14 @@ export const MOBILE_TAB_BAR_PAGE_SHELL = `${MOBILE_PAGE_TOP_PADDING} ${MOBILE_TA
 
 /**
  * Mobile viewport height — uses `svh` (small viewport) so layouts stay stable
- * when the browser chrome shows/hides (native app feel). Desktop uses classic `vh`.
+ * when the browser chrome shows/hides (native app feel). Desktop uses full `svh`
+ * beside the sidebar (no top navbar).
  */
 export const MOBILE_VIEWPORT_MIN_HEIGHT = "min-h-svh"
-export const DESKTOP_VIEWPORT_MIN_HEIGHT = "md:min-h-[calc(100vh-4rem)]"
+export const DESKTOP_VIEWPORT_MIN_HEIGHT = "md:min-h-svh"
 export const PAGE_MIN_HEIGHT = `${MOBILE_VIEWPORT_MIN_HEIGHT} ${DESKTOP_VIEWPORT_MIN_HEIGHT}`
 
 /** Full-height app shells (e.g. Ask AI chat). */
 export const MOBILE_VIEWPORT_HEIGHT = "h-svh max-h-svh"
-export const DESKTOP_VIEWPORT_HEIGHT = "md:h-[calc(100vh-4rem)] md:max-h-[calc(100vh-4rem)]"
+export const DESKTOP_VIEWPORT_HEIGHT = "md:h-svh md:max-h-svh"
 export const APP_SHELL_HEIGHT = `${MOBILE_VIEWPORT_HEIGHT} ${DESKTOP_VIEWPORT_HEIGHT}`

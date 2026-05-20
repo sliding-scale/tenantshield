@@ -118,7 +118,7 @@ export default function AskAiShell() {
   }
 
   return (
-    <div className="bg-background flex h-svh max-h-svh flex-col overflow-hidden md:h-[calc(100vh-4rem)] md:max-h-[calc(100vh-4rem)]">
+    <div className="bg-background flex h-svh max-h-svh flex-col overflow-hidden md:h-svh md:max-h-svh">
       <div className="flex min-h-0 flex-1 flex-col md:flex-row md:items-stretch">
         <ChatSidebar
           conversations={conversations}

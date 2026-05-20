@@ -31,7 +31,7 @@ export default function StateLawDetailPage({
     return (
       <main
         className={cn(
-          "flex min-h-svh flex-col items-center justify-center bg-background px-4 md:min-h-[calc(100vh-4rem)]",
+          "flex min-h-svh flex-col items-center justify-center bg-background px-4 md:min-h-svh",
           MOBILE_TAB_BAR_PAGE_SHELL,
         )}
       >
@@ -49,7 +49,7 @@ export default function StateLawDetailPage({
   return (
     <main
       className={cn(
-        "min-h-svh bg-background px-4 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10",
+        "min-h-svh bg-background px-4 md:min-h-svh md:px-8 md:py-10",
         MOBILE_TAB_BAR_PAGE_SHELL,
       )}
     >

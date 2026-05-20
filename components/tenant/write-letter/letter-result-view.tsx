@@ -177,7 +177,7 @@ export function LetterResultView({
   return (
     <main
       className={cn(
-        "flex min-h-svh flex-col bg-background pt-5 md:min-h-[calc(100vh-4rem)] md:pb-10 md:pt-6 lg:pt-8",
+        "flex min-h-svh flex-col bg-background pt-5 md:min-h-svh md:pb-10 md:pt-6 lg:pt-8",
         caseId
           ? "pb-[calc(22rem+env(safe-area-inset-bottom,0px))]"
           : "pb-[calc(18rem+env(safe-area-inset-bottom,0px))]",

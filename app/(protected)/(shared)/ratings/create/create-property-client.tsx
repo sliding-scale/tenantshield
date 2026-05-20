@@ -11,7 +11,7 @@ export default function CreatePropertyClient() {
   const initialName = searchParams.get("name")?.trim() ?? ""
 
   return (
-    <main className="min-h-svh bg-background px-4 py-5 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-8">
+    <main className="min-h-svh bg-background px-4 py-5 md:min-h-svh md:px-8 md:py-8">
       <div className="mx-auto w-full min-w-0 max-w-2xl">
         <Button
           variant="outline"

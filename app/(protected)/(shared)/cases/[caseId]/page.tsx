@@ -50,7 +50,7 @@ export default function CaseDetailsPage() {
 
   if (!params?.caseId) {
     return (
-      <main className="min-h-svh bg-background px-4 py-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10">
+      <main className="min-h-svh bg-background px-4 py-6 md:min-h-svh md:px-8 md:py-10">
         <p className="text-muted-foreground">Invalid case id.</p>
       </main>
     )
@@ -58,7 +58,7 @@ export default function CaseDetailsPage() {
 
   if (row === undefined) {
     return (
-      <main className="min-h-svh bg-background px-4 py-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10">
+      <main className="min-h-svh bg-background px-4 py-6 md:min-h-svh md:px-8 md:py-10">
         <ShieldLoader variant="case" fullPage />
       </main>
     )
@@ -66,7 +66,7 @@ export default function CaseDetailsPage() {
 
   if (!row || !details) {
     return (
-      <main className="min-h-svh bg-background px-4 py-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10">
+      <main className="min-h-svh bg-background px-4 py-6 md:min-h-svh md:px-8 md:py-10">
         <p className="text-muted-foreground">Case not found.</p>
       </main>
     )
@@ -106,7 +106,7 @@ export default function CaseDetailsPage() {
   }
 
   return (
-    <main className="flex min-h-svh flex-col bg-background pb-28 pt-5 md:min-h-[calc(100vh-4rem)] md:pb-10 md:pt-6 lg:pt-8">
+    <main className="flex min-h-svh flex-col bg-background pb-28 pt-5 md:min-h-svh md:pb-10 md:pt-6 lg:pt-8">
       <div className="flex w-full flex-1 flex-col px-4 sm:px-6 md:px-10 lg:px-14 xl:px-16">
         <NewCaseAnalysisResult
           details={details}
