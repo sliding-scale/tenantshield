@@ -92,14 +92,14 @@ export function CreatePropertyForm({ initialName = "" }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="w-full min-w-0 space-y-6">
-      <div className="w-full min-w-0 rounded-2xl border border-cream-border bg-background p-4 shadow-sm sm:p-5 md:p-6">
+      <div className="w-full min-w-0 rounded-2xl border border-border bg-background p-4 shadow-sm sm:p-5 md:p-6">
         <h2 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary md:text-xs">
           Property details
         </h2>
 
         <div className="mt-4 space-y-5">
           <div>
-            <label htmlFor={nameId} className="text-sm font-medium text-ink-warm">
+            <label htmlFor={nameId} className="text-sm font-medium text-foreground">
               Property name <span className="text-destructive">*</span>
             </label>
             <Input
@@ -108,16 +108,16 @@ export function CreatePropertyForm({ initialName = "" }: Props) {
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. 1240 Oak Street, Apt 3B"
               maxLength={120}
-              className="mt-1.5 h-11 w-full min-w-0 rounded-xl border-cream-border bg-cream-surface-soft px-3 text-sm text-ink-warm placeholder:text-ink-warm-muted"
+              className="mt-1.5 h-11 w-full min-w-0 rounded-xl border-border bg-accent px-3 text-sm text-foreground placeholder:text-muted-foreground"
               required
             />
-            <p className="mt-1 text-xs text-ink-warm-muted">
+            <p className="mt-1 text-xs text-muted-foreground">
               Include the unit / suite so other tenants can find it.
             </p>
           </div>
 
           <div>
-            <p className="text-sm font-medium text-ink-warm">
+            <p className="text-sm font-medium text-foreground">
               Property image <span className="text-destructive">*</span>
             </p>
 
@@ -130,7 +130,7 @@ export function CreatePropertyForm({ initialName = "" }: Props) {
             />
 
             {previewUrl ? (
-              <div className="relative mt-2 overflow-hidden rounded-2xl border border-cream-border bg-cream-surface-soft">
+              <div className="relative mt-2 overflow-hidden rounded-2xl border border-border bg-accent">
                 <div className="relative h-48 w-full sm:h-56">
                   <Image
                     src={previewUrl}
@@ -141,8 +141,8 @@ export function CreatePropertyForm({ initialName = "" }: Props) {
                     unoptimized
                   />
                 </div>
-                <div className="flex items-center justify-between gap-2 border-t border-cream-border bg-background/95 px-3 py-2">
-                  <span className="truncate text-xs text-ink-warm-muted">
+                <div className="flex items-center justify-between gap-2 border-t border-border bg-background/95 px-3 py-2">
+                  <span className="truncate text-xs text-muted-foreground">
                     {file?.name ?? "Image selected"}
                   </span>
                   <div className="flex gap-2">
@@ -150,7 +150,7 @@ export function CreatePropertyForm({ initialName = "" }: Props) {
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="h-8 rounded-full border-cream-border"
+                      className="h-8 rounded-full border-border"
                       onClick={() => fileInputRef.current?.click()}
                     >
                       Change
@@ -159,7 +159,7 @@ export function CreatePropertyForm({ initialName = "" }: Props) {
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="h-8 rounded-full text-ink-warm-muted hover:text-foreground"
+                      className="h-8 rounded-full text-muted-foreground hover:text-foreground"
                       onClick={() => handleSelectFile(null)}
                     >
                       <X className="size-4" />
@@ -172,15 +172,15 @@ export function CreatePropertyForm({ initialName = "" }: Props) {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="mt-2 flex h-44 w-full flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-cream-border bg-cream-surface-soft/60 text-center transition hover:border-primary/50 hover:bg-cream-surface-soft sm:h-52"
+                className="mt-2 flex h-44 w-full flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-accent/60 text-center transition hover:border-primary/50 hover:bg-accent sm:h-52"
               >
-                <span className="flex size-10 items-center justify-center rounded-full bg-cream-surface-deep/35 text-ink-warm">
+                <span className="flex size-10 items-center justify-center rounded-full bg-muted/35 text-foreground">
                   <ImagePlus className="size-5" />
                 </span>
-                <span className="text-sm font-medium text-ink-warm">
+                <span className="text-sm font-medium text-foreground">
                   Click to upload a photo
                 </span>
-                <span className="text-xs text-ink-warm-muted">JPG, PNG, or WEBP · up to 5 MB</span>
+                <span className="text-xs text-muted-foreground">JPG, PNG, or WEBP · up to 5 MB</span>
               </button>
             )}
           </div>
@@ -195,7 +195,7 @@ export function CreatePropertyForm({ initialName = "" }: Props) {
         <Button
           type="submit"
           disabled={!canSubmit}
-          className="h-12 w-full rounded-xl border-0 bg-surface-strong text-base font-semibold text-white shadow-md hover:bg-surface-strong-hover disabled:bg-cream-surface-deep disabled:text-ink-warm-muted disabled:opacity-100 sm:h-14 sm:text-lg"
+          className="h-12 w-full rounded-xl border-0 bg-foreground text-base font-semibold text-white shadow-md hover:bg-foreground/90 disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100 sm:h-14 sm:text-lg"
         >
           {isSubmitting ? (
             <span className="inline-flex items-center gap-2">
@@ -209,7 +209,7 @@ export function CreatePropertyForm({ initialName = "" }: Props) {
             </>
           )}
         </Button>
-        <p className="text-center text-xs text-ink-warm-muted">
+        <p className="text-center text-xs text-muted-foreground">
           You&apos;ll be taken to the rating form right after the property is created.
         </p>
       </div>

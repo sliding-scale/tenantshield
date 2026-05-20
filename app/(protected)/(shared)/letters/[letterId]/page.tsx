@@ -80,7 +80,7 @@ export default function LetterDetailPage() {
 
   if (!params?.letterId) {
     return (
-      <main className="min-h-[100dvh] bg-cream-page px-4 py-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10">
+      <main className="min-h-svh bg-background px-4 py-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10">
         <p className="text-muted-foreground">Invalid letter id.</p>
       </main>
     )
@@ -88,7 +88,7 @@ export default function LetterDetailPage() {
 
   if (row === undefined) {
     return (
-      <main className="min-h-[100dvh] bg-cream-page px-4 py-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10">
+      <main className="min-h-svh bg-background px-4 py-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10">
         <ShieldLoader variant="letter" fullPage />
       </main>
     )
@@ -96,7 +96,7 @@ export default function LetterDetailPage() {
 
   if (!row) {
     return (
-      <main className="min-h-[100dvh] bg-cream-page px-4 py-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10">
+      <main className="min-h-svh bg-background px-4 py-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10">
         <p className="text-muted-foreground">Letter not found.</p>
       </main>
     )
@@ -143,7 +143,7 @@ export default function LetterDetailPage() {
                   setSaveError(null)
                   setIsEditing(false)
                 }}
-                className="h-12 rounded-2xl border-cream-border bg-background sm:h-14 sm:min-w-[7.5rem]"
+                className="h-12 rounded-2xl border-border bg-background sm:h-14 sm:min-w-[7.5rem]"
               >
                 Cancel
               </Button>
@@ -151,7 +151,7 @@ export default function LetterDetailPage() {
                 type="button"
                 disabled={isSaving}
                 onClick={() => void handleSave()}
-                className="h-12 rounded-2xl bg-surface-strong px-6 text-base font-semibold text-white hover:bg-surface-strong-hover sm:h-14 sm:flex-1 sm:max-w-xs"
+                className="h-12 rounded-2xl bg-foreground px-6 text-base font-semibold text-white hover:bg-foreground/90 sm:h-14 sm:flex-1 sm:max-w-xs"
               >
                 {isSaving ? "Saving…" : "Save letter"}
               </Button>
@@ -164,7 +164,7 @@ export default function LetterDetailPage() {
       headerBeforeCopy={
         <Button
           size="sm"
-          className="h-10 max-w-[10.5rem] truncate rounded-xl border-0 bg-surface-strong px-3 text-xs font-semibold text-white shadow-sm hover:bg-surface-strong-hover sm:max-w-none sm:px-4 sm:text-sm"
+          className="h-10 max-w-[10.5rem] truncate rounded-xl border-0 bg-foreground px-3 text-xs font-semibold text-white shadow-sm hover:bg-foreground/90 sm:max-w-none sm:px-4 sm:text-sm"
           asChild
         >
           <Link href="/ratings">

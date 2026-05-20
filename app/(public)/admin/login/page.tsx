@@ -42,7 +42,7 @@ export default function AdminLoginPage() {
   }, [isLoaded, isSignedIn, role, router]);
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-background text-foreground">
+    <div className="relative flex min-h-svh flex-col bg-background text-foreground">
       <div className="flex flex-1 flex-col items-center justify-center px-5 py-10 sm:px-8">
         <div className="w-full max-w-md">
           <header className="mb-8 flex shrink-0 items-center gap-3">

@@ -148,7 +148,7 @@ export default function SsoCallbackPage() {
   }, [clerk, clerk.loaded, signIn, signUp, router])
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-4">
+    <div className="flex min-h-svh flex-col items-center justify-center gap-6 px-4">
       <ShieldLoader variant="auth" embedded label="Finishing sign-in…" />
       <div id="clerk-captcha" />
     </div>

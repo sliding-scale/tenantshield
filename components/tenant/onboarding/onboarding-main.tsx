@@ -159,7 +159,7 @@ export default function OnboardingMain() {
 
   if (needsStateGate) {
     return (
-      <main className="flex min-h-[100dvh] w-full flex-col md:min-h-[calc(100vh-4rem)]">
+      <main className="flex min-h-svh w-full flex-col md:min-h-[calc(100vh-4rem)]">
         <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-8 pt-8 sm:px-6 lg:max-w-lg lg:px-10 lg:pt-12">
           <p className="text-sm font-semibold tracking-[0.2em] text-primary">Before we start</p>
           <h1 className="mt-3 font-heading text-4xl leading-tight text-foreground lg:text-5xl">
@@ -198,7 +198,7 @@ export default function OnboardingMain() {
               type="button"
               onClick={() => void handleStateContinue()}
               disabled={isSavingState}
-              className="mt-2 h-14 w-full rounded-2xl border border-cream-border bg-cream-surface px-6 text-lg font-semibold text-ink-warm hover:bg-cream-surface-soft disabled:opacity-60 lg:h-16"
+              className="mt-2 h-14 w-full rounded-2xl border border-border bg-card px-6 text-lg font-semibold text-foreground hover:bg-accent disabled:opacity-60 lg:h-16"
             >
               {isSavingState ? "Saving…" : "Continue"}
             </Button>
@@ -221,7 +221,7 @@ export default function OnboardingMain() {
   }
 
   return (
-    <main className="flex min-h-[100dvh] w-full flex-col md:min-h-[calc(100vh-4rem)]">
+    <main className="flex min-h-svh w-full flex-col md:min-h-[calc(100vh-4rem)]">
       <div className="flex w-full items-center gap-3 px-4 pb-4 pt-5 sm:px-6 lg:gap-4 lg:px-10">
         <button
           type="button"
@@ -274,7 +274,7 @@ export default function OnboardingMain() {
               className={[
                 "flex min-h-16 items-center gap-3 rounded-2xl border px-4 text-left text-xl transition",
                 isSelected
-                  ? "border-cream-border bg-cream-surface text-ink-warm"
+                  ? "border-border bg-card text-foreground"
                   : "border-border bg-background text-foreground",
               ].join(" ")}
             >
@@ -299,7 +299,7 @@ export default function OnboardingMain() {
             type="button"
             onClick={handleContinue}
             disabled={!canContinue}
-            className="h-14 w-full rounded-2xl border border-cream-border bg-cream-surface px-6 text-lg font-semibold text-ink-warm hover:bg-cream-surface-soft disabled:border-border disabled:bg-muted disabled:text-muted-foreground lg:h-16 lg:text-xl"
+            className="h-14 w-full rounded-2xl border border-border bg-card px-6 text-lg font-semibold text-foreground hover:bg-accent disabled:border-border disabled:bg-muted disabled:text-muted-foreground lg:h-16 lg:text-xl"
           >
             {currentIndex >= totalQuestions - 1 ? "See My Impact Score" : "Continue"}
           </Button>

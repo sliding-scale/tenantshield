@@ -39,13 +39,13 @@ export default function ChatSidebar({
 
       <aside
         className={cn(
-          "border-cream-border bg-cream-surface-soft z-50 flex min-h-0 w-[min(100vw-2rem,280px)] shrink-0 flex-col border-r md:relative md:h-full md:w-[280px] md:self-stretch",
+          "border-border bg-accent z-50 flex min-h-0 w-[min(100vw-2rem,280px)] shrink-0 flex-col border-r md:relative md:h-full md:w-[280px] md:self-stretch",
           open
             ? "fixed inset-y-0 left-0 flex md:relative md:inset-auto"
             : "hidden md:flex",
         )}
       >
-        <div className="border-cream-border flex items-center justify-between gap-2 border-b px-3 py-3">
+        <div className="border-border flex items-center justify-between gap-2 border-b px-3 py-3">
           <div className="flex min-w-0 items-center gap-2">
             <Button
               type="button"
@@ -67,7 +67,7 @@ export default function ChatSidebar({
           <Button
             type="button"
             variant="outline"
-            className="w-full justify-start gap-2 border-cream-border bg-background/80 font-medium dark:bg-card/40"
+            className="w-full justify-start gap-2 border-border bg-background/80 font-medium dark:bg-card/40"
             onClick={() => {
               onNewChat();
               onClose();
@@ -83,7 +83,7 @@ export default function ChatSidebar({
           aria-label="Past conversations"
         >
           {conversations.length === 0 ? (
-            <p className="text-ink-warm-muted px-2 py-6 text-center text-sm">
+            <p className="text-muted-foreground px-2 py-6 text-center text-sm">
               No chats yet. Start with New chat.
             </p>
           ) : (
@@ -101,7 +101,7 @@ export default function ChatSidebar({
                     "flex w-full flex-col items-start rounded-xl px-3 py-2.5 text-left text-sm transition-colors",
                     active
                       ? "bg-accent text-foreground shadow-sm"
-                      : "text-ink-warm-muted hover:bg-accent/60 hover:text-foreground",
+                      : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
                   )}
                 >
                   <span className="line-clamp-2 w-full font-medium text-foreground">
@@ -130,7 +130,7 @@ export function ChatSidebarMobileToggle({
       type="button"
       variant="outline"
       size="icon-sm"
-      className="border-cream-border shrink-0 md:hidden"
+      className="border-border shrink-0 md:hidden"
       aria-label="Open conversation list"
       onClick={onClick}
     >

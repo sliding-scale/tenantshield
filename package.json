@@ -33,6 +33,7 @@
     "jspdf": "^4.2.1",
     "langchain": "^1.4.0",
     "lucide-react": "^1.14.0",
+    "motion": "^12.39.0",
     "next": "16.2.4",
     "pdf-oxide-wasm": "^0.3.45",
     "radix-ui": "^1.4.3",

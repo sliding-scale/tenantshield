@@ -50,7 +50,7 @@ export default function CaseDetailsPage() {
 
   if (!params?.caseId) {
     return (
-      <main className="min-h-[100dvh] bg-cream-page px-4 py-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10">
+      <main className="min-h-svh bg-background px-4 py-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10">
         <p className="text-muted-foreground">Invalid case id.</p>
       </main>
     )
@@ -58,7 +58,7 @@ export default function CaseDetailsPage() {
 
   if (row === undefined) {
     return (
-      <main className="min-h-[100dvh] bg-cream-page px-4 py-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10">
+      <main className="min-h-svh bg-background px-4 py-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10">
         <ShieldLoader variant="case" fullPage />
       </main>
     )
@@ -66,7 +66,7 @@ export default function CaseDetailsPage() {
 
   if (!row || !details) {
     return (
-      <main className="min-h-[100dvh] bg-cream-page px-4 py-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10">
+      <main className="min-h-svh bg-background px-4 py-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10">
         <p className="text-muted-foreground">Case not found.</p>
       </main>
     )
@@ -106,7 +106,7 @@ export default function CaseDetailsPage() {
   }
 
   return (
-    <main className="flex min-h-[100dvh] flex-col bg-cream-page pb-28 pt-5 md:min-h-[calc(100vh-4rem)] md:pb-10 md:pt-6 lg:pt-8">
+    <main className="flex min-h-svh flex-col bg-background pb-28 pt-5 md:min-h-[calc(100vh-4rem)] md:pb-10 md:pt-6 lg:pt-8">
       <div className="flex w-full flex-1 flex-col px-4 sm:px-6 md:px-10 lg:px-14 xl:px-16">
         <NewCaseAnalysisResult
           details={details}
@@ -119,7 +119,7 @@ export default function CaseDetailsPage() {
             <div className="flex max-w-[min(100vw-8rem,20rem)] flex-wrap items-center justify-end gap-2 sm:max-w-none">
               <Button
                 size="sm"
-                className="h-10 shrink-0 rounded-xl border-0 bg-surface-strong px-3 text-xs font-semibold text-white shadow-sm hover:bg-surface-strong-hover sm:px-4 sm:text-sm"
+                className="h-10 shrink-0 rounded-xl border-0 bg-foreground px-3 text-xs font-semibold text-white shadow-sm hover:bg-foreground/90 sm:px-4 sm:text-sm"
                 asChild
               >
                 <Link href="/ratings">Rate your experience</Link>
@@ -129,7 +129,7 @@ export default function CaseDetailsPage() {
                 variant="outline"
                 disabled={statusBusy}
                 onClick={() => void toggleArchive()}
-                className="h-10 shrink-0 rounded-xl border-cream-border bg-cream-surface-deep px-3 text-sm font-semibold text-ink-warm hover:bg-cream-surface sm:h-11 sm:px-4 sm:text-base"
+                className="h-10 shrink-0 rounded-xl border-border bg-muted px-3 text-sm font-semibold text-foreground hover:bg-card sm:h-11 sm:px-4 sm:text-base"
               >
                 {statusBusy
                   ? "…"

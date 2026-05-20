@@ -144,33 +144,33 @@ export function NewCaseForm({
   }
 
   return (
-    <main className="flex min-h-[100dvh] flex-col bg-cream-page pb-28 pt-5 md:min-h-[calc(100vh-4rem)] md:pb-10 md:pt-6 lg:pt-8">
+    <main className="flex min-h-svh flex-col bg-background pb-28 pt-5 md:min-h-[calc(100vh-4rem)] md:pb-10 md:pt-6 lg:pt-8">
       <div className="flex w-full flex-1 flex-col px-4 sm:px-6 md:px-10 lg:px-14 xl:px-16">
         <header className="mb-5 flex shrink-0 items-center justify-between md:hidden">
           <Button
             type="button"
             variant="outline"
             onClick={onClose}
-            className="h-11 w-11 rounded-full border-border bg-cream-surface-soft p-0 text-foreground"
+            className="h-11 w-11 rounded-full border-border bg-accent p-0 text-foreground"
             aria-label="Close"
           >
             <X className="size-5" />
           </Button>
         </header>
 
-        <section className="flex min-h-0 flex-1 flex-col rounded-2xl border border-cream-border bg-cream-surface p-5 shadow-sm sm:p-7 md:rounded-3xl md:p-10 lg:p-12 xl:p-14">
+        <section className="flex min-h-0 flex-1 flex-col rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-7 md:rounded-3xl md:p-10 lg:p-12 xl:p-14">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary md:text-sm">
             Step 1 · What happened?
           </p>
-          <h2 className="mt-3 max-w-5xl font-heading text-4xl font-semibold leading-[0.95] text-ink-warm text-balance sm:text-5xl md:text-6xl lg:text-7xl xl:max-w-6xl">
+          <h2 className="mt-3 max-w-5xl font-heading text-4xl font-semibold leading-[0.95] text-foreground text-balance sm:text-5xl md:text-6xl lg:text-7xl xl:max-w-6xl">
             Tell us about your situation.
           </h2>
-          <p className="mt-4 max-w-3xl text-lg text-ink-warm-muted text-pretty sm:text-xl lg:max-w-4xl lg:text-2xl">
+          <p className="mt-4 max-w-3xl text-lg text-muted-foreground text-pretty sm:text-xl lg:max-w-4xl lg:text-2xl">
             Our AI will score your case strength and lay out the specific laws that apply.
           </p>
 
           <div className="mt-8 md:mt-10 lg:mt-12">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-warm-muted md:text-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground md:text-sm">
               Issue Type
             </p>
             <div className="mt-4 flex flex-wrap gap-2.5 md:gap-3 lg:max-w-5xl">
@@ -185,7 +185,7 @@ export function NewCaseForm({
                     className={[
                       "inline-flex min-h-11 items-center gap-3 rounded-full border px-4 py-2.5 text-base font-medium transition md:text-lg",
                       active
-                        ? "border-cream-border bg-cream-surface-deep text-ink-warm shadow-sm ring-1 ring-cream-border/80 font-semibold"
+                        ? "border-border bg-muted text-foreground shadow-sm ring-1 ring-border/80 font-semibold"
                         : "border-border bg-background text-foreground hover:bg-accent",
                     ].join(" ")}
                   >
@@ -215,7 +215,7 @@ export function NewCaseForm({
           </div>
 
           <div className="mt-6 md:mt-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-warm-muted md:text-sm">State</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground md:text-sm">State</p>
             <div className="relative mt-3 w-full">
               <Search
                 className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
@@ -259,7 +259,7 @@ export function NewCaseForm({
                       className={[
                         "inline-flex h-12 shrink-0 snap-start items-center justify-center rounded-2xl border px-[1.1rem] text-base transition md:min-w-[4.25rem] md:px-5 md:text-lg",
                         active
-                          ? "border-cream-border bg-cream-surface-deep text-ink-warm shadow-sm ring-1 ring-cream-border/80 font-semibold"
+                          ? "border-border bg-muted text-foreground shadow-sm ring-1 ring-border/80 font-semibold"
                           : "border-transparent bg-background font-medium text-foreground hover:bg-accent",
                       ].join(" ")}
                     >
@@ -301,7 +301,7 @@ export function NewCaseForm({
             type="button"
             disabled={!canSubmit}
             onClick={() => void handleSubmitClick()}
-            className="mt-8 h-14 mx-auto w-full rounded-2xl bg-surface-strong px-6 text-lg font-semibold text-white hover:bg-surface-strong-hover disabled:bg-muted disabled:text-muted-foreground md:mt-10 md:max-w-md md:text-xl lg:max-w-sm"
+            className="mt-8 h-14 mx-auto w-full rounded-2xl bg-foreground px-6 text-lg font-semibold text-white hover:bg-foreground/90 disabled:bg-muted disabled:text-muted-foreground md:mt-10 md:max-w-md md:text-xl lg:max-w-sm"
           >
             {isSubmitting ? "Analyzing..." : "Analyze My Case"}
           </Button>

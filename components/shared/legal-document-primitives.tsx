@@ -13,10 +13,10 @@ const calloutStylesPage: Record<CalloutVariant, string> = {
 };
 
 const calloutStylesModal: Record<CalloutVariant, string> = {
-  red: "border-destructive/30 bg-destructive/10 text-ink-warm",
-  green: "border-secondary/30 bg-secondary/10 text-ink-warm",
-  gold: "border-primary/30 bg-primary/10 text-ink-warm",
-  orange: "border-warning/30 bg-warning/10 text-ink-warm",
+  red: "border-destructive/30 bg-destructive/10 text-foreground",
+  green: "border-secondary/30 bg-secondary/10 text-foreground",
+  gold: "border-primary/30 bg-primary/10 text-foreground",
+  orange: "border-warning/30 bg-warning/10 text-foreground",
 };
 
 export function LegalCallout({
@@ -82,7 +82,7 @@ export function LegalSection({
       </p>
       <h2
         className={cn(
-          "mt-1.5 font-bold text-ink-warm sm:mt-2",
+          "mt-1.5 font-bold text-foreground sm:mt-2",
           isModal ? "text-base sm:text-lg" : "text-xl text-gray-900 sm:text-2xl",
         )}
       >
@@ -92,7 +92,7 @@ export function LegalSection({
         className={cn(
           "mt-3 space-y-3 sm:mt-4 sm:space-y-4",
           isModal
-            ? "text-xs leading-relaxed text-ink-warm-muted sm:text-sm"
+            ? "text-xs leading-relaxed text-muted-foreground sm:text-sm"
             : "text-sm leading-7 text-gray-700 sm:text-base",
         )}
       >
@@ -117,14 +117,14 @@ export function LegalHighlightBox({
       className={cn(
         "mt-4 rounded-2xl border-2 p-4 sm:p-5",
         isModal
-          ? "border-border bg-muted/30 text-ink-warm"
+          ? "border-border bg-muted/30 text-foreground"
           : "border-amber-200 bg-amber-50/70 text-gray-800",
       )}
     >
       <h3
         className={cn(
           "font-bold",
-          isModal ? "text-sm text-ink-warm" : "text-base text-gray-900",
+          isModal ? "text-sm text-foreground" : "text-base text-gray-900",
         )}
       >
         {title}

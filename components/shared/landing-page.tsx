@@ -15,7 +15,7 @@ const HERO_IMAGE_SRC = "/tenantshield_hero_image_v2.svg";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-svh bg-white">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-white px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
         <div className="mx-auto grid max-w-7xl items-center gap-10 md:grid-cols-2 lg:gap-14">

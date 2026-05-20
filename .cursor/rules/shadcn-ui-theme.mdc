@@ -1,5 +1,5 @@
 ---
-description: shadcn/ui + TenantShield theme — cream surfaces, semantic tokens from globals.css only
+description: shadcn/ui + TenantShield theme — semantic tokens from globals.css only
 globs: "**/*.{tsx,css}"
 alwaysApply: false
 ---
@@ -16,42 +16,50 @@ Extract a component only when reused heavily or state grows.
 
 ## `app/globals.css` is the single source of truth
 
+Use **only shadcn semantic tokens** — no parallel custom color layers (`cream-*`, `ink-warm`, `surface-strong`, etc.).
+
 - **No** ad-hoc hex/HSL or raw palette utilities (`bg-zinc-900`, `text-amber-300`) for product UI.
 - **Do** use tokens exposed via `@theme inline` and `:root` / `.dark`.
 
-### Tenant-facing “cream” layer (ratings, profile rows, warm marketing)
+### Semantic token map
 
-Use these for warm pages and cards on cream backgrounds:
-
-- `bg-cream-page` — page canvas
-- `bg-cream-surface`, `bg-cream-surface-soft`, `bg-cream-surface-deep` — cards / fills
-- `border-cream-border` — borders on cream UI
-- `text-ink-warm`, `text-ink-warm-muted` — body copy on cream
-- `bg-surface-strong`, `hover:bg-surface-strong-hover`, `text-white` — **primary dark CTAs** on cream (matches selected filter chips, high contrast)
-
-### shadcn / forms layer (auth, inputs, default app chrome)
-
-Still use standard semantic tokens:
-
-- Surfaces: `bg-background`, `bg-popover`, `bg-card`, `text-foreground`, `text-card-foreground`, `border-border`, `bg-accent`
-- Actions: `bg-primary`, `text-primary-foreground`, `bg-secondary`, `text-secondary-foreground`
-- Feedback: `text-destructive`, `border-destructive`, `text-warning`, `bg-warning`
-- Focus: `ring-ring`, `border-input`
+| Purpose | Token / class |
+|---------|---------------|
+| Page canvas | `bg-background`, `text-foreground` |
+| Elevated cards / list rows | `bg-card`, `text-card-foreground`, `border-border` |
+| Inputs / dropdowns | `bg-popover`, `border-input`, `ring-ring` |
+| Orange accent (gauge, badges, plan card) | `bg-primary`, `text-primary` |
+| Soft fills (icon boxes, note boxes) | `bg-accent`, `text-accent-foreground` |
+| Secondary text / eyebrows | `text-muted-foreground` |
+| Subtle surface tint | `bg-muted` |
+| Dark hero / featured tile / black CTA | `bg-foreground`, `text-background` |
+| Primary orange button | `Button variant="default"` |
+| Black pill CTA | `Button variant="cta"` → `bg-foreground text-background` |
+| Feedback | `text-destructive`, `bg-destructive`, `text-warning`, `bg-warning` |
 
 Light/dark: extend **only** in `globals.css` (`:root` / `.dark` + `@theme inline` when adding a new `--color-*`). Do not add parallel color systems in TS or random CSS files.
+
+Loader animations (`gavel-*`, `shield-*` vars) live in loader CSS files only — not in the app theme.
 
 ## Examples
 
 ```tsx
-// ✅ Cream page + dark CTA (ratings, similar flows)
-<Button className="bg-surface-strong text-white hover:bg-surface-strong-hover">Give a rating</Button>
-<section className="rounded-2xl border border-cream-border bg-cream-surface/40 p-4">…</section>
+// ✅ Cream page + dark hero card
+<main className="bg-background">
+  <section className="rounded-3xl bg-foreground p-5 text-background">…</section>
+</main>
 
-// ✅ Auth / forms (shadcn + defaults)
+// ✅ White list row
+<Card className="border-border bg-card">…</Card>
+
+// ✅ Black CTA
+<Button variant="cta" className="h-12 w-full rounded-full">Sign In</Button>
+
+// ✅ Auth inputs
 <Input className="border-border bg-popover" />
-<Button variant="default">Save</Button>
 
 // ❌ Avoid
+<div className="bg-cream-page text-ink-warm border-cream-border" />
 <div className="bg-[#f5f0e8] text-[#1a1a1a]" />
 ```
 

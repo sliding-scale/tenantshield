@@ -49,8 +49,8 @@ function ChatRetryBanner({
   message?: string;
 }) {
   return (
-    <div className="border-cream-border bg-cream-surface/80 flex flex-wrap items-center gap-3 rounded-xl border px-4 py-3 text-sm">
-      <span className="text-ink-warm-muted min-w-0 flex-1">{message}</span>
+    <div className="border-border bg-card/80 flex flex-wrap items-center gap-3 rounded-xl border px-4 py-3 text-sm">
+      <span className="text-muted-foreground min-w-0 flex-1">{message}</span>
       <Button
         type="button"
         size="sm"
@@ -248,7 +248,7 @@ function ChatThreadLoaded({
               <h3 className="font-heading text-2xl text-foreground md:text-3xl">
                 Tenant Shield Assistant
               </h3>
-              <p className="text-ink-warm-muted text-base leading-relaxed">
+              <p className="text-muted-foreground text-base leading-relaxed">
                 Ask about your lease, past cases, letters you&apos;ve drafted,
                 or tenant rights. Answers use your saved documents when
                 available.
@@ -277,15 +277,15 @@ function ChatThreadLoaded({
                       m.role === "user" ? "items-end" : "items-start",
                     )}
                   >
-                    <span className="text-ink-warm-muted mb-0.5 text-xs font-medium uppercase tracking-wide">
+                    <span className="text-muted-foreground mb-0.5 text-xs font-medium uppercase tracking-wide">
                       {m.role === "user" ? "You" : "Assistant"}
                     </span>
                     <div
                       className={cn(
                         "rounded-2xl px-4 py-3 text-[15px] leading-relaxed shadow-sm",
                         m.role === "user"
-                          ? "border-cream-border w-fit max-w-[min(100%,42rem)] border bg-cream-page dark:bg-card/30"
-                          : "border-cream-border mr-auto max-w-[min(100%,48rem)] border bg-background dark:bg-card/50",
+                          ? "border-border w-fit max-w-[min(100%,42rem)] border bg-background dark:bg-card/30"
+                          : "border-border mr-auto max-w-[min(100%,48rem)] border bg-background dark:bg-card/50",
                       )}
                     >
                       {m.role === "assistant" ? (
@@ -302,7 +302,7 @@ function ChatThreadLoaded({
                 );
               })}
               {showThinkingRow ? (
-                <li className="text-ink-warm-muted flex items-center gap-2 text-sm">
+                <li className="text-muted-foreground flex items-center gap-2 text-sm">
                   <Loader2 className="size-4 animate-spin" aria-hidden />
                   Thinking…
                 </li>
@@ -322,17 +322,17 @@ function ChatThreadLoaded({
                     <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4">
                       <Sparkles className="size-6" />
                     </div>
-                    <h4 className="font-heading text-xl font-semibold text-ink-warm">
+                    <h4 className="font-heading text-xl font-semibold text-foreground">
                       Chat limit reached
                     </h4>
-                    <p className="mt-2 text-ink-warm-muted text-sm leading-relaxed max-w-md mx-auto">
+                    <p className="mt-2 text-muted-foreground text-sm leading-relaxed max-w-md mx-auto">
                       You&apos;ve sent 5 messages in this conversation. Upgrade
                       to a paid plan for unlimited AI guidance and deeper legal
                       research.
                     </p>
                     <Button
                       asChild
-                      className="mt-5 h-11 rounded-xl bg-surface-strong px-6 text-sm font-semibold text-white shadow-sm hover:bg-surface-strong-hover"
+                      className="mt-5 h-11 rounded-xl bg-foreground px-6 text-sm font-semibold text-white shadow-sm hover:bg-foreground/90"
                     >
                       <Link href="/billing">Upgrade to continue</Link>
                     </Button>
@@ -361,7 +361,7 @@ function ChatThreadLoaded({
 
         <form
           onSubmit={handleSubmit}
-          className="border-cream-border bg-cream-page/90 sticky bottom-0 z-10 mt-auto shrink-0 border-t px-4 pt-4 pb-[max(1rem,calc(0.75rem+env(safe-area-inset-bottom,0px)))] backdrop-blur-md dark:bg-background/90 md:static md:z-0 md:px-8 md:pb-4"
+          className="border-border bg-background/90 sticky bottom-0 z-10 mt-auto shrink-0 border-t px-4 pt-4 pb-[max(1rem,calc(0.75rem+env(safe-area-inset-bottom,0px)))] backdrop-blur-md dark:bg-background/90 md:static md:z-0 md:px-8 md:pb-4"
         >
           <div className="mx-auto flex max-w-3xl items-center gap-2">
             <textarea

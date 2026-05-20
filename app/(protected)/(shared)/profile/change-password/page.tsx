@@ -5,6 +5,8 @@ import { useUser } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
 import { ChevronLeft, KeyRound } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { MOBILE_TAB_BAR_PAGE_SHELL } from "@/lib/nav/mobile-chrome"
+import { cn } from "@/lib/utils"
 
 export default function ChangePasswordPage() {
   const { user, isLoaded } = useUser()
@@ -60,14 +62,19 @@ export default function ChangePasswordPage() {
   }
 
   return (
-    <main className="min-h-[100dvh] bg-cream-page px-4 py-6 sm:px-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10 md:pt-8 lg:px-10 lg:py-12">
+    <main
+      className={cn(
+        "min-h-svh bg-background px-4 sm:px-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10 md:pt-8 lg:px-10 lg:py-12",
+        MOBILE_TAB_BAR_PAGE_SHELL,
+      )}
+    >
       <div className="mx-auto w-full max-w-2xl">
         <header className="mb-6 flex items-center gap-4 md:mb-8">
           <Button
             type="button"
             variant="outline"
             onClick={() => router.push("/profile")}
-            className="h-11 w-11 shrink-0 rounded-full border-border bg-cream-surface-soft p-0 text-foreground"
+            className="h-11 w-11 shrink-0 rounded-full border-border bg-accent p-0 text-foreground"
             aria-label="Back to profile"
           >
             <ChevronLeft className="size-5" />
@@ -77,12 +84,12 @@ export default function ChangePasswordPage() {
           </div>
         </header>
 
-        <div className="rounded-[2rem] border border-cream-border bg-cream-surface p-5 shadow-sm sm:p-7 md:p-10">
+        <div className="rounded-[2rem] border border-border bg-card p-5 shadow-sm sm:p-7 md:p-10">
           <div className="mb-6 flex items-center gap-3">
             <div className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
               <KeyRound className="size-5" />
             </div>
-            <p className="text-sm font-medium text-ink-warm-muted md:text-base">
+            <p className="text-sm font-medium text-muted-foreground md:text-base">
               Update your account password below.
             </p>
           </div>
@@ -102,7 +109,7 @@ export default function ChangePasswordPage() {
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="current-password" className="text-sm font-medium text-ink-warm">
+                <label htmlFor="current-password" className="text-sm font-medium text-foreground">
                   Current Password
                 </label>
                 <input
@@ -116,7 +123,7 @@ export default function ChangePasswordPage() {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="new-password" className="text-sm font-medium text-ink-warm">
+                <label htmlFor="new-password" className="text-sm font-medium text-foreground">
                   New Password
                 </label>
                 <input
@@ -129,7 +136,7 @@ export default function ChangePasswordPage() {
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="confirm-password" className="text-sm font-medium text-ink-warm">
+                <label htmlFor="confirm-password" className="text-sm font-medium text-foreground">
                   Confirm New Password
                 </label>
                 <input
@@ -147,7 +154,7 @@ export default function ChangePasswordPage() {
               <Button
                 type="submit"
                 disabled={isSubmitting || !isLoaded}
-                className="mt-4 h-12 w-full rounded-xl bg-surface-strong text-base font-semibold text-white hover:bg-surface-strong-hover"
+                className="mt-4 h-12 w-full rounded-xl bg-foreground text-base font-semibold text-white hover:bg-foreground/90"
               >
                 {isSubmitting ? "Updating..." : "Update Password"}
               </Button>

@@ -30,7 +30,7 @@ export function ProfileResourcesSection() {
     <section aria-labelledby="profile-resources-heading" className="mt-8 min-w-0 md:mt-10">
       <h2
         id="profile-resources-heading"
-        className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-warm-muted"
+        className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground"
       >
         Resources
       </h2>
@@ -41,19 +41,19 @@ export function ProfileResourcesSection() {
             <li key={href} className="min-w-0">
               <Link
                 href={href}
-                className="group flex min-h-14 items-center gap-3 rounded-2xl border border-cream-border bg-cream-surface-soft px-3 py-3.5 transition hover:border-cream-border hover:bg-cream-surface sm:gap-4 sm:px-4 sm:py-4 md:min-h-16"
+                className="group flex min-h-14 items-center gap-3 rounded-2xl border border-border bg-accent px-3 py-3.5 transition hover:border-border hover:bg-card sm:gap-4 sm:px-4 sm:py-4 md:min-h-16"
               >
-                <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-cream-surface text-ink-warm ring-1 ring-cream-border/60 md:size-12">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-card text-foreground ring-1 ring-border/60 md:size-12">
                   <Icon className="size-5 md:size-6" aria-hidden />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block font-heading text-lg font-semibold text-ink-warm md:text-xl">{title}</span>
-                  <span className="mt-0.5 block text-sm leading-snug text-ink-warm-muted md:text-base">
+                  <span className="block font-heading text-lg font-semibold text-foreground md:text-xl">{title}</span>
+                  <span className="mt-0.5 block text-sm leading-snug text-muted-foreground md:text-base">
                     {subtitle}
                   </span>
                 </span>
                 <ChevronRight
-                  className="size-5 shrink-0 text-ink-warm-muted transition group-hover:text-ink-warm"
+                  className="size-5 shrink-0 text-muted-foreground transition group-hover:text-foreground"
                   aria-hidden
                 />
               </Link>
@@ -62,14 +62,14 @@ export function ProfileResourcesSection() {
         </ul>
 
         <div
-          className="rounded-2xl border border-cream-border bg-cream-surface p-4 ring-1 ring-cream-border/40 sm:p-5 md:p-6"
+          className="rounded-2xl border border-border bg-card p-4 ring-1 ring-border/40 sm:p-5 md:p-6"
           role="note"
           aria-label="Legal notice"
         >
-          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-ink-warm-muted md:text-xs">
+          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground md:text-xs">
             Important
           </p>
-          <p className="mt-2 text-sm leading-relaxed text-ink-warm md:text-base md:leading-relaxed">
+          <p className="mt-2 text-sm leading-relaxed text-foreground md:text-base md:leading-relaxed">
             {DISCLAIMER}
           </p>
         </div>

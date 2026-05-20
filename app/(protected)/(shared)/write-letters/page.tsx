@@ -143,7 +143,7 @@ export default function WriteLettersPage() {
 
   const caseLetterBanner =
     caseId && attachedLetterId ? (
-      <div className="mb-4 rounded-2xl border border-cream-border bg-cream-surface-deep px-4 py-3 text-sm text-foreground">
+      <div className="mb-4 rounded-2xl border border-border bg-muted px-4 py-3 text-sm text-foreground">
         This case already has a letter.{" "}
         <Link href={`/letters/${attachedLetterId}`} className="font-semibold text-primary hover:underline">
           View attached letter

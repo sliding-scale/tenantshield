@@ -4,6 +4,8 @@ import { FileText, MessageSquareShare, PlusCircle, Sparkles, Star, UserRound, Sc
 import { useQuery } from 'convex/react';
 import useCurrentUser from '@/app/hooks/useCurrentUser';
 import { api } from '@/convex/_generated/api';
+import { MOBILE_TAB_BAR_PAGE_SHELL } from '@/lib/nav/mobile-chrome';
+import { cn } from '@/lib/utils';
 
 const quickActions = [
   {
@@ -77,7 +79,7 @@ export default function TenantDashboardMain() {
 
   return (
     <>
-      <main className='min-h-[100dvh] bg-cream-page px-4 pb-24 pt-5 text-foreground md:min-h-[calc(100vh-4rem)] md:px-8 md:pb-10 md:pt-8 lg:px-10'>
+      <main className={cn('min-h-svh bg-background px-4 text-foreground md:min-h-[calc(100vh-4rem)] md:px-8 md:pb-10 md:pt-8 lg:px-10', MOBILE_TAB_BAR_PAGE_SHELL)}>
         <div className='mx-auto w-full max-w-7xl'>
           <section className='mb-6 flex items-center justify-between md:mb-8'>
             <div>
@@ -89,7 +91,7 @@ export default function TenantDashboardMain() {
           </section>
 
           <section>
-            <div className='rounded-[2rem] bg-surface-strong p-5 text-ink-warm shadow-[0_16px_35px_-24px_rgba(50,38,18,0.45)] md:p-7 lg:px-10 lg:py-8 xl:px-12 xl:py-9'>
+            <div className='rounded-[2rem] bg-foreground p-5 text-foreground shadow-[0_16px_35px_-24px_rgba(50,38,18,0.45)] md:p-7 lg:px-10 lg:py-8 xl:px-12 xl:py-9'>
               <p className='text-xs font-semibold uppercase tracking-[0.24em] text-primary text-bold'>
                 Protection Index
               </p>
@@ -109,7 +111,7 @@ export default function TenantDashboardMain() {
                     background: `conic-gradient(from -90deg, var(--primary) 0deg ${protectionAngle}deg, var(--border) ${protectionAngle}deg 360deg)`,
                   }}
                 >
-                  <div className='grid size-[7rem] place-items-center rounded-full bg-surface-strong sm:size-[12.1rem] lg:size-[14.25rem]'>
+                  <div className='grid size-[7rem] place-items-center rounded-full bg-foreground sm:size-[12.1rem] lg:size-[14.25rem]'>
                     <span className='font-heading text-5xl sm:text-7xl font-semibold text-white'>
                       {protectionIndex}
                     </span>
@@ -131,18 +133,18 @@ export default function TenantDashboardMain() {
                     'sm:min-h-[8.25rem] md:min-h-0',
                     'md:col-span-2',
                     featured
-                      ? 'border-surface-strong bg-surface-strong text-white hover:bg-surface-strong-hover'
+                      ? 'border-foreground bg-foreground text-white hover:bg-foreground/90'
                       : 'border-border bg-white text-foreground hover:border-foreground/25 hover:shadow-sm',
                   ].join(' ')}
                 >
-                  <div className={['inline-flex shrink-0', featured ? 'text-primary' : 'text-ink-warm'].join(' ')}>
+                  <div className={['inline-flex shrink-0', featured ? 'text-primary' : 'text-foreground'].join(' ')}>
                     <Icon className='size-5' />
                   </div>
                   <div className='flex min-h-0 flex-1 flex-col gap-1'>
                     <h3
                       className={[
                         'font-heading text-base font-semibold leading-snug sm:text-xl md:text-3xl md:leading-tight',
-                        featured ? 'text-white' : 'text-ink-warm',
+                        featured ? 'text-white' : 'text-foreground',
                       ].join(' ')}
                     >
                       {title}
@@ -150,7 +152,7 @@ export default function TenantDashboardMain() {
                     <p
                       className={[
                         'line-clamp-2 text-xs leading-relaxed break-words sm:text-sm md:line-clamp-none',
-                        featured ? 'text-white/75' : 'text-ink-warm-muted',
+                        featured ? 'text-white/75' : 'text-muted-foreground',
                       ].join(' ')}
                     >
                       {subtitle}

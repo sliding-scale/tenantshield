@@ -3,7 +3,8 @@
 import useCurrentUser from "@/app/hooks/useCurrentUser";
 import NoAccessMessage from "@/components/shared/NoAccessMessage";
 import { ShieldLoader } from "@/components/shared/shield-loader";
-import { MOBILE_TAB_BAR_PAGE_PADDING } from "@/lib/nav/mobile-chrome";
+import { MOBILE_TAB_BAR_PAGE_SHELL } from "@/lib/nav/mobile-chrome";
+import { cn } from "@/lib/utils";
 
 export default function AdminSectionLayout({
   children,
@@ -27,7 +28,10 @@ export default function AdminSectionLayout({
 
   return (
     <div
-      className={`mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 ${MOBILE_TAB_BAR_PAGE_PADDING}`}
+      className={cn(
+        "mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 md:py-8",
+        MOBILE_TAB_BAR_PAGE_SHELL,
+      )}
     >
       {children}
     </div>

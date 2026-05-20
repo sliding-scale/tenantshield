@@ -51,13 +51,13 @@ export function ProfileHeaderSection() {
   if (isLoading || !clerkUser) {
     return (
       <section className="animate-pulse" aria-busy="true" aria-label="Loading profile">
-        <div className="h-3 w-16 rounded bg-cream-surface-deep" />
+        <div className="h-3 w-16 rounded bg-muted" />
         <div className="mt-4 flex gap-4">
-          <div className="size-16 shrink-0 rounded-full bg-cream-surface-deep md:size-20" />
+          <div className="size-16 shrink-0 rounded-full bg-muted md:size-20" />
           <div className="min-w-0 flex-1 space-y-2 pt-1">
-            <div className="h-7 w-40 rounded bg-cream-surface-deep md:h-8 md:w-48" />
-            <div className="h-4 w-56 rounded bg-cream-surface-deep" />
-            <div className="h-6 w-24 rounded-full bg-cream-surface-deep" />
+            <div className="h-7 w-40 rounded bg-muted md:h-8 md:w-48" />
+            <div className="h-4 w-56 rounded bg-muted" />
+            <div className="h-6 w-24 rounded-full bg-muted" />
           </div>
         </div>
       </section>
@@ -71,10 +71,10 @@ export function ProfileHeaderSection() {
 
   return (
     <section aria-labelledby="profile-user-heading">
-      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-warm-muted">Profile</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Profile</p>
       <div className="mt-4 flex gap-4 md:mt-5 md:gap-5">
         <div
-          className="flex size-16 shrink-0 items-center justify-center rounded-full bg-surface-strong font-heading text-2xl font-semibold text-cream-surface-soft md:size-20 md:text-3xl"
+          className="flex size-16 shrink-0 items-center justify-center rounded-full bg-foreground font-heading text-2xl font-semibold text-background md:size-20 md:text-3xl"
           aria-hidden
         >
           {initialLetter(clerkUser)}
@@ -82,17 +82,17 @@ export function ProfileHeaderSection() {
         <div className="min-w-0 flex-1">
           <h1
             id="profile-user-heading"
-            className="font-heading text-2xl font-semibold leading-tight text-ink-warm md:text-3xl lg:text-4xl"
+            className="font-heading text-2xl font-semibold leading-tight text-foreground md:text-3xl lg:text-4xl"
           >
             {name}
           </h1>
           {email ? (
-            <p className="mt-1 truncate text-sm text-ink-warm-muted md:text-base">{email}</p>
+            <p className="mt-1 truncate text-sm text-muted-foreground md:text-base">{email}</p>
           ) : null}
 
           {/* State row */}
           <div className="mt-2 flex items-center gap-2">
-            <MapPin className="size-4 shrink-0 text-ink-warm-muted" aria-hidden />
+            <MapPin className="size-4 shrink-0 text-muted-foreground" aria-hidden />
             {editingState ? (
               <div className="flex items-center gap-2">
                 <select
@@ -111,7 +111,7 @@ export function ProfileHeaderSection() {
                   type="button"
                   disabled={savingState}
                   onClick={() => void handleSaveState()}
-                  className="flex size-7 items-center justify-center rounded-full bg-surface-strong text-white hover:bg-surface-strong-hover disabled:opacity-60"
+                  className="flex size-7 items-center justify-center rounded-full bg-foreground text-white hover:bg-foreground/90 disabled:opacity-60"
                   aria-label="Save state"
                 >
                   <Check className="size-3.5" />
@@ -128,7 +128,7 @@ export function ProfileHeaderSection() {
               </div>
             ) : (
               <div className="flex items-center gap-1.5">
-                <span className="text-sm text-ink-warm-muted">
+                <span className="text-sm text-muted-foreground">
                   {convexUser?.state
                     ? `${US_STATE_NAMES[convexUser.state as USStateAbbr] ?? convexUser.state} (${convexUser.state})`
                     : "No state set"}

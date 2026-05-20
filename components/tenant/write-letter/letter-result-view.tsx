@@ -177,7 +177,7 @@ export function LetterResultView({
   return (
     <main
       className={cn(
-        "flex min-h-[100dvh] flex-col bg-cream-page pt-5 md:min-h-[calc(100vh-4rem)] md:pb-10 md:pt-6 lg:pt-8",
+        "flex min-h-svh flex-col bg-background pt-5 md:min-h-[calc(100vh-4rem)] md:pb-10 md:pt-6 lg:pt-8",
         caseId
           ? "pb-[calc(22rem+env(safe-area-inset-bottom,0px))]"
           : "pb-[calc(18rem+env(safe-area-inset-bottom,0px))]",
@@ -189,7 +189,7 @@ export function LetterResultView({
             type="button"
             variant="outline"
             onClick={onBack}
-            className="h-11 w-11 rounded-full border-border bg-cream-surface-soft p-0 text-foreground"
+            className="h-11 w-11 rounded-full border-border bg-accent p-0 text-foreground"
             aria-label="Back"
           >
             <ChevronLeft className="size-5" />
@@ -204,7 +204,7 @@ export function LetterResultView({
               variant="outline"
               onClick={onCopy}
               disabled={blurLetter}
-              className="h-11 w-11 shrink-0 rounded-full border-border bg-cream-surface-soft p-0 text-foreground"
+              className="h-11 w-11 shrink-0 rounded-full border-border bg-accent p-0 text-foreground"
               aria-label="Copy letter"
             >
               <Copy className="size-5" />
@@ -216,10 +216,10 @@ export function LetterResultView({
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
             {metaLine}
           </p>
-          <h2 className="mt-3 font-heading text-4xl font-semibold leading-[0.95] text-ink-warm sm:text-5xl">
+          <h2 className="mt-3 font-heading text-4xl font-semibold leading-[0.95] text-foreground sm:text-5xl">
             {titleText}
           </h2>
-          <p className="mt-3 text-base text-ink-warm-muted sm:text-lg">
+          <p className="mt-3 text-base text-muted-foreground sm:text-lg">
             {subtitleText}
           </p>
 
@@ -229,7 +229,7 @@ export function LetterResultView({
                 type="button"
                 variant="outline"
                 onClick={onEditLetter}
-                className="rounded-2xl border-cream-border bg-cream-surface-deep px-4 py-2.5 text-sm font-semibold text-ink-warm hover:bg-cream-surface"
+                className="rounded-2xl border-border bg-muted px-4 py-2.5 text-sm font-semibold text-foreground hover:bg-card"
               >
                 <span className="inline-flex items-center gap-2">
                   <Pencil className="size-4" />
@@ -241,7 +241,7 @@ export function LetterResultView({
 
           <div
             className={cn(
-              "mt-6 overflow-hidden rounded-3xl border border-cream-border bg-background px-5 py-6 shadow-sm sm:px-7 sm:py-8",
+              "mt-6 overflow-hidden rounded-3xl border border-border bg-background px-5 py-6 shadow-sm sm:px-7 sm:py-8",
               blurLetter && "relative min-h-[18rem]",
             )}
           >
@@ -266,11 +266,11 @@ export function LetterResultView({
           </div>
 
           {!letterContentSlot ? (
-            <div className="mt-6 rounded-3xl border border-cream-border bg-cream-surface p-5 shadow-sm sm:p-6">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-warm-muted">
+            <div className="mt-6 rounded-3xl border border-border bg-card p-5 shadow-sm sm:p-6">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                 Delivery tips
               </p>
-              <ul className="mt-3 space-y-2 text-sm text-ink-warm sm:text-base">
+              <ul className="mt-3 space-y-2 text-sm text-foreground sm:text-base">
                 <li className="leading-relaxed text-foreground">
                   Send via USPS Certified Mail with Return Receipt — creates a
                   paper trail.
@@ -288,7 +288,7 @@ export function LetterResultView({
         </div>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 bg-cream-page/80 px-4 pb-6 pt-3 backdrop-blur md:static md:mt-6 md:bg-transparent md:px-0 md:pb-0 md:pt-0 md:backdrop-blur-0">
+      <div className="fixed inset-x-0 bottom-0 z-40 bg-background/80 px-4 pb-6 pt-3 backdrop-blur md:static md:mt-6 md:bg-transparent md:px-0 md:pb-0 md:pt-0 md:backdrop-blur-0">
         <div className="mx-auto w-full max-w-3xl">
           {footerSlot ?? (
             <div className="flex flex-col gap-2">
@@ -296,7 +296,7 @@ export function LetterResultView({
                 <Button
                   asChild
                   variant="outline"
-                  className="h-14 w-full rounded-2xl border-cream-border bg-cream-surface-deep px-6 text-lg font-semibold text-ink-warm hover:bg-cream-surface"
+                  className="h-14 w-full rounded-2xl border-border bg-muted px-6 text-lg font-semibold text-foreground hover:bg-card"
                 >
                   <Link
                     href={`/cases/${caseId}`}
@@ -313,7 +313,7 @@ export function LetterResultView({
                   variant="outline"
                   onClick={() => void onDownloadPdf()}
                   disabled={blurLetter}
-                  className="h-14 w-full rounded-2xl border-cream-border bg-background px-5 text-base font-semibold text-foreground hover:bg-cream-surface-soft"
+                  className="h-14 w-full rounded-2xl border-border bg-background px-5 text-base font-semibold text-foreground hover:bg-accent"
                 >
                   <span className="inline-flex items-center gap-2">
                     <Download className="size-4" />
@@ -325,7 +325,7 @@ export function LetterResultView({
                   variant="outline"
                   onClick={onDownloadDoc}
                   disabled={blurLetter}
-                  className="h-14 w-full rounded-2xl border-cream-border bg-background px-5 text-base font-semibold text-foreground hover:bg-cream-surface-soft"
+                  className="h-14 w-full rounded-2xl border-border bg-background px-5 text-base font-semibold text-foreground hover:bg-accent"
                 >
                   <span className="inline-flex items-center gap-2">
                     <Download className="size-4" />
@@ -337,7 +337,7 @@ export function LetterResultView({
                 type="button"
                 onClick={onCopy}
                 disabled={blurLetter}
-                className="h-14 w-full rounded-2xl bg-surface-strong px-6 text-lg font-semibold text-white hover:bg-surface-strong-hover"
+                className="h-14 w-full rounded-2xl bg-foreground px-6 text-lg font-semibold text-white hover:bg-foreground/90"
               >
                 {didCopy ? "Copied!" : "Copy full letter"}
               </Button>

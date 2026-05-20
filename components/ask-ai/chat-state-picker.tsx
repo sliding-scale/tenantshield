@@ -25,8 +25,8 @@ export type ChatStatePickerProps = {
 };
 
 const itemClass = cn(
-  "justify-center py-2 pr-8 pl-2 font-mono text-sm font-semibold tracking-wide text-ink-warm",
-  "focus:bg-cream-surface dark:text-ink-warm dark:focus:bg-surface-strong",
+  "justify-center py-2 pr-8 pl-2 font-mono text-sm font-semibold tracking-wide text-foreground",
+  "focus:bg-card dark:text-foreground dark:focus:bg-foreground",
 );
 
 /**
@@ -51,12 +51,12 @@ export default function ChatStatePicker({
           size="sm"
           className={cn(
             DROPDOWN_W,
-            "h-8 gap-1 rounded-lg border-cream-border bg-cream-surface-soft px-2 py-0",
-            "font-mono text-sm font-semibold tracking-wide text-ink-warm shadow-sm",
-            "hover:bg-cream-surface data-[size=sm]:h-8",
-            "dark:border-cream-border dark:bg-cream-surface-soft dark:text-ink-warm dark:hover:bg-surface-strong",
+            "h-8 gap-1 rounded-lg border-border bg-accent px-2 py-0",
+            "font-mono text-sm font-semibold tracking-wide text-foreground shadow-sm",
+            "hover:bg-card data-[size=sm]:h-8",
+            "dark:border-border dark:bg-accent dark:text-foreground dark:hover:bg-foreground/90",
             "justify-between [&>span]:min-w-0",
-            "[&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-ink-warm-muted",
+            "[&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-muted-foreground",
           )}
           aria-label="Select US state (two-letter code) for tenant law context"
         >
@@ -68,11 +68,11 @@ export default function ChatStatePicker({
           align="end"
           className={cn(
             DROPDOWN_W,
-            "overflow-hidden rounded-lg border border-cream-border bg-cream-page p-1",
-            "text-ink-warm shadow-md ring-0 dark:bg-cream-surface-soft dark:text-ink-warm",
-            "max-h-[min(20rem,65dvh)]",
-            "[&_[data-slot=select-scroll-up-button]]:bg-cream-page dark:[&_[data-slot=select-scroll-up-button]]:bg-cream-surface-soft",
-            "[&_[data-slot=select-scroll-down-button]]:bg-cream-page dark:[&_[data-slot=select-scroll-down-button]]:bg-cream-surface-soft",
+            "overflow-hidden rounded-lg border border-border bg-background p-1",
+            "text-foreground shadow-md ring-0 dark:bg-accent dark:text-foreground",
+            "max-h-[min(20rem,65svh)]",
+            "[&_[data-slot=select-scroll-up-button]]:bg-background dark:[&_[data-slot=select-scroll-up-button]]:bg-accent",
+            "[&_[data-slot=select-scroll-down-button]]:bg-background dark:[&_[data-slot=select-scroll-down-button]]:bg-accent",
           )}
         >
           {US_STATE_CODES_SORTED.map((code) => (

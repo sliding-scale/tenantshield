@@ -61,7 +61,7 @@ export default function LoginContinuePage() {
   const inputClass = "h-11 rounded-lg border border-border bg-background px-3 text-foreground outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-4 py-10">
+    <div className="flex min-h-svh flex-col items-center justify-center gap-6 px-4 py-10">
       <Link href="/signup" className="text-sm text-muted-foreground hover:text-foreground">
         ← Back to sign up
       </Link>

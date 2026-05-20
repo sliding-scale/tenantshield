@@ -13,6 +13,8 @@ import {
   type RatingFilterTag,
 } from "@/lib/constants/issue-types"
 import { PropertyCardImage } from "@/components/tenant/rating/property-card-image"
+import { MOBILE_TAB_BAR_PAGE_SHELL } from "@/lib/nav/mobile-chrome"
+import { cn } from "@/lib/utils"
 
 const PAGE_SIZE = 15
 /** Delay Convex search until typing pauses — avoids a query per keystroke. */
@@ -87,7 +89,12 @@ export default function RatingsPage() {
     : "/ratings/create"
 
   return (
-    <main className="min-h-[100dvh] bg-cream-page px-4 py-5 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-8">
+    <main
+      className={cn(
+        "min-h-svh bg-background px-4 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-8",
+        MOBILE_TAB_BAR_PAGE_SHELL,
+      )}
+    >
       <div className="mx-auto w-full max-w-screen-2xl">
         <header className="mb-5 md:mb-6">
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary md:text-xs">
@@ -96,21 +103,21 @@ export default function RatingsPage() {
           <h1 className="mt-1 font-heading text-2xl font-semibold leading-snug text-foreground md:text-3xl lg:text-[2rem]">
             Know Before You Sign.
           </h1>
-          <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-ink-warm-muted">
+          <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-muted-foreground">
             Anonymous ratings from verified tenants. Spot patterns before choosing your next
             rental.
           </p>
         </header>
 
-        <section className="rounded-2xl border border-cream-border bg-cream-surface/40 p-3 md:p-4">
+        <section className="rounded-2xl border border-border bg-card/40 p-3 md:p-4">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-ink-warm-muted" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
               value={searchInput}
               onChange={(event) => setSearchInput(event.target.value)}
               placeholder="Search by address, city, or property name..."
-              className="h-9 w-full rounded-xl border border-cream-border bg-background pl-9 pr-3 text-xs text-foreground placeholder:text-ink-warm-muted focus:border-primary focus:outline-none md:text-sm"
+              className="h-9 w-full rounded-xl border border-border bg-background pl-9 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none md:text-sm"
             />
           </div>
         </section>
@@ -120,7 +127,7 @@ export default function RatingsPage() {
             type="button"
             variant="outline"
             size="sm"
-            className="h-9 w-full shrink-0 gap-1.5 rounded-xl border-cream-border bg-cream-surface text-xs font-semibold text-foreground hover:bg-cream-surface-soft sm:w-auto sm:text-sm"
+            className="h-9 w-full shrink-0 gap-1.5 rounded-xl border-border bg-card text-xs font-semibold text-foreground hover:bg-accent sm:w-auto sm:text-sm"
             asChild
           >
             <Link href={createHref}>
@@ -141,7 +148,7 @@ export default function RatingsPage() {
                 className={[
                   "rounded-full border px-3 py-1 text-xs font-medium transition md:px-3.5 md:py-1.5 md:text-[13px]",
                   active
-                    ? "border-surface-strong bg-surface-strong text-white"
+                    ? "border-foreground bg-foreground text-white"
                     : "border-border bg-background text-foreground hover:bg-accent",
                 ].join(" ")}
               >
@@ -152,18 +159,18 @@ export default function RatingsPage() {
         </section>
 
         {showEmptySearch ? (
-          <section className="mt-4 rounded-2xl border border-cream-border bg-cream-surface p-6 text-center md:p-8">
-            <p className="font-heading text-xl text-ink-warm md:text-2xl">
+          <section className="mt-4 rounded-2xl border border-border bg-card p-6 text-center md:p-8">
+            <p className="font-heading text-xl text-foreground md:text-2xl">
               No such property found
             </p>
-            <p className="mt-2 text-sm text-ink-warm-muted">
+            <p className="mt-2 text-sm text-muted-foreground">
               We couldn&apos;t find a property matching{" "}
-              <span className="font-semibold text-ink-warm">&ldquo;{trimmedDebounced}&rdquo;</span>.
+              <span className="font-semibold text-foreground">&ldquo;{trimmedDebounced}&rdquo;</span>.
               Add it now so other tenants can find it too.
             </p>
             <Button
               size="sm"
-              className="mt-5 h-10 gap-1.5 rounded-full border-0 bg-surface-strong px-4 text-sm font-semibold text-white shadow-md hover:bg-surface-strong-hover"
+              className="mt-5 h-10 gap-1.5 rounded-full border-0 bg-foreground px-4 text-sm font-semibold text-white shadow-md hover:bg-foreground/90"
               asChild
             >
               <Link href={createHref}>
@@ -175,16 +182,16 @@ export default function RatingsPage() {
         ) : null}
 
         {showEmptyAll ? (
-          <section className="mt-4 rounded-2xl border border-cream-border bg-cream-surface p-6 text-center md:p-8">
-            <p className="font-heading text-xl text-ink-warm md:text-2xl">
+          <section className="mt-4 rounded-2xl border border-border bg-card p-6 text-center md:p-8">
+            <p className="font-heading text-xl text-foreground md:text-2xl">
               No properties yet
             </p>
-            <p className="mt-2 text-sm text-ink-warm-muted">
+            <p className="mt-2 text-sm text-muted-foreground">
               Be the first to add a property and start the rating history.
             </p>
             <Button
               size="sm"
-              className="mt-5 h-10 gap-1.5 rounded-full border-0 bg-surface-strong px-4 text-sm font-semibold text-white shadow-md hover:bg-surface-strong-hover"
+              className="mt-5 h-10 gap-1.5 rounded-full border-0 bg-foreground px-4 text-sm font-semibold text-white shadow-md hover:bg-foreground/90"
               asChild
             >
               <Link href="/ratings/create">
@@ -196,9 +203,9 @@ export default function RatingsPage() {
         ) : null}
 
         {showEmptyFilter ? (
-          <section className="mt-4 rounded-2xl border border-cream-border bg-cream-surface p-8 text-center md:p-10">
-            <p className="font-heading text-xl text-ink-warm md:text-2xl">No properties found</p>
-            <p className="mt-2 text-sm text-ink-warm-muted">
+          <section className="mt-4 rounded-2xl border border-border bg-card p-8 text-center md:p-10">
+            <p className="font-heading text-xl text-foreground md:text-2xl">No properties found</p>
+            <p className="mt-2 text-sm text-muted-foreground">
               No listings match this issue tag in what&apos;s loaded so far. Try &ldquo;All
               Properties&rdquo;, load more below, or pick another filter.
             </p>
@@ -210,7 +217,7 @@ export default function RatingsPage() {
             {Array.from({ length: 4 }).map((_, i) => (
               <div
                 key={i}
-                className="h-[22rem] animate-pulse rounded-2xl border border-cream-border bg-cream-surface/60"
+                className="h-[22rem] animate-pulse rounded-2xl border border-border bg-card/60"
               />
             ))}
           </section>
@@ -223,7 +230,7 @@ export default function RatingsPage() {
                 <Link
                   key={property._id}
                   href={`/ratings/${property._id}`}
-                  className="group block overflow-hidden rounded-2xl border border-cream-border bg-cream-surface shadow-sm outline-none transition hover:border-primary/40 hover:shadow-md focus-visible:ring-2 focus-visible:ring-primary/50"
+                  className="group block overflow-hidden rounded-2xl border border-border bg-card shadow-sm outline-none transition hover:border-primary/40 hover:shadow-md focus-visible:ring-2 focus-visible:ring-primary/50"
                 >
                   <article className="flex flex-col">
                     <PropertyCardImage
@@ -234,17 +241,17 @@ export default function RatingsPage() {
                     <div className="p-3 sm:p-3.5">
                       <div className="mb-3 flex items-start justify-between gap-2">
                         <div className="min-w-0 flex-1">
-                          <h2 className="line-clamp-2 font-heading text-sm font-semibold leading-snug text-ink-warm group-hover:text-foreground md:text-[0.9375rem]">
+                          <h2 className="line-clamp-2 font-heading text-sm font-semibold leading-snug text-foreground group-hover:text-foreground md:text-[0.9375rem]">
                             {property.name}
                           </h2>
-                          <p className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-ink-warm-muted md:text-xs">
+                          <p className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-muted-foreground md:text-xs">
                             <MapPin className="size-3 shrink-0" />
                             {property.reviewCount === 0
                               ? "No reviews yet"
                               : `${property.reviewCount} review${property.reviewCount === 1 ? "" : "s"}`}
                           </p>
                         </div>
-                        <p className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-cream-surface-soft px-2 py-0.5 text-xs font-semibold text-ink-warm">
+                        <p className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-accent px-2 py-0.5 text-xs font-semibold text-foreground">
                           <Star className="size-3 fill-primary text-primary" />
                           {property.overallRating != null
                             ? property.overallRating.toFixed(1)
@@ -257,7 +264,7 @@ export default function RatingsPage() {
                             {property.tags.map((tag) => (
                               <span
                                 key={tag}
-                                className="shrink-0 whitespace-nowrap rounded-full border border-cream-border bg-cream-surface-soft px-2 py-0.5 text-[10px] font-medium text-ink-warm-muted md:text-xs"
+                                className="shrink-0 whitespace-nowrap rounded-full border border-border bg-accent px-2 py-0.5 text-[10px] font-medium text-muted-foreground md:text-xs"
                               >
                                 {tag}
                               </span>
@@ -283,12 +290,12 @@ export default function RatingsPage() {
             className="mt-6 flex min-h-14 items-center justify-center py-4"
           >
             {loadingMore ? (
-              <span className="inline-flex items-center gap-3 text-sm text-ink-warm-muted">
+              <span className="inline-flex items-center gap-3 text-sm text-muted-foreground">
                 <ShieldLoader variant="ratings" compact />
                 Loading more…
               </span>
             ) : (
-              <span className="text-[11px] text-ink-warm-muted md:text-xs">
+              <span className="text-[11px] text-muted-foreground md:text-xs">
                 Scroll for more properties
               </span>
             )}

@@ -7,7 +7,7 @@ const toneClass: Record<ListRowPillTone, string> = {
   good: "border-secondary/30 bg-secondary/15 text-secondary",
   negotiate: "border-warning/30 bg-warning/15 text-warning",
   avoid: "border-destructive/30 bg-destructive/15 text-destructive",
-  muted: "border-cream-border bg-background text-ink-warm-muted",
+  muted: "border-border bg-background text-muted-foreground",
 }
 
 const pillBase =

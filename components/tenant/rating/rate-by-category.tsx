@@ -73,7 +73,7 @@ export function RateByCategory({
   return (
     <div
       className={cn(
-        "w-full min-w-0 max-w-full rounded-2xl border border-cream-border bg-background p-4 shadow-sm sm:p-5 md:p-6 lg:max-w-none",
+        "w-full min-w-0 max-w-full rounded-2xl border border-border bg-background p-4 shadow-sm sm:p-5 md:p-6 lg:max-w-none",
         className,
       )}
     >
@@ -81,14 +81,14 @@ export function RateByCategory({
         Rate by category
       </h2>
       <div className="mt-4" role="group" aria-labelledby={groupLabelId}>
-        <p id={groupLabelId} className="text-sm font-medium text-ink-warm">
+        <p id={groupLabelId} className="text-sm font-medium text-foreground">
           Issue types <span className="text-destructive">*</span>
         </p>
-        <p className="mt-1 text-xs text-ink-warm-muted">Select all that apply.</p>
+        <p className="mt-1 text-xs text-muted-foreground">Select all that apply.</p>
         <ul
           className={cn(
             "mt-3 max-h-[min(22rem,50vh)] space-y-2 overflow-y-auto rounded-xl border p-2 sm:p-3",
-            issueTypesError ? "border-destructive" : "border-cream-border",
+            issueTypesError ? "border-destructive" : "border-border",
           )}
         >
           {ISSUE_TYPES.map((t) => {
@@ -98,18 +98,18 @@ export function RateByCategory({
                 <label
                   className={cn(
                     "flex cursor-pointer items-start gap-3 rounded-lg px-2 py-2 transition sm:px-3",
-                    checked ? "bg-primary/10" : "hover:bg-cream-surface-soft",
+                    checked ? "bg-primary/10" : "hover:bg-accent",
                   )}
                 >
                   <input
                     type="checkbox"
                     checked={checked}
                     onChange={() => onToggleIssueType(t.value)}
-                    className="mt-1 size-4 shrink-0 rounded border-cream-border text-primary focus-visible:ring-2 focus-visible:ring-primary/40"
+                    className="mt-1 size-4 shrink-0 rounded border-border text-primary focus-visible:ring-2 focus-visible:ring-primary/40"
                   />
-                  <span className="min-w-0 text-sm leading-snug text-ink-warm">
+                  <span className="min-w-0 text-sm leading-snug text-foreground">
                     <span className="font-medium">{t.value}</span>
-                    <span className="mt-0.5 block text-xs font-normal text-ink-warm-muted">
+                    <span className="mt-0.5 block text-xs font-normal text-muted-foreground">
                       {t.subtitle}
                     </span>
                   </span>
@@ -131,7 +131,7 @@ export function RateByCategory({
           return (
             <li key={row.id}>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <span className="text-sm font-medium text-ink-warm">{row.label}</span>
+                <span className="text-sm font-medium text-foreground">{row.label}</span>
                 <div className="flex min-w-0 flex-wrap items-center gap-2">
                   <div className="flex gap-0.5" role="group" aria-label={`${row.label} rating`}>
                     {[1, 2, 3, 4, 5].map((star) => {
@@ -150,7 +150,7 @@ export function RateByCategory({
                               "size-7 sm:size-8",
                               active
                                 ? "fill-primary text-primary"
-                                : "fill-transparent text-cream-surface-deep",
+                                : "fill-transparent text-muted",
                             )}
                             strokeWidth={active ? 0 : 1.25}
                           />
@@ -159,11 +159,11 @@ export function RateByCategory({
                     })}
                   </div>
                   {value !== null ? (
-                    <span className="text-xs font-medium tabular-nums text-ink-warm-muted sm:text-sm">
+                    <span className="text-xs font-medium tabular-nums text-muted-foreground sm:text-sm">
                       {value}/5 — {STAR_LABELS[value]}
                     </span>
                   ) : (
-                    <span className="text-xs text-ink-warm-muted">Tap stars to rate</span>
+                    <span className="text-xs text-muted-foreground">Tap stars to rate</span>
                   )}
                 </div>
               </div>
@@ -172,12 +172,12 @@ export function RateByCategory({
         })}
       </ul>
 
-      <div className="mt-8 border-t border-cream-border pt-8">
+      <div className="mt-8 border-t border-border pt-8">
         <h2 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary md:text-xs">
           Landlord details
         </h2>
         <div className="mt-4">
-          <label htmlFor={landlordId} className="text-sm font-medium text-ink-warm">
+          <label htmlFor={landlordId} className="text-sm font-medium text-foreground">
             Landlord / Property Manager Name <span className="text-destructive">*</span>
           </label>
           <Input
@@ -189,8 +189,8 @@ export function RateByCategory({
             maxLength={120}
             aria-invalid={landlordNameError || undefined}
             className={cn(
-              "mt-1.5 h-11 w-full min-w-0 rounded-xl bg-cream-surface-soft px-3 text-sm text-ink-warm placeholder:text-ink-warm-muted",
-              landlordNameError ? "border-destructive" : "border-cream-border border",
+              "mt-1.5 h-11 w-full min-w-0 rounded-xl bg-accent px-3 text-sm text-foreground placeholder:text-muted-foreground",
+              landlordNameError ? "border-destructive" : "border-border border",
             )}
           />
           {landlordNameError ? (
@@ -201,13 +201,13 @@ export function RateByCategory({
         </div>
       </div>
 
-      <div className="mt-8 border-t border-cream-border pt-8">
+      <div className="mt-8 border-t border-border pt-8">
         <h2 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary md:text-xs">
           Optional details
         </h2>
         <div className="mt-4 w-full min-w-0 space-y-4">
           <div>
-            <label htmlFor={experienceId} className="text-sm font-medium text-ink-warm">
+            <label htmlFor={experienceId} className="text-sm font-medium text-foreground">
               Your experience
             </label>
             <textarea
@@ -217,9 +217,9 @@ export function RateByCategory({
               rows={5}
               maxLength={maxExperienceLength}
               placeholder="Share what it was actually like living here..."
-              className="mt-1.5 w-full min-w-0 resize-y rounded-xl border border-cream-border bg-cream-surface-soft px-3 py-2.5 text-sm text-ink-warm outline-none transition placeholder:text-ink-warm-muted focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/25"
+              className="mt-1.5 w-full min-w-0 resize-y rounded-xl border border-border bg-accent px-3 py-2.5 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/25"
             />
-            <p className="mt-1 text-right text-xs text-ink-warm-muted">
+            <p className="mt-1 text-right text-xs text-muted-foreground">
               {experienceLen} / {maxExperienceLength}
             </p>
           </div>

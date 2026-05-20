@@ -118,7 +118,7 @@ export default function AskAiShell() {
   }
 
   return (
-    <div className="bg-cream-page flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden md:h-[calc(100dvh-4rem)] md:max-h-[calc(100dvh-4rem)]">
+    <div className="bg-background flex h-svh max-h-svh flex-col overflow-hidden md:h-[calc(100vh-4rem)] md:max-h-[calc(100vh-4rem)]">
       <div className="flex min-h-0 flex-1 flex-col md:flex-row md:items-stretch">
         <ChatSidebar
           conversations={conversations}
@@ -130,11 +130,11 @@ export default function AskAiShell() {
         />
 
         <section className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <header className="border-cream-border flex shrink-0 items-center gap-2 border-b bg-background/90 px-3 py-2.5 backdrop-blur md:hidden">
+          <header className="border-border flex shrink-0 items-center gap-2 border-b bg-background/90 px-3 py-2.5 backdrop-blur md:hidden">
             <Button
               variant="outline"
               size="sm"
-              className="border-cream-border shrink-0 gap-1.5 px-2.5 text-xs font-medium"
+              className="border-border shrink-0 gap-1.5 px-2.5 text-xs font-medium"
               asChild
             >
               {/* <Link href="/dashboard">
@@ -147,7 +147,7 @@ export default function AskAiShell() {
               <p className="font-heading text-center truncate text-lg leading-tight">
                 Ask AI
               </p>
-              <p className="text-center text-ink-warm-muted truncate text-xs">
+              <p className="text-center text-muted-foreground truncate text-xs">
                 Lease, cases & tenant rights
               </p>
             </div>
@@ -157,7 +157,7 @@ export default function AskAiShell() {
               className="shrink-0"
             />
           </header>
-          <div className="justify-center border-cream-border bg-background/90 hidden shrink-0 items-center md:justify-end border-b px-4 py-2 backdrop-blur md:flex">
+          <div className="justify-center border-border bg-background/90 hidden shrink-0 items-center md:justify-end border-b px-4 py-2 backdrop-blur md:flex">
             <ChatStatePicker
               id="ask-ai-state-desktop"
               value={selectedStateCode}

@@ -45,3 +45,8 @@ export function shouldShowMobileTabBar(pathname: string | null, isSignedIn: bool
   if (isSharedPagePath(pathname)) return false
   return true
 }
+
+/** Tab-bar routes use bottom nav only on mobile — no duplicate top navbar. */
+export function shouldHideTopNavbarOnMobile(pathname: string | null, isSignedIn: boolean) {
+  return shouldShowMobileTabBar(pathname, isSignedIn)
+}

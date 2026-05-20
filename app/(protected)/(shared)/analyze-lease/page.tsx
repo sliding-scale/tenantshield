@@ -243,29 +243,29 @@ export default function AnalyzeLeasePage() {
   const analysis = lease?.aiAnalysis;
 
   return (
-    <main className="flex min-h-[100dvh] flex-col bg-cream-page pb-28 pt-5 md:min-h-[calc(100vh-4rem)] md:pb-10 md:pt-6 lg:pt-8">
+    <main className="flex min-h-svh flex-col bg-background pb-28 pt-5 md:min-h-[calc(100vh-4rem)] md:pb-10 md:pt-6 lg:pt-8">
       <div className="flex w-full flex-1 flex-col px-4 sm:px-6 md:px-10 lg:px-14 xl:px-16">
         <header className="mb-5 flex shrink-0 items-center justify-between md:hidden">
           <Button
             type="button"
             variant="outline"
             onClick={() => router.back()}
-            className="h-11 w-11 rounded-full border-border bg-cream-surface-soft p-0 text-foreground"
+            className="h-11 w-11 rounded-full border-border bg-accent p-0 text-foreground"
             aria-label="Back"
           >
             <X className="size-5" />
           </Button>
         </header>
         {showUploadForm ? (
-          <section className="flex min-h-0 flex-1 flex-col rounded-2xl border border-cream-border bg-cream-surface p-5 shadow-sm sm:p-7 md:rounded-3xl md:p-10 lg:p-12 xl:p-14">
+          <section className="flex min-h-0 flex-1 flex-col rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-7 md:rounded-3xl md:p-10 lg:p-12 xl:p-14">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary md:text-sm">
               AI &middot; Red Flag Detector
             </p>
-            <h2 className="mt-3 max-w-5xl font-heading text-4xl font-semibold leading-[0.95] text-ink-warm text-balance sm:text-5xl md:text-6xl lg:text-7xl xl:max-w-6xl">
+            <h2 className="mt-3 max-w-5xl font-heading text-4xl font-semibold leading-[0.95] text-foreground text-balance sm:text-5xl md:text-6xl lg:text-7xl xl:max-w-6xl">
               Upload your lease. <br className="hidden sm:block" />
               We&rsquo;ll find the traps.
             </h2>
-            <p className="mt-4 max-w-3xl text-lg text-ink-warm-muted text-pretty sm:text-xl lg:max-w-4xl lg:text-2xl">
+            <p className="mt-4 max-w-3xl text-lg text-muted-foreground text-pretty sm:text-xl lg:max-w-4xl lg:text-2xl">
               Our AI reviews every clause against your state&rsquo;s tenant law
               and flags illegal or one-sided terms.
             </p>
@@ -285,8 +285,8 @@ export default function AnalyzeLeasePage() {
                   isDragOver
                     ? "border-primary bg-primary/5"
                     : file
-                      ? "border-cream-border bg-cream-surface-soft"
-                      : "border-cream-border bg-background hover:border-primary/50 hover:bg-cream-surface-soft",
+                      ? "border-border bg-accent"
+                      : "border-border bg-background hover:border-primary/50 hover:bg-accent",
                 ].join(" ")}
               >
                 <input
@@ -302,12 +302,12 @@ export default function AnalyzeLeasePage() {
                     <FileText className="mt-0.5 size-8 shrink-0 text-primary sm:mt-0" />
                     <div className="min-w-0 flex-1 overflow-hidden text-left">
                       <p
-                        className="w-full max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold leading-snug text-ink-warm sm:text-base md:text-lg"
+                        className="w-full max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold leading-snug text-foreground sm:text-base md:text-lg"
                         title={file.name}
                       >
                         {file.name}
                       </p>
-                      <p className="mt-0.5 text-xs text-ink-warm-muted sm:text-sm">
+                      <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">
                         {(file.size / 1024).toFixed(0)} KB
                       </p>
                     </div>
@@ -317,7 +317,7 @@ export default function AnalyzeLeasePage() {
                         e.stopPropagation();
                         setFile(null);
                       }}
-                      className="flex size-8 shrink-0 items-center justify-center rounded-full text-ink-warm-muted transition-colors hover:bg-cream-surface-deep hover:text-ink-warm"
+                      className="flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                       aria-label="Remove file"
                     >
                       <X className="size-4" />
@@ -325,13 +325,13 @@ export default function AnalyzeLeasePage() {
                   </div>
                 ) : (
                   <>
-                    <div className="flex size-16 items-center justify-center rounded-full bg-cream-surface-soft transition-colors group-hover:bg-cream-surface-deep md:size-20">
-                      <Upload className="size-6 text-ink-warm-muted md:size-7" />
+                    <div className="flex size-16 items-center justify-center rounded-full bg-accent transition-colors group-hover:bg-muted md:size-20">
+                      <Upload className="size-6 text-muted-foreground md:size-7" />
                     </div>
-                    <p className="mt-4 text-lg font-semibold text-ink-warm md:text-xl">
+                    <p className="mt-4 text-lg font-semibold text-foreground md:text-xl">
                       Tap to upload PDF
                     </p>
-                    <p className="mt-1 text-sm text-ink-warm-muted md:text-base">
+                    <p className="mt-1 text-sm text-muted-foreground md:text-base">
                       PDF or text file
                     </p>
                   </>
@@ -341,7 +341,7 @@ export default function AnalyzeLeasePage() {
 
             {/* State selector */}
             <div className="mx-auto mt-8 w-full max-w-3xl md:mt-10">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-warm-muted md:text-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground md:text-sm">
                 State
               </p>
               <div className="relative mt-3 w-full">
@@ -390,7 +390,7 @@ export default function AnalyzeLeasePage() {
                         className={[
                           "inline-flex h-12 shrink-0 snap-start items-center justify-center rounded-2xl border px-[1.1rem] text-base transition md:min-w-[4.25rem] md:px-5 md:text-lg",
                           active
-                            ? "border-cream-border bg-cream-surface-deep text-ink-warm shadow-sm ring-1 ring-cream-border/80 font-semibold"
+                            ? "border-border bg-muted text-foreground shadow-sm ring-1 ring-border/80 font-semibold"
                             : "border-transparent bg-background font-medium text-foreground hover:bg-accent",
                         ].join(" ")}
                       >
@@ -429,7 +429,7 @@ export default function AnalyzeLeasePage() {
               type="button"
               disabled={!canSubmit}
               onClick={() => void onSubmit()}
-              className="mx-auto mt-8 h-14 w-full max-w-xl rounded-2xl bg-surface-strong px-6 text-lg font-semibold text-white hover:bg-surface-strong-hover disabled:bg-muted disabled:text-muted-foreground md:mt-10 md:text-xl"
+              className="mx-auto mt-8 h-14 w-full max-w-xl rounded-2xl bg-foreground px-6 text-lg font-semibold text-white hover:bg-foreground/90 disabled:bg-muted disabled:text-muted-foreground md:mt-10 md:text-xl"
             >
               {isSubmitting ? (
                 <span className="flex items-center justify-center gap-3">
@@ -444,7 +444,7 @@ export default function AnalyzeLeasePage() {
             </Button>
           </section>
         ) : !analysis ? (
-          <section className="flex min-h-0 flex-1 flex-col items-center justify-center rounded-2xl border border-cream-border bg-cream-surface p-6 shadow-sm sm:p-10 md:rounded-3xl">
+          <section className="flex min-h-0 flex-1 flex-col items-center justify-center rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-10 md:rounded-3xl">
             <GavelLoader
               variant="lease"
               embedded

@@ -14,6 +14,7 @@ import {
   MOBILE_MORE_NAV_ITEMS,
 } from "@/lib/nav/items"
 import { shouldShowMobileTabBar } from "@/lib/nav/visibility"
+import { MOBILE_TAB_BAR_HEIGHT } from "@/lib/nav/mobile-chrome"
 import { cn } from "@/lib/utils"
 
 function NavTab({
@@ -101,7 +102,7 @@ export default function MobileTabBar() {
           aria-modal="true"
           aria-label="More navigation"
           className="fixed inset-x-0 z-[120] md:hidden"
-          style={{ bottom: "calc(3.75rem + env(safe-area-inset-bottom, 0px))" }}
+          style={{ bottom: MOBILE_TAB_BAR_HEIGHT }}
         >
           <div className="mx-auto max-w-lg border-t border-border bg-background px-3 py-3 shadow-lg">
             <p className="mb-2 px-1 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
@@ -119,7 +120,7 @@ export default function MobileTabBar() {
                         "flex items-center gap-3 rounded-xl border px-3 py-3 text-sm font-medium transition-colors",
                         active
                           ? "border-border bg-muted text-foreground"
-                          : "border-transparent bg-cream-surface text-foreground hover:bg-muted",
+                          : "border-transparent bg-card text-foreground hover:bg-muted",
                       )}
                     >
                       <Icon
@@ -140,7 +141,7 @@ export default function MobileTabBar() {
         </div>
       ) : null}
       <nav
-        className="fixed inset-x-0 bottom-0 z-[100] border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85 md:hidden"
+        className="fixed inset-x-0 bottom-0 z-[100] border-t border-border bg-background md:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         aria-label="Main"
       >
@@ -193,9 +194,7 @@ function TabBarSpacer() {
   return (
     <div
       className="shrink-0 md:hidden"
-      style={{
-        height: "calc(3.75rem + env(safe-area-inset-bottom, 0px))",
-      }}
+      style={{ height: MOBILE_TAB_BAR_HEIGHT }}
       aria-hidden
     />
   )

@@ -8,9 +8,7 @@ import { firstClerkErrorCode, firstClerkErrorMessage } from "@/lib/auth/clerk-er
 import { ForgotPasswordForm } from "@/components/auth/forgot-password-form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-
-const authFieldClass =
-  "h-12 rounded-full border-border bg-popover px-5 text-base shadow-sm placeholder:text-muted-foreground md:text-sm"
+import { authFieldClass } from "@/lib/ui/auth-field-styles"
 type Props = {
   /** When omitted, self-serve signup links are hidden (e.g. admin login). */
   signUpHref?: string

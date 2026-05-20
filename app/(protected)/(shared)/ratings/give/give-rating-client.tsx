@@ -112,12 +112,12 @@ export default function GiveRatingClient() {
   }
 
   return (
-    <main className="min-h-[100dvh] bg-cream-page px-4 py-5 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-8">
+    <main className="min-h-svh bg-background px-4 py-5 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-8">
       <div className="mx-auto w-full min-w-0 max-w-screen-2xl">
         <Button
           variant="outline"
           size="sm"
-          className="mb-5 gap-1 rounded-full border-cream-border bg-background"
+          className="mb-5 gap-1 rounded-full border-border bg-background"
           asChild
         >
           <Link href={backHref}>
@@ -130,7 +130,7 @@ export default function GiveRatingClient() {
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary md:text-xs">
             Anonymous review
           </p>
-          <h1 className="mt-2 font-heading text-2xl font-semibold leading-snug text-ink-warm md:text-3xl lg:text-[2rem]">
+          <h1 className="mt-2 font-heading text-2xl font-semibold leading-snug text-foreground md:text-3xl lg:text-[2rem]">
             {alreadyRated ? "Your review" : "Rate this property"}
           </h1>
           {property === undefined && propertyIdRaw ? (
@@ -139,7 +139,7 @@ export default function GiveRatingClient() {
             </div>
           ) : null}
           {property ? (
-            <p className="mt-2 text-base font-medium text-ink-warm md:text-lg">{property.name}</p>
+            <p className="mt-2 text-base font-medium text-foreground md:text-lg">{property.name}</p>
           ) : null}
           {property === null ? (
             <p className="mt-2 text-sm text-destructive">
@@ -151,7 +151,7 @@ export default function GiveRatingClient() {
             </p>
           ) : null}
           {!alreadyRated ? (
-            <p className="mt-3 inline-flex items-center gap-2 text-sm text-ink-warm-muted">
+            <p className="mt-3 inline-flex items-center gap-2 text-sm text-muted-foreground">
               <span className="inline-flex size-8 items-center justify-center rounded-lg bg-secondary/15 text-secondary">
                 <Shield className="size-4 shrink-0" strokeWidth={1.75} />
               </span>
@@ -161,7 +161,7 @@ export default function GiveRatingClient() {
         </header>
 
         {checkingExisting ? (
-          <div className="flex min-h-[12rem] items-center justify-center rounded-2xl border border-cream-border bg-cream-surface/40 px-4 py-10">
+          <div className="flex min-h-[12rem] items-center justify-center rounded-2xl border border-border bg-card/40 px-4 py-10">
             <ShieldLoader variant="ratings" embedded label="Checking your\nreviews…" />
           </div>
         ) : null}
@@ -200,7 +200,7 @@ export default function GiveRatingClient() {
           ) : null}
 
           <div className="rounded-xl border border-secondary/25 bg-secondary/10 px-3 py-3 sm:px-4 sm:py-3.5">
-            <p className="flex items-start gap-2 text-sm leading-relaxed text-ink-warm">
+            <p className="flex items-start gap-2 text-sm leading-relaxed text-foreground">
               <Shield className="mt-0.5 size-4 shrink-0 text-secondary" strokeWidth={1.75} />
               <span>
                 Reviews are anonymous. We never show your name or contact details to landlords or
@@ -213,7 +213,7 @@ export default function GiveRatingClient() {
             <Button
               type="submit"
               disabled={isSubmitting || missingProperty || property === null}
-              className="h-12 w-full rounded-xl border-0 bg-surface-strong text-base font-semibold text-white shadow-md hover:bg-surface-strong-hover disabled:bg-cream-surface-deep disabled:text-ink-warm-muted disabled:opacity-100 sm:h-14 sm:text-lg"
+              className="h-12 w-full rounded-xl border-0 bg-foreground text-base font-semibold text-white shadow-md hover:bg-foreground/90 disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100 sm:h-14 sm:text-lg"
             >
               {isSubmitting ? (
                 <span className="inline-flex items-center gap-2">
@@ -226,7 +226,7 @@ export default function GiveRatingClient() {
             </Button>
             <Link
               href={backHref}
-              className="text-center text-sm font-medium text-ink-warm-muted underline-offset-4 hover:text-ink-warm hover:underline"
+              className="text-center text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
             >
               Cancel
             </Link>

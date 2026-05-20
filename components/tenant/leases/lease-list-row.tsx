@@ -44,7 +44,7 @@ export function LeaseListRow({ item }: { item: LeaseListItem }) {
 
   return (
     <>
-      <article className="flex items-stretch gap-2 rounded-3xl border border-cream-border bg-cream-surface transition hover:bg-cream-surface-soft sm:gap-3">
+      <article className="flex items-stretch gap-2 rounded-3xl border border-border bg-card transition hover:bg-accent sm:gap-3">
         <Link
           href={`/leases/${item._id}`}
           className="min-w-0 flex-1 p-4 sm:p-5 md:p-5"
@@ -55,14 +55,14 @@ export function LeaseListRow({ item }: { item: LeaseListItem }) {
             </p>
             <LeaseVerdictTag verdict={item.verdict} />
           </div>
-          <h2 className="mt-1.5 line-clamp-2 break-words text-balance font-heading text-xl font-semibold leading-snug text-ink-warm sm:text-2xl">
+          <h2 className="mt-1.5 line-clamp-2 break-words text-balance font-heading text-xl font-semibold leading-snug text-foreground sm:text-2xl">
             {title}
           </h2>
-          <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-ink-warm-muted">
+          <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
             {item.documentSummary}
           </p>
           {item.issuesCount > 0 ? (
-            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs font-medium text-ink-warm-muted">
+            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs font-medium text-muted-foreground">
               {item.redFlagsCount > 0 ? (
                 <span>
                   {item.redFlagsCount} red flag{item.redFlagsCount === 1 ? "" : "s"}
@@ -93,7 +93,7 @@ export function LeaseListRow({ item }: { item: LeaseListItem }) {
               setError(null)
               setConfirmOpen(true)
             }}
-            className="size-10 rounded-xl border-cream-border bg-background text-muted-foreground hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive sm:size-11"
+            className="size-10 rounded-xl border-border bg-background text-muted-foreground hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive sm:size-11"
           >
             <Trash2 className="size-4" />
           </Button>

@@ -52,7 +52,7 @@ function CaseStrengthDonut({ score }: { score: number }) {
         aria-hidden
       />
       <div className="relative flex size-[7.25rem] flex-col items-center justify-center rounded-full bg-background shadow-inner md:size-[8.5rem]">
-        <span className="font-heading text-4xl font-semibold leading-none text-ink-warm md:text-5xl">
+        <span className="font-heading text-4xl font-semibold leading-none text-foreground md:text-5xl">
           {Math.round(clamped)}
         </span>
         <span className="mt-2 text-center text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground md:text-xs">
@@ -74,7 +74,7 @@ function AnalysisSections({
   const listSection = (title: string, items: string[]) =>
     items.length > 0 ? (
       <section className="space-y-2">
-        <h3 className="font-heading text-lg font-semibold text-ink-warm md:text-xl">{title}</h3>
+        <h3 className="font-heading text-lg font-semibold text-foreground md:text-xl">{title}</h3>
         <ul
           className={cn(
             "list-inside list-disc space-y-1.5 text-base leading-relaxed text-foreground md:text-lg",
@@ -91,11 +91,11 @@ function AnalysisSections({
   return (
     <div className="space-y-6 text-pretty">
       <div>
-        <h3 className="font-heading text-xl font-semibold text-ink-warm md:text-2xl">TenantShield Analysis</h3>
+        <h3 className="font-heading text-xl font-semibold text-foreground md:text-2xl">TenantShield Analysis</h3>
       </div>
 
       <section className="space-y-2">
-        <h4 className="font-heading text-lg font-semibold text-ink-warm md:text-xl">Summary</h4>
+        <h4 className="font-heading text-lg font-semibold text-foreground md:text-xl">Summary</h4>
         <p
           className={cn(
             "text-base leading-relaxed text-foreground md:text-lg",
@@ -107,7 +107,7 @@ function AnalysisSections({
       </section>
 
       <section className="space-y-2">
-        <h4 className="font-heading text-lg font-semibold text-ink-warm md:text-xl">Case strength</h4>
+        <h4 className="font-heading text-lg font-semibold text-foreground md:text-xl">Case strength</h4>
         <p
           className={cn(
             "text-base leading-relaxed text-foreground md:text-lg",
@@ -162,7 +162,7 @@ export function NewCaseAnalysisResult({
           type="button"
           variant="outline"
           onClick={onBack}
-          className="h-11 w-11 rounded-full border-border bg-cream-surface-soft p-0 text-foreground"
+          className="h-11 w-11 rounded-full border-border bg-accent p-0 text-foreground"
           aria-label="Back to cases"
         >
           <ArrowLeft className="size-5" />
@@ -176,13 +176,13 @@ export function NewCaseAnalysisResult({
       <div className="space-y-6 md:space-y-8 lg:max-w-4xl lg:mx-auto w-full">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">{metaLine}</p>
-          <h2 className="mt-2 font-heading text-3xl font-semibold leading-tight text-ink-warm text-balance sm:text-4xl md:text-5xl">
+          <h2 className="mt-2 font-heading text-3xl font-semibold leading-tight text-foreground text-balance sm:text-4xl md:text-5xl">
             {details.title}
           </h2>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-3xl border border-cream-border bg-background px-5 py-8 shadow-sm md:px-8 md:py-10">
+          <div className="rounded-3xl border border-border bg-background px-5 py-8 shadow-sm md:px-8 md:py-10">
             <div className="flex flex-col items-center">
               <CaseStrengthDonut score={aiAnalysis.caseStrength} />
               <p className="mt-6 max-w-xs text-center text-sm text-muted-foreground md:text-base">
@@ -190,15 +190,15 @@ export function NewCaseAnalysisResult({
               </p>
             </div>
           </div>
-          <div className="rounded-3xl border border-cream-border bg-background px-5 py-6 shadow-sm md:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-warm-muted">Case details</p>
+          <div className="rounded-3xl border border-border bg-background px-5 py-6 shadow-sm md:px-8">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Case details</p>
             <dl className="mt-4 space-y-3 text-sm md:text-base">
               <div>
-                <dt className="text-xs font-semibold uppercase tracking-wider text-ink-warm-muted">Issue type</dt>
+                <dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Issue type</dt>
                 <dd className="mt-1 text-foreground">{details.issueType || "—"}</dd>
               </div>
               <div>
-                <dt className="text-xs font-semibold uppercase tracking-wider text-ink-warm-muted">Description</dt>
+                <dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Description</dt>
                 <dd className="mt-1 whitespace-pre-wrap text-foreground">{displayedDescription}</dd>
                 {isDescriptionLong ? (
                   <button
@@ -211,17 +211,17 @@ export function NewCaseAnalysisResult({
                 ) : null}
               </div>
               <div>
-                <dt className="text-xs font-semibold uppercase tracking-wider text-ink-warm-muted">State</dt>
+                <dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">State</dt>
                 <dd className="mt-1 text-foreground">
                   {details.state ? `${stateName} (${details.state})` : "—"}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs font-semibold uppercase tracking-wider text-ink-warm-muted">Landlord</dt>
+                <dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Landlord</dt>
                 <dd className="mt-1 text-foreground">{details.landlord || "—"}</dd>
               </div>
               <div>
-                <dt className="text-xs font-semibold uppercase tracking-wider text-ink-warm-muted">
+                <dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Property address
                 </dt>
                 <dd className="mt-1 line-clamp-2 whitespace-pre-wrap text-foreground">{details.propertyAddress || "—"}</dd>
@@ -231,10 +231,10 @@ export function NewCaseAnalysisResult({
         </div>
 
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-warm-muted">AI analysis</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">AI analysis</p>
           <div
             className={cn(
-              "mt-3 overflow-hidden rounded-3xl border border-cream-border bg-background px-5 py-6 shadow-sm md:px-8 md:py-8",
+              "mt-3 overflow-hidden rounded-3xl border border-border bg-background px-5 py-6 shadow-sm md:px-8 md:py-8",
               blurAnalysis && "relative min-h-[20rem]",
             )}
           >
@@ -254,7 +254,7 @@ export function NewCaseAnalysisResult({
           <Button
             asChild
             variant="outline"
-            className="h-14 w-full rounded-2xl border-cream-border bg-cream-surface-deep px-6 text-lg font-semibold text-ink-warm hover:bg-cream-surface md:text-xl"
+            className="h-14 w-full rounded-2xl border-border bg-muted px-6 text-lg font-semibold text-foreground hover:bg-card md:text-xl"
           >
             <Link href={`/letters/${attachedLetterId}`} className="inline-flex items-center justify-center gap-2">
               <FileText className="size-5 shrink-0" aria-hidden />
@@ -264,7 +264,7 @@ export function NewCaseAnalysisResult({
         ) : (
           <Button
             asChild
-            className="h-14 w-full rounded-2xl bg-surface-strong px-6 text-lg font-semibold text-white hover:bg-surface-strong-hover md:text-xl"
+            className="h-14 w-full rounded-2xl bg-foreground px-6 text-lg font-semibold text-white hover:bg-foreground/90 md:text-xl"
           >
             <Link
               href={{

@@ -33,16 +33,16 @@ export function LeaseResultsView({
 
   return (
     <div className="flex flex-col gap-6 pb-6">
-      <section className="rounded-2xl border border-cream-border bg-cream-surface p-6 shadow-sm md:rounded-3xl md:p-10">
+      <section className="rounded-2xl border border-border bg-card p-6 shadow-sm md:rounded-3xl md:p-10">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary md:text-sm">
               Lease Analysis Complete
             </p>
-            <h2 className="mt-2 font-heading text-3xl font-semibold text-ink-warm md:text-4xl">
+            <h2 className="mt-2 font-heading text-3xl font-semibold text-foreground md:text-4xl">
               {analysis.leaseReview}
             </h2>
-            <p className="mt-4 text-base leading-relaxed text-ink-warm-muted md:text-lg">
+            <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">
               {analysis.documentSummary}
             </p>
           </div>
@@ -81,14 +81,14 @@ function LeaseAnalysisSections({ analysis }: { analysis: LeaseAnalysis }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <section className="rounded-2xl border border-cream-border bg-cream-surface p-6 shadow-sm md:rounded-3xl md:p-10">
+      <section className="rounded-2xl border border-border bg-card p-6 shadow-sm md:rounded-3xl md:p-10">
         <div className="flex items-start gap-3">
           <CheckCircle className={`mt-0.5 size-6 shrink-0 ${verdictColor}`} />
           <div>
-            <h3 className="text-lg font-semibold text-ink-warm md:text-xl">
+            <h3 className="text-lg font-semibold text-foreground md:text-xl">
               Overall Recommendation
             </h3>
-            <p className="mt-2 text-base leading-relaxed text-ink-warm-muted">
+            <p className="mt-2 text-base leading-relaxed text-muted-foreground">
               {analysis.overallRecommendation}
             </p>
           </div>
@@ -96,10 +96,10 @@ function LeaseAnalysisSections({ analysis }: { analysis: LeaseAnalysis }) {
       </section>
 
       {analysis.redFlags.length > 0 && (
-        <section className="rounded-2xl border border-cream-border bg-cream-surface p-6 shadow-sm md:rounded-3xl md:p-10">
+        <section className="rounded-2xl border border-border bg-card p-6 shadow-sm md:rounded-3xl md:p-10">
           <div className="flex items-center gap-2">
             <AlertTriangle className="size-5 text-destructive" />
-            <h3 className="text-lg font-semibold text-ink-warm md:text-xl">
+            <h3 className="text-lg font-semibold text-foreground md:text-xl">
               Red Flags ({analysis.redFlags.length})
             </h3>
           </div>
@@ -107,22 +107,22 @@ function LeaseAnalysisSections({ analysis }: { analysis: LeaseAnalysis }) {
             {analysis.redFlags.map((rf, i) => (
               <div
                 key={i}
-                className="rounded-xl border border-cream-border bg-cream-surface-soft p-4"
+                className="rounded-xl border border-border bg-accent p-4"
               >
-                <blockquote className="border-l-2 border-destructive pl-3 text-sm italic text-ink-warm-muted">
+                <blockquote className="border-l-2 border-destructive pl-3 text-sm italic text-muted-foreground">
                   &ldquo;{rf.quote}&rdquo;
                 </blockquote>
-                <p className="mt-2 text-sm text-ink-warm">{rf.problem}</p>
+                <p className="mt-2 text-sm text-foreground">{rf.problem}</p>
               </div>
             ))}
           </div>
         </section>
       )}
       {analysis.missingClauses.length > 0 && (
-        <section className="rounded-2xl border border-cream-border bg-cream-surface p-6 shadow-sm md:rounded-3xl md:p-10">
+        <section className="rounded-2xl border border-border bg-card p-6 shadow-sm md:rounded-3xl md:p-10">
           <div className="flex items-center gap-2">
             <FileQuestion className="size-5 text-warning" />
-            <h3 className="text-lg font-semibold text-ink-warm md:text-xl">
+            <h3 className="text-lg font-semibold text-foreground md:text-xl">
               Missing Clauses ({analysis.missingClauses.length})
             </h3>
           </div>
@@ -130,12 +130,12 @@ function LeaseAnalysisSections({ analysis }: { analysis: LeaseAnalysis }) {
             {analysis.missingClauses.map((mc, i) => (
               <div
                 key={i}
-                className="rounded-xl border border-cream-border bg-cream-surface-soft p-4"
+                className="rounded-xl border border-border bg-accent p-4"
               >
-                <p className="text-sm font-semibold text-ink-warm">
+                <p className="text-sm font-semibold text-foreground">
                   {mc.clauseName}
                 </p>
-                <p className="mt-1 text-sm text-ink-warm-muted">
+                <p className="mt-1 text-sm text-muted-foreground">
                   {mc.explanation}
                 </p>
               </div>
@@ -145,10 +145,10 @@ function LeaseAnalysisSections({ analysis }: { analysis: LeaseAnalysis }) {
       )}
 
       {analysis.tenantFriendlyClauses.length > 0 && (
-        <section className="rounded-2xl border border-cream-border bg-cream-surface p-6 shadow-sm md:rounded-3xl md:p-10">
+        <section className="rounded-2xl border border-border bg-card p-6 shadow-sm md:rounded-3xl md:p-10">
           <div className="flex items-center gap-2">
             <ShieldCheck className="size-5 text-primary" />
-            <h3 className="text-lg font-semibold text-ink-warm md:text-xl">
+            <h3 className="text-lg font-semibold text-foreground md:text-xl">
               Tenant-Friendly Clauses ({analysis.tenantFriendlyClauses.length})
             </h3>
           </div>
@@ -156,12 +156,12 @@ function LeaseAnalysisSections({ analysis }: { analysis: LeaseAnalysis }) {
             {analysis.tenantFriendlyClauses.map((tf, i) => (
               <div
                 key={i}
-                className="rounded-xl border border-cream-border bg-cream-surface-soft p-4"
+                className="rounded-xl border border-border bg-accent p-4"
               >
-                <blockquote className="border-l-2 border-primary pl-3 text-sm italic text-ink-warm-muted">
+                <blockquote className="border-l-2 border-primary pl-3 text-sm italic text-muted-foreground">
                   &ldquo;{tf.quote}&rdquo;
                 </blockquote>
-                <p className="mt-2 text-sm text-ink-warm">{tf.explanation}</p>
+                <p className="mt-2 text-sm text-foreground">{tf.explanation}</p>
               </div>
             ))}
           </div>
@@ -169,10 +169,10 @@ function LeaseAnalysisSections({ analysis }: { analysis: LeaseAnalysis }) {
       )}
 
       {analysis.questionsToAsk.length > 0 && (
-        <section className="rounded-2xl border border-cream-border bg-cream-surface p-6 shadow-sm md:rounded-3xl md:p-10">
+        <section className="rounded-2xl border border-border bg-card p-6 shadow-sm md:rounded-3xl md:p-10">
           <div className="flex items-center gap-2">
-            <HelpCircle className="size-5 text-ink-warm-muted" />
-            <h3 className="text-lg font-semibold text-ink-warm md:text-xl">
+            <HelpCircle className="size-5 text-muted-foreground" />
+            <h3 className="text-lg font-semibold text-foreground md:text-xl">
               Questions to Ask Your Landlord
             </h3>
           </div>
@@ -180,9 +180,9 @@ function LeaseAnalysisSections({ analysis }: { analysis: LeaseAnalysis }) {
             {analysis.questionsToAsk.map((q, i) => (
               <li
                 key={i}
-                className="flex items-start gap-2 text-sm text-ink-warm"
+                className="flex items-start gap-2 text-sm text-foreground"
               >
-                <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-cream-surface-deep text-xs font-semibold text-ink-warm-muted">
+                <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground">
                   {i + 1}
                 </span>
                 {q}

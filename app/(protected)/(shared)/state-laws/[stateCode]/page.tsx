@@ -7,6 +7,8 @@ import { useQuery } from "convex/react"
 import { Briefcase, ChevronLeft, ChevronRight, Scale } from "lucide-react"
 import { api } from "@/convex/_generated/api"
 import { ShieldLoader } from "@/components/shared/shield-loader"
+import { MOBILE_TAB_BAR_PAGE_SHELL } from "@/lib/nav/mobile-chrome"
+import { cn } from "@/lib/utils"
 
 export default function StateLawDetailPage({
   params,
@@ -27,8 +29,13 @@ export default function StateLawDetailPage({
 
   if (stateLaw === null) {
     return (
-      <main className="flex min-h-[100dvh] flex-col items-center justify-center bg-cream-page px-4 md:min-h-[calc(100vh-4rem)]">
-        <p className="font-heading text-2xl font-medium text-ink-warm">State not found</p>
+      <main
+        className={cn(
+          "flex min-h-svh flex-col items-center justify-center bg-background px-4 md:min-h-[calc(100vh-4rem)]",
+          MOBILE_TAB_BAR_PAGE_SHELL,
+        )}
+      >
+        <p className="font-heading text-2xl font-medium text-foreground">State not found</p>
         <button onClick={() => router.back()} className="mt-4 text-primary hover:underline">
           Go back
         </button>
@@ -40,12 +47,17 @@ export default function StateLawDetailPage({
   const { headlineMetrics, depositReturnTimeline, repairAndHabitability, evictionNotice } = lawDetails
 
   return (
-    <main className="min-h-[100dvh] bg-cream-page px-4 py-6 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10">
+    <main
+      className={cn(
+        "min-h-svh bg-background px-4 md:min-h-[calc(100vh-4rem)] md:px-8 md:py-10",
+        MOBILE_TAB_BAR_PAGE_SHELL,
+      )}
+    >
       <div className="mx-auto w-full max-w-6xl">
         <div className="mb-6 flex items-center justify-between md:mb-8">
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-2 text-sm font-medium text-ink-warm-muted transition-colors hover:text-ink-warm"
+            className="flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             <ChevronLeft className="size-4" />
             Back to States
@@ -59,11 +71,11 @@ export default function StateLawDetailPage({
               Tenant Rights · {stateCode}
             </p>
           </div>
-          <h1 className="mt-4 font-heading text-4xl font-semibold tracking-tight text-ink-warm md:text-5xl lg:text-6xl">
+          <h1 className="mt-4 font-heading text-4xl font-semibold tracking-tight text-foreground md:text-5xl lg:text-6xl">
             {stateName}
           </h1>
           
-          <p className="mt-4 max-w-3xl text-lg leading-relaxed text-ink-warm-muted md:text-xl">
+          <p className="mt-4 max-w-3xl text-lg leading-relaxed text-muted-foreground md:text-xl">
             Security deposit capped at {headlineMetrics.depositCap.toLowerCase()};
             must be returned {depositReturnTimeline.toLowerCase()}.
             Notice to quit is {headlineMetrics.noticeToQuit.toLowerCase()}.
@@ -72,27 +84,27 @@ export default function StateLawDetailPage({
 
         {/* Headline Metrics Cards */}
         <div className="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-3 md:mb-14 md:gap-6">
-          <div className="rounded-3xl border border-cream-border bg-cream-surface p-6 shadow-sm md:p-8">
-            <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-warm-muted">
+          <div className="rounded-3xl border border-border bg-card p-6 shadow-sm md:p-8">
+            <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
               Deposit Cap
             </h3>
-            <p className="mt-3 font-heading text-2xl font-semibold leading-tight text-ink-warm md:text-3xl">
+            <p className="mt-3 font-heading text-2xl font-semibold leading-tight text-foreground md:text-3xl">
               {headlineMetrics.depositCap}
             </p>
           </div>
-          <div className="rounded-3xl border border-cream-border bg-cream-surface p-6 shadow-sm md:p-8">
-            <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-warm-muted">
+          <div className="rounded-3xl border border-border bg-card p-6 shadow-sm md:p-8">
+            <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
               Grace Period
             </h3>
-            <p className="mt-3 font-heading text-2xl font-semibold leading-tight text-ink-warm md:text-3xl">
+            <p className="mt-3 font-heading text-2xl font-semibold leading-tight text-foreground md:text-3xl">
               {headlineMetrics.gracePeriod}
             </p>
           </div>
-          <div className="rounded-3xl border border-cream-border bg-cream-surface p-6 shadow-sm md:p-8">
-            <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-warm-muted">
+          <div className="rounded-3xl border border-border bg-card p-6 shadow-sm md:p-8">
+            <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
               Notice To Quit
             </h3>
-            <p className="mt-3 font-heading text-2xl font-semibold leading-tight text-ink-warm md:text-3xl">
+            <p className="mt-3 font-heading text-2xl font-semibold leading-tight text-foreground md:text-3xl">
               {headlineMetrics.noticeToQuit}
             </p>
           </div>
@@ -100,24 +112,24 @@ export default function StateLawDetailPage({
 
         {/* Detail Sections */}
         <div className="grid gap-8 md:grid-cols-2 md:gap-12">
-          <section className="rounded-3xl border border-cream-border bg-cream-surface p-6 md:p-8">
-            <h2 className="font-heading text-2xl font-semibold text-ink-warm md:text-3xl">
+          <section className="rounded-3xl border border-border bg-card p-6 md:p-8">
+            <h2 className="font-heading text-2xl font-semibold text-foreground md:text-3xl">
               Repair & Habitability
             </h2>
-            <p className="mt-4 text-base leading-relaxed text-ink-warm-muted md:text-lg">
+            <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">
               {repairAndHabitability.landlordObligation}
               {repairAndHabitability.legalCitation && ` (${repairAndHabitability.legalCitation}).`}
               {repairAndHabitability.repairAndDeductAvailable && " Tenant may use 'repair and deduct' remedy if issues are not fixed."}
             </p>
           </section>
 
-          <section className="rounded-3xl border border-cream-border bg-cream-surface p-6 md:p-8">
-            <h2 className="font-heading text-2xl font-semibold text-ink-warm md:text-3xl">
+          <section className="rounded-3xl border border-border bg-card p-6 md:p-8">
+            <h2 className="font-heading text-2xl font-semibold text-foreground md:text-3xl">
               Eviction Notice
             </h2>
-            <p className="mt-4 text-base leading-relaxed text-ink-warm-muted md:text-lg">
-              <span className="font-semibold text-ink-warm">Nonpayment:</span> {evictionNotice.nonpayment}<br/>
-              <span className="mt-2 block font-semibold text-ink-warm">Lease violation:</span> {evictionNotice.otherBreach}
+            <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">
+              <span className="font-semibold text-foreground">Nonpayment:</span> {evictionNotice.nonpayment}<br/>
+              <span className="mt-2 block font-semibold text-foreground">Lease violation:</span> {evictionNotice.otherBreach}
             </p>
           </section>
         </div>
@@ -125,22 +137,22 @@ export default function StateLawDetailPage({
         {/* CTA Banner */}
         <Link
           href={`/newcase?state=${encodeURIComponent(stateCode)}`}
-          className="group mt-12 flex flex-col justify-between gap-6 rounded-3xl border border-cream-border bg-ink-warm p-6 transition hover:bg-ink-warm/95 sm:flex-row sm:items-center sm:p-8 md:mt-16 md:p-10"
+          className="group mt-12 flex flex-col justify-between gap-6 rounded-3xl border border-border bg-foreground p-6 transition hover:bg-foreground/95 sm:flex-row sm:items-center sm:p-8 md:mt-16 md:p-10"
         >
           <div className="flex items-center gap-4 md:gap-6">
-            <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-cream-page text-ink-warm md:size-16">
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-background text-foreground md:size-16">
               <Briefcase className="size-6 md:size-8" />
             </div>
             <div>
-              <h3 className="font-heading text-xl font-semibold text-cream-page md:text-2xl">
+              <h3 className="font-heading text-xl font-semibold text-background md:text-2xl">
                 Have a dispute in {stateName}?
               </h3>
-              <p className="mt-1 text-sm text-cream-page/80 md:text-base">
+              <p className="mt-1 text-sm text-background/80 md:text-base">
                 Get an AI case-strength score using {stateCode}-specific law.
               </p>
             </div>
           </div>
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-cream-page/10 text-cream-page transition-colors group-hover:bg-cream-page/20">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-background/10 text-background transition-colors group-hover:bg-background/20">
             <ChevronRight className="size-5 transition-transform group-hover:translate-x-0.5" />
           </div>
         </Link>

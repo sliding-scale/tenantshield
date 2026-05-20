@@ -324,11 +324,11 @@ export function OnboardingPlansMain() {
     catalogRows === undefined ||
     (activePlanId !== null && isPaidPlan(activePlanId))
   ) {
-    return <ShieldLoader variant="onboarding" fullPage className="min-h-[100dvh]" />
+    return <ShieldLoader variant="onboarding" fullPage className="min-h-svh" />
   }
 
   return (
-    <main className="min-h-[100dvh] w-full bg-background text-foreground">
+    <main className="min-h-svh w-full bg-background text-foreground">
       <div
         className="relative overflow-hidden border-b border-border bg-cover bg-center px-6 pb-10 pt-16 md:px-10 lg:px-12 lg:pb-14 lg:pt-20"
         style={{

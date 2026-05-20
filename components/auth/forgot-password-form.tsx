@@ -6,9 +6,7 @@ import { useState } from "react"
 import { firstClerkErrorCode, firstClerkErrorMessage } from "@/lib/auth/clerk-errors"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-
-const authFieldClass =
-  "h-12 rounded-full border-border bg-popover px-5 text-base shadow-sm placeholder:text-muted-foreground md:text-sm"
+import { authFieldClass } from "@/lib/ui/auth-field-styles"
 
 type Props = {
   initialEmail?: string

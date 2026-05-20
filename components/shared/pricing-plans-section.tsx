@@ -52,13 +52,13 @@ function BillingPeriodToggle({
       role='group'
       aria-label='Billing period'
     >
-      <div className='inline-flex w-full rounded-full border border-cream-border bg-cream-surface p-1 shadow-sm'>
+      <div className='inline-flex w-full rounded-full border border-border bg-card p-1 shadow-sm'>
         <button
           type='button'
           onClick={() => onChange('monthly')}
           className={cn(
             'h-11 flex-1 rounded-full px-4 text-sm font-semibold transition-colors',
-            billingPeriod === 'monthly' ? 'bg-surface-strong text-white' : 'text-ink-warm hover:text-foreground',
+            billingPeriod === 'monthly' ? 'bg-foreground text-white' : 'text-foreground hover:text-foreground',
           )}
         >
           Monthly
@@ -68,13 +68,13 @@ function BillingPeriodToggle({
           onClick={() => onChange('yearly')}
           className={cn(
             'h-11 flex-1 rounded-full px-4 text-sm font-semibold transition-colors',
-            billingPeriod === 'yearly' ? 'bg-surface-strong text-white' : 'text-ink-warm hover:text-foreground',
+            billingPeriod === 'yearly' ? 'bg-foreground text-white' : 'text-foreground hover:text-foreground',
           )}
         >
           Yearly
         </button>
       </div>
-      <p className='text-sm text-ink-warm-muted'>Save with annual billing on paid plans.</p>
+      <p className='text-sm text-muted-foreground'>Save with annual billing on paid plans.</p>
     </div>
   );
 }
@@ -136,7 +136,7 @@ function PricingPlanCard({
         <div
           className={cn(
             'absolute -top-3 left-1/2 -translate-x-1/2 rounded-full px-3 py-1 text-xs font-bold shadow-md',
-            cancellationNotice ? 'bg-surface-strong text-cream-surface-soft' : 'bg-primary text-primary-foreground',
+            cancellationNotice ? 'bg-foreground text-background' : 'bg-primary text-primary-foreground',
           )}
         >
           {cancellationNotice ? 'Ends soon' : 'Current plan'}
@@ -174,7 +174,7 @@ function PricingPlanCard({
       </ul>
 
       {cancellationNotice ? (
-        <p className='mb-4 rounded-lg border border-cream-border bg-cream-surface px-3 py-2.5 text-center text-sm leading-snug text-ink-warm-muted'>
+        <p className='mb-4 rounded-lg border border-border bg-card px-3 py-2.5 text-center text-sm leading-snug text-muted-foreground'>
           {cancellationNotice}
         </p>
       ) : null}
@@ -385,7 +385,7 @@ export function PricingPlansSection({
         description='Plan changes and billing are handled in the secure customer portal. Open it to switch tiers, update payment, or cancel.'
         cancelLabel='Not now'
         actionLabel='Manage subscription'
-        actionVariant='surface-strong'
+        actionVariant='default'
         isActionLoading={portalLoading}
         onAction={() => {
           void handleManageSubscription();
@@ -394,8 +394,8 @@ export function PricingPlansSection({
       <div className='mx-auto max-w-6xl'>
         {!hideHeader ? (
           <div className='mb-12 text-center'>
-            <h2 className='mb-4 text-3xl font-bold tracking-tight text-ink-warm'>{title}</h2>
-            <p className='text-lg text-ink-warm-muted'>{subtitle}</p>
+            <h2 className='mb-4 text-3xl font-bold tracking-tight text-foreground'>{title}</h2>
+            <p className='text-lg text-muted-foreground'>{subtitle}</p>
           </div>
         ) : null}
 
@@ -443,7 +443,7 @@ export function PricingPlansSection({
                   onClick={() => setCarouselIndex(index)}
                   className={cn(
                     'h-2 rounded-full transition-all duration-300',
-                    index === carouselIndex ? 'w-8 bg-primary' : 'w-2 bg-cream-border hover:bg-cream-surface-deep',
+                    index === carouselIndex ? 'w-8 bg-primary' : 'w-2 bg-border hover:bg-muted',
                     isCurrent && index !== carouselIndex && 'ring-2 ring-primary/40',
                   )}
                   aria-label={isCurrent ? `Go to ${plan.name} (current plan)` : `Go to ${plan.name}`}

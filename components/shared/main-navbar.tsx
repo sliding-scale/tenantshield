@@ -1,6 +1,6 @@
 "use client";
 
-import { Show, UserButton, useUser } from "@clerk/nextjs"
+import { Show, UserButton, useAuth, useUser } from "@clerk/nextjs"
 import { useQuery } from "convex/react"
 import { Sparkles } from "lucide-react";
 import Image from "next/image";
@@ -11,13 +11,14 @@ import { api } from "@/convex/_generated/api";
 import { APP_NAV_ITEMS } from "@/lib/nav/items";
 import { planDisplayLabel } from "@/lib/plans/plan-access";
 import { cn } from "@/lib/utils";
-import { isAuthPagePath } from "@/lib/nav/visibility";
+import { isAuthPagePath, shouldHideTopNavbarOnMobile } from "@/lib/nav/visibility";
 
 const APP_LOGO_SRC =
   "/vecteezy_stylized-yellow-shield-icon-flat-design_54786290.png";
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { isSignedIn } = useAuth();
   const { user: clerkUser } = useUser();
   const billing = useQuery(api.planUsage.queries.current, clerkUser ? {} : "skip");
   const { convexUser, isLoading, role } = useCurrentUser();
@@ -30,8 +31,15 @@ export default function Navbar() {
     return null;
   }
 
+  const hideOnMobile = shouldHideTopNavbarOnMobile(pathname, Boolean(isSignedIn));
+
   return (
-    <header className="sticky top-0 z-50 border-b border-amber-200 bg-white shadow-sm">
+    <header
+      className={cn(
+        "sticky top-0 z-50 border-b border-amber-200 bg-white shadow-sm",
+        hideOnMobile && "max-md:hidden",
+      )}
+    >
       <div className="flex h-16 items-center justify-between gap-4 px-4 sm:gap-6 sm:px-6">
         <div className="flex min-w-0 flex-1 items-center gap-4 sm:gap-8">
           <Link

@@ -3,7 +3,7 @@ import { PrivacyPolicyContent } from "@/components/shared/privacy-policy-content
 
 export default function PrivacyPolicyPage() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-amber-50 px-4 py-12 sm:px-6 lg:px-8">
+    <main className="min-h-svh bg-gradient-to-b from-emerald-50 via-white to-amber-50 px-4 py-12 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-4xl">
         <div className="rounded-3xl border-2 border-amber-200 bg-white/95 p-6 shadow-xl shadow-emerald-100/60 sm:p-10">
           

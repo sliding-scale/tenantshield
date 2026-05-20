@@ -122,14 +122,14 @@ export function NewLetterForm({
   };
 
   return (
-    <main className='flex min-h-[100dvh] flex-col bg-cream-page pb-28 pt-5 md:min-h-[calc(100vh-4rem)] md:pb-10 md:pt-6 lg:pt-8'>
+    <main className='flex min-h-svh flex-col bg-background pb-28 pt-5 md:min-h-[calc(100vh-4rem)] md:pb-10 md:pt-6 lg:pt-8'>
       <div className='mx-auto flex w-full flex-1 flex-col px-4 sm:px-6 md:px-10 lg:px-14 xl:px-16'>
         <header className='mb-5 flex shrink-0 items-center justify-between md:hidden'>
           <Button
             type='button'
             variant='outline'
             onClick={onClose}
-            className='h-11 w-11 rounded-full border-border bg-cream-surface-soft p-0 text-foreground'
+            className='h-11 w-11 rounded-full border-border bg-accent p-0 text-foreground'
             aria-label='Close'
           >
             <X className='size-5' />
@@ -138,15 +138,15 @@ export function NewLetterForm({
 
         <section className='flex min-h-0 flex-1 flex-col'>
           <p className='text-xs font-semibold uppercase tracking-[0.2em] text-primary md:text-sm'>Demand letter</p>
-          <h2 className='mt-3 font-heading text-4xl font-semibold leading-[0.95] text-ink-warm text-balance sm:text-5xl md:text-6xl lg:text-7xl'>
+          <h2 className='mt-3 font-heading text-4xl font-semibold leading-[0.95] text-foreground text-balance sm:text-5xl md:text-6xl lg:text-7xl'>
             Turn your issue into a legal-grade letter.
           </h2>
-          <p className='mt-4 text-base text-ink-warm/80 text-pretty sm:text-xl lg:text-2xl'>
+          <p className='mt-4 text-base text-foreground/80 text-pretty sm:text-xl lg:text-2xl'>
             Our AI drafts a state-specific demand letter with statute citations, timelines, and consequences.
           </p>
 
           <div className='mt-8 md:mt-10 lg:mt-12'>
-            <p className='text-xs font-semibold uppercase tracking-[0.2em] text-ink-warm/80 md:text-sm'>Issue type</p>
+            <p className='text-xs font-semibold uppercase tracking-[0.2em] text-foreground/80 md:text-sm'>Issue type</p>
             <div className='mt-4 grid gap-2.5 md:gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5'>
               {ISSUE_TYPES.map((type) => {
                 const active = letterType === type.value;
@@ -159,17 +159,17 @@ export function NewLetterForm({
                     className={[
                       'inline-flex w-full min-h-11 items-center justify-start gap-3 rounded-full border px-4 py-2 text-sm font-medium transition md:min-h-[2.75rem] md:text-base',
                       active
-                        ? 'border-surface-strong bg-surface-strong shadow-sm font-semibold'
+                        ? 'border-foreground bg-foreground shadow-sm font-semibold'
                         : 'border-border bg-white hover:bg-accent',
                     ].join(' ')}
                   >
-                    <Icon className={`size-5 shrink-0 ${active ? 'text-primary' : 'text-ink-warm'}`} />
+                    <Icon className={`size-5 shrink-0 ${active ? 'text-primary' : 'text-foreground'}`} />
                     <div className='flex min-w-0 flex-col items-start text-left'>
-                      <span className={`font-heading font-bold ${active ? 'text-white' : 'text-ink-warm'}`}>
+                      <span className={`font-heading font-bold ${active ? 'text-white' : 'text-foreground'}`}>
                         {type.value}
                       </span>
                       <span
-                        className={`mt-0.5 text-xs font-normal md:text-sm ${active ? 'text-white/75' : 'text-ink-warm/80'}`}
+                        className={`mt-0.5 text-xs font-normal md:text-sm ${active ? 'text-white/75' : 'text-foreground/80'}`}
                       >
                         {type.subtitle}
                       </span>
@@ -181,7 +181,7 @@ export function NewLetterForm({
           </div>
 
           <div className='mt-6 md:mt-8'>
-            <p className='text-xs font-semibold uppercase tracking-[0.2em] text-ink-warm-muted md:text-sm'>State</p>
+            <p className='text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground md:text-sm'>State</p>
             <div className='relative mt-3 w-full'>
               <Search
                 className='pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground'
@@ -225,7 +225,7 @@ export function NewLetterForm({
                       className={[
                         'inline-flex h-12 shrink-0 snap-start items-center justify-center rounded-2xl border px-[1.1rem] text-base transition md:min-w-[4.25rem] md:px-5 md:text-lg',
                         active
-                          ? 'border-surface-strong bg-surface-strong text-white shadow-sm font-semibold'
+                          ? 'border-foreground bg-foreground text-white shadow-sm font-semibold'
                           : 'border-transparent bg-background font-medium text-foreground hover:bg-accent',
                       ].join(' ')}
                     >
@@ -301,7 +301,7 @@ export function NewLetterForm({
             type='button'
             disabled={!canSubmit}
             onClick={() => void handleSubmitClick()}
-            className='mt-8 h-14 w-full rounded-2xl bg-surface-strong px-6 text-lg font-semibold text-white hover:bg-surface-strong-hover disabled:bg-muted disabled:text-muted-foreground md:mt-10 md:text-xl'
+            className='mt-8 h-14 w-full rounded-2xl bg-foreground px-6 text-lg font-semibold text-white hover:bg-foreground/90 disabled:bg-muted disabled:text-muted-foreground md:mt-10 md:text-xl'
           >
             {isSubmitting ? 'Generating...' : 'Generate Letter'}
           </Button>

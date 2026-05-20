@@ -114,10 +114,11 @@ export function ShieldLoader({
   const loader = (
     <div
       className={cn(
+        "shield-loader",
         compact ? "inline-flex items-center" : "flex flex-col items-center gap-5",
         !compact &&
           !embedded &&
-          "rounded-[1.25rem] border border-cream-border bg-cream-surface px-10 py-10 shadow-sm",
+          "rounded-[1.25rem] border border-border bg-card px-10 py-10 shadow-sm",
         className,
       )}
       role="status"
@@ -130,11 +131,11 @@ export function ShieldLoader({
       </div>
       {!compact ? (
         <div className="flex flex-col items-center gap-3 text-center">
-          <p className="whitespace-pre-line font-heading text-lg font-semibold leading-snug text-ink-warm sm:text-xl">
+          <p className="whitespace-pre-line font-heading text-lg font-semibold leading-snug text-foreground sm:text-xl">
             {headline}
           </p>
           {body ? (
-            <p className="max-w-md text-sm leading-relaxed text-ink-warm-muted">{body}</p>
+            <p className="max-w-md text-sm leading-relaxed text-muted-foreground">{body}</p>
           ) : null}
           <div className="shield-loader__dots flex gap-1.5 pt-1" aria-hidden>
             <span />
@@ -151,7 +152,7 @@ export function ShieldLoader({
   return (
     <div
       className={cn(
-        "flex min-h-[50dvh] items-center justify-center bg-cream-page px-4 md:min-h-[calc(100vh-5rem)]",
+        "flex min-h-[50svh] items-center justify-center bg-background px-4 md:min-h-[calc(100vh-5rem)]",
         className,
       )}
     >
@@ -176,7 +177,7 @@ export function ShieldLoaderOverlay({
   if (!show) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-cream-page/90 px-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 px-4 backdrop-blur-sm">
       <ShieldLoader variant={variant} label={label} description={description} />
     </div>
   )

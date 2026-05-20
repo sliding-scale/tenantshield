@@ -46,7 +46,7 @@ export function LetterListRow({ item }: { item: LetterListItem }) {
 
   return (
     <>
-      <article className="flex items-stretch gap-2 rounded-3xl border border-cream-border bg-cream-surface transition hover:bg-cream-surface-soft sm:gap-3">
+      <article className="flex items-stretch gap-2 rounded-3xl border border-border bg-card transition hover:bg-accent sm:gap-3">
         <Link
           href={`/letters/${item._id}`}
           className="min-w-0 flex-1 p-4 sm:p-5 md:p-5"
@@ -59,10 +59,10 @@ export function LetterListRow({ item }: { item: LetterListItem }) {
               Recipient · {item.inputData.landlordName || "Landlord"}
             </ListRowPill>
           </div>
-          <h2 className="mt-1.5 line-clamp-2 break-words text-balance font-heading text-xl font-semibold leading-snug text-ink-warm sm:text-2xl">
+          <h2 className="mt-1.5 line-clamp-2 break-words text-balance font-heading text-xl font-semibold leading-snug text-foreground sm:text-2xl">
             {title}
           </h2>
-          <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-ink-warm-muted">
+          <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
             {item.preview}
           </p>
           <div className="mt-3 flex items-center gap-2 text-sm font-medium text-foreground">
@@ -82,7 +82,7 @@ export function LetterListRow({ item }: { item: LetterListItem }) {
               setError(null)
               setConfirmOpen(true)
             }}
-            className="size-10 rounded-xl border-cream-border bg-background text-muted-foreground hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive sm:size-11"
+            className="size-10 rounded-xl border-border bg-background text-muted-foreground hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive sm:size-11"
           >
             <Trash2 className="size-4" />
           </Button>

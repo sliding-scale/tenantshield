@@ -8,9 +8,7 @@ import { splitFullName } from "@/lib/auth/signup-metadata"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { US_STATES, US_STATE_NAMES } from "@/lib/constants/us-states"
-
-const authFieldClass =
-  "h-12 rounded-full border-border bg-popover px-5 text-base shadow-sm placeholder:text-muted-foreground md:text-sm"
+import { authFieldClass } from "@/lib/ui/auth-field-styles"
 
 type Props = {
   unsafeMetadata?: Record<string, unknown>
