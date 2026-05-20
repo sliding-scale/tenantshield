@@ -25,7 +25,7 @@ interface BrandedAlertDialogProps {
   iconVariant?: "warning" | "destructive" | "primary"
   cancelLabel?: string
   actionLabel: string | React.ReactNode
-  actionVariant?: "surface-strong" | "destructive"
+  actionVariant?: "default" | "destructive"
   onAction: () => void | Promise<void>
   isActionLoading?: boolean
 }
@@ -41,7 +41,7 @@ export function BrandedAlertDialog({
   iconVariant = "warning",
   cancelLabel = "Not now",
   actionLabel,
-  actionVariant = "surface-strong",
+  actionVariant = "default",
   onAction,
   isActionLoading = false,
 }: BrandedAlertDialogProps) {
@@ -49,7 +49,7 @@ export function BrandedAlertDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent
         overlayClassName="bg-black/60 backdrop-blur-sm"
-        className="w-[calc(100vw-2rem)] max-w-xl gap-0 overflow-hidden rounded-[2rem] border border-cream-border bg-cream-surface p-0 text-ink-warm shadow-2xl ring-0 sm:max-w-2xl"
+        className="w-[calc(100vw-2rem)] max-w-xl gap-0 overflow-hidden rounded-[2rem] border border-border bg-card p-0 text-foreground shadow-2xl ring-0 sm:max-w-2xl"
       >
         <div className="px-6 py-7 sm:px-8 sm:py-9">
           {eyebrow && (
@@ -63,7 +63,7 @@ export function BrandedAlertDialog({
             </p>
           )}
           <div className={cn("flex items-start gap-4 sm:gap-5", eyebrow ? "mt-4 sm:mt-5" : "")}>
-            <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-cream-border bg-cream-surface-deep sm:size-16">
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-border bg-muted sm:size-16">
               {icon || (
                 <AlertTriangle
                   className={cn(
@@ -76,24 +76,24 @@ export function BrandedAlertDialog({
               )}
             </div>
             <div className="min-w-0 space-y-3">
-              <AlertDialogTitle className="font-heading text-2xl font-semibold leading-tight text-ink-warm sm:text-3xl">
+              <AlertDialogTitle className="font-heading text-2xl font-semibold leading-tight text-foreground sm:text-3xl">
                 {title}
               </AlertDialogTitle>
-              <AlertDialogDescription className="text-base leading-relaxed text-ink-warm-muted sm:text-lg">
+              <AlertDialogDescription className="text-base leading-relaxed text-muted-foreground sm:text-lg">
                 {description}
               </AlertDialogDescription>
             </div>
           </div>
         </div>
 
-        <AlertDialogFooter className="flex-col-reverse gap-3 border-t border-cream-border bg-cream-surface-soft px-6 py-5 sm:flex-row sm:justify-end sm:px-8 sm:py-6">
-          <AlertDialogCancel className="h-12 min-h-11 w-full rounded-2xl border-cream-border bg-background px-6 text-base font-semibold text-ink-warm hover:bg-cream-surface sm:w-auto">
+        <AlertDialogFooter className="flex-col-reverse gap-3 border-t border-border bg-accent px-6 py-5 sm:flex-row sm:justify-end sm:px-8 sm:py-6">
+          <AlertDialogCancel className="h-12 min-h-11 w-full rounded-2xl border-border bg-background px-6 text-base font-semibold text-foreground hover:bg-card sm:w-auto">
             {cancelLabel}
           </AlertDialogCancel>
           <AlertDialogAction
             className={cn(
-              "h-12 min-h-11 w-full rounded-2xl border-0 px-6 text-base font-semibold text-white sm:w-auto",
-              actionVariant === "surface-strong" && "bg-surface-strong hover:bg-surface-strong-hover",
+              "h-12 min-h-11 w-full rounded-2xl border-0 px-6 text-base font-semibold sm:w-auto",
+              actionVariant === "default" && "bg-foreground text-background hover:bg-foreground/90",
               actionVariant === "destructive" && "bg-destructive hover:bg-destructive/90"
             )}
             onClick={(e) => {

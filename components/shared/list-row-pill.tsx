@@ -4,14 +4,14 @@ import { cn } from "@/lib/utils"
 export type ListRowPillTone = "good" | "negotiate" | "avoid" | "muted"
 
 const toneClass: Record<ListRowPillTone, string> = {
-  good: "border-secondary/30 bg-secondary/15 text-secondary",
-  negotiate: "border-warning/30 bg-warning/15 text-warning",
+  good: "border-primary/30 bg-primary/15 text-primary",
+  negotiate: "border-secondary/30 bg-secondary/15 text-secondary",
   avoid: "border-destructive/30 bg-destructive/15 text-destructive",
-  muted: "border-cream-border bg-background text-ink-warm-muted",
+  muted: "border-border bg-background text-muted-foreground",
 }
 
 const pillBase =
-  "inline-flex max-w-full min-w-0 items-center truncate rounded-full border px-2.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-[0.12em] sm:max-w-md sm:text-xs"
+  "inline-flex h-6 max-w-full min-w-0 items-center justify-center truncate rounded-full border px-2.5 text-[0.65rem] font-semibold uppercase leading-none tracking-[0.12em] sm:h-7 sm:max-w-md sm:px-3 sm:text-xs"
 
 export function ListRowPill({
   tone,

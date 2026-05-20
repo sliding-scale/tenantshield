@@ -1,3 +1,16 @@
+.gavel-loader {
+  --gavel-wood-shadow: hsl(28 45% 14%);
+  --gavel-wood-deep: hsl(28 38% 18%);
+  --gavel-wood-body: hsl(28 35% 24%);
+  --gavel-wood-mid: hsl(30 32% 38%);
+  --gavel-wood-light: hsl(34 38% 52%);
+  --gavel-wood-face: hsl(36 42% 62%);
+  --gavel-brass: hsl(38 48% 42%);
+  --gavel-brass-light: hsl(42 45% 52%);
+  --gavel-block-base: hsl(28 35% 28%);
+  --gavel-block-strike: hsl(28 38% 22%);
+}
+
 .gavel-loader__dots span {
   width: 5px;
   height: 5px;

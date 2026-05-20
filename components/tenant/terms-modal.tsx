@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { createPortal } from "react-dom"
 import { useMutation } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
@@ -38,10 +39,10 @@ export function TermsModal() {
     }
   }
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm sm:p-6">
-      <div className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-3xl border border-cream-border bg-cream-surface p-5 shadow-2xl md:max-w-3xl md:rounded-[2rem] md:p-8">
-        <h2 className="mb-2 shrink-0 font-heading text-xl font-semibold text-ink-warm md:text-3xl">
+  return createPortal(
+    <div className="fixed inset-0 z-[120] flex items-end justify-center bg-black/60 p-4 backdrop-blur-sm sm:items-center sm:p-6">
+      <div className="flex max-h-[min(92svh,calc(100svh-2rem-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px)))] w-full max-w-lg flex-col overflow-hidden rounded-3xl border border-border bg-card p-5 shadow-2xl md:max-h-[90vh] md:max-w-3xl md:rounded-[2rem] md:p-8">
+        <h2 className="mb-2 shrink-0 font-heading text-xl font-semibold text-foreground md:text-3xl">
           Terms &amp; Conditions
         </h2>
         <p className="mb-4 shrink-0 text-xs text-muted-foreground md:mb-6 md:text-sm">
@@ -62,7 +63,7 @@ export function TermsModal() {
           />
           <label
             htmlFor="accept-terms"
-            className="cursor-pointer select-none text-xs leading-tight text-ink-warm md:text-sm"
+            className="cursor-pointer select-none text-xs leading-tight text-foreground md:text-sm"
           >
             I accept the Terms and Conditions and Privacy Policy.
           </label>
@@ -72,13 +73,14 @@ export function TermsModal() {
           <Button
             onClick={handleAccept}
             disabled={!isAccepted || isSaving}
-            className="w-full rounded-xl border border-surface-strong bg-surface-strong px-5 py-4 text-sm font-semibold text-white transition-colors hover:bg-surface-strong-hover disabled:opacity-50 sm:w-auto md:rounded-2xl md:px-8 md:py-6 md:text-lg"
+            className="w-full rounded-xl border border-foreground bg-foreground px-5 py-4 text-sm font-semibold text-white transition-colors hover:bg-foreground/90 disabled:opacity-50 sm:w-auto md:rounded-2xl md:px-8 md:py-6 md:text-lg"
           >
             {isSaving ? "Saving..." : "I Accept"}
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 

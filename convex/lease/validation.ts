@@ -1,4 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
+import { leaseNotADocumentMessage } from "../../lib/lease/analyze-lease-errors";
 
 type LeaseDocumentCheck = {
   isLease: boolean;
@@ -98,8 +99,6 @@ ${leaseText}`,
   }
 
   if (!parsed.isLease) {
-    throw new Error(
-      `The uploaded document does not look like a lease. ${parsed.reason}`.trim(),
-    );
+    throw new Error(leaseNotADocumentMessage(parsed.reason ?? ""));
   }
 }

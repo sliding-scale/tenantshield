@@ -49,37 +49,24 @@ function EmailLink() {
   );
 }
 
-function PageEmailLink() {
-  return (
-    <a
-      href={`mailto:${SUPPORT_EMAIL}`}
-      className="font-medium text-amber-800 underline underline-offset-2"
-    >
-      {SUPPORT_EMAIL}
-    </a>
-  );
-}
-
 export function TermsOfServiceContent({
   variant = "page",
 }: {
   variant?: LegalDocVariant;
 }) {
   const v = variant;
-  const Email = v === "modal" ? EmailLink : PageEmailLink;
+  const Email = EmailLink;
   const linkClass =
-    v === "modal"
-      ? "font-medium text-primary underline underline-offset-2"
-      : "font-medium text-amber-800 underline underline-offset-2";
+    "font-medium text-primary underline underline-offset-2 hover:text-primary/80";
 
   return (
     <>
-      <LegalCallout variant="red" icon="⚠️" docVariant={v}>
+      <LegalCallout variant="neutral" docVariant={v}>
         <p>
-          <strong>PLEASE READ THESE TERMS CAREFULLY.</strong> By creating an account or
-          using TenantShield, you agree to be bound by these Terms of Service. If you do
-          not agree, do not use our Services. These Terms contain a binding arbitration
-          clause and class action waiver in Sections 19 and 20.
+          <strong>Before you continue:</strong> By creating an account or using
+          TenantShield, you agree to these Terms of Service. If you do not agree, please
+          do not use our Services. Sections 19 and 20 describe binding arbitration and a
+          class action waiver.
         </p>
       </LegalCallout>
 
@@ -633,12 +620,11 @@ export function TermsOfServiceContent({
         </LegalSection>
 
         <LegalSection id="ts-19" sectionNum="Section 19" title="Dispute Resolution & Binding Arbitration" docVariant={v}>
-          <LegalCallout variant="red" icon="⚖️" docVariant={v}>
+          <LegalCallout variant="neutral" docVariant={v}>
             <p>
-              <strong>PLEASE READ THIS SECTION CAREFULLY — IT AFFECTS YOUR LEGAL RIGHTS.</strong>{" "}
-              This section requires you to resolve most disputes through binding individual
-              arbitration rather than in court. You have the right to opt out within 30 days of
-              first accepting these Terms.
+              <strong>About dispute resolution.</strong> This section describes how most
+              disputes are handled through binding individual arbitration rather than in
+              court. You may opt out within 30 days of first accepting these Terms.
             </p>
           </LegalCallout>
 
@@ -788,19 +774,18 @@ export function TermsOfServiceContent({
           </LegalHighlightBox>
 
           {v === "page" && (
-            <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50/40 p-5 sm:p-6">
-              <p className="text-sm font-bold text-gray-900">Acknowledgment</p>
-              <p className="mt-2 text-sm leading-7 text-gray-700">
+            <LegalHighlightBox title="Acknowledgment" docVariant="page">
+              <p>
                 By creating an account or using TenantShield&apos;s Services, you acknowledge that
                 you have read, understood, and agree to be bound by these Terms of Service and our
                 Privacy Policy. You further acknowledge that TenantShield is not a law firm, does
                 not provide legal advice, and that no attorney-client relationship is created by
                 your use of the Services.
               </p>
-              <p className="mt-4 text-xs text-gray-500">
+              <p className="mt-4 text-xs text-muted-foreground">
                 TenantShield, Inc. · Effective May 7, 2026 · Version 1.0 · Delaware Corporation
               </p>
-            </div>
+            </LegalHighlightBox>
           )}
         </LegalSection>
       </div>

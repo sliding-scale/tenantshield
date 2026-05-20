@@ -7,16 +7,19 @@ alwaysApply: true
 
 - Never use hardcoded colors in app code (`#hex`, `rgb()`, `hsl()`, inline style colors).
 - Never use raw Tailwind palette color utilities for product UI surfaces/text (e.g. `bg-zinc-900`, `text-amber-300`) unless explicitly approved for one-off visualizations.
-- Always use semantic token classes from `app/globals.css` (e.g. `bg-background`, `text-foreground`, `bg-primary`, `border-border`, `bg-cream-surface`, `text-ink-warm`).
-- If a needed color does not exist, add a new CSS variable in `:root` and `.dark` in `app/globals.css`, expose it in `@theme inline`, then use that token class in components.
-- Keep naming semantic and reusable (`cream-surface`, `ink-warm-muted`, `surface-strong`), not context-specific (`dashboard-card-bg`).
+- Always use **shadcn semantic token classes** from `app/globals.css` (e.g. `bg-background`, `text-foreground`, `bg-card`, `bg-primary`, `border-border`, `bg-accent`, `text-muted-foreground`).
+- Dark surfaces use inversion: `bg-foreground text-background` — not custom tokens.
+- If a needed color does not exist, retune an existing shadcn variable in `:root` / `.dark` before adding a new one. Expose in `@theme inline` only when necessary.
+- Keep naming semantic and reusable (`accent`, `muted`), not context-specific (`dashboard-card-bg`).
 
 ## Example
 
 ```tsx
 // ❌ Avoid
 <div className="bg-[#f1eadf] text-[#171717] border-[#e2d6c2]" />
+<div className="bg-cream-surface text-ink-warm border-cream-border" />
 
 // ✅ Use tokens
-<div className="bg-cream-surface text-ink-warm border-cream-border" />
+<div className="bg-card text-foreground border-border" />
+<div className="bg-foreground text-background" />
 ```

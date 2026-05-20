@@ -98,42 +98,42 @@ function GavelLoaderSvg({ className }: { className?: string }) {
         />
       </g>
 
-      <circle className="gavel-loader__ring" cx={55} cy={88} r={4} />
-      <circle className="gavel-loader__ring gavel-loader__ring--delayed" cx={55} cy={88} r={4} />
+      <circle className="gavel-loader__ring" cx={54} cy={86} r={4} />
+      <circle className="gavel-loader__ring gavel-loader__ring--delayed" cx={54} cy={86} r={4} />
 
       <g className="gavel-loader__sparks">
         <line
-          x1={55}
-          y1={84}
-          x2={52}
-          y2={78}
+          x1={54}
+          y1={82}
+          x2={51}
+          y2={76}
           className="gavel-loader__spark-line"
           strokeWidth={1.2}
           strokeLinecap="round"
         />
         <line
-          x1={55}
-          y1={84}
-          x2={58}
-          y2={78}
+          x1={54}
+          y1={82}
+          x2={57}
+          y2={76}
           className="gavel-loader__spark-line"
           strokeWidth={1.2}
           strokeLinecap="round"
         />
         <line
-          x1={48}
-          y1={85}
-          x2={42}
-          y2={81}
+          x1={47}
+          y1={83}
+          x2={41}
+          y2={79}
           className="gavel-loader__spark-line"
           strokeWidth={1}
           strokeLinecap="round"
         />
         <line
-          x1={62}
-          y1={85}
-          x2={68}
-          y2={81}
+          x1={61}
+          y1={83}
+          x2={67}
+          y2={79}
           className="gavel-loader__spark-line"
           strokeWidth={1}
           strokeLinecap="round"
@@ -318,9 +318,9 @@ export function GavelLoader({
   return (
     <div
       className={cn(
-        "flex flex-col items-center gap-5",
+        "gavel-loader flex flex-col items-center gap-5",
         !embedded &&
-          "rounded-[1.25rem] border border-cream-border bg-cream-surface px-10 py-10 shadow-sm",
+          "rounded-[1.25rem] border border-border bg-card px-10 py-10 shadow-sm",
         className,
       )}
       role="status"
@@ -329,11 +329,11 @@ export function GavelLoader({
     >
       <GavelLoaderSvg />
       <div className="flex flex-col items-center gap-3 text-center">
-        <p className="whitespace-pre-line font-heading text-lg font-semibold leading-snug text-ink-warm sm:text-xl">
+        <p className="whitespace-pre-line font-heading text-lg font-semibold leading-snug text-foreground sm:text-xl">
           {heading}
         </p>
         {body ? (
-          <p className="max-w-md text-sm leading-relaxed text-ink-warm-muted">{body}</p>
+          <p className="max-w-md text-sm leading-relaxed text-muted-foreground">{body}</p>
         ) : null}
         <div className="gavel-loader__dots flex gap-1.5 pt-1" aria-hidden>
           <span />
@@ -355,7 +355,7 @@ export function GavelLoaderOverlay({ show, variant, description }: GavelLoaderOv
   if (!show) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-cream-page/90 px-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 px-4 backdrop-blur-sm">
       <GavelLoader variant={variant} description={description} />
     </div>
   )

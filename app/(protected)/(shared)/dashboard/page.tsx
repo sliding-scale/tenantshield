@@ -3,19 +3,21 @@
 import AdminDashboardMain from "@/components/admin/dashboard-main";
 import TenantDashboardMain from "@/components/tenant/dashboard/dashboard-main";
 import useCurrentUser from "@/app/hooks/useCurrentUser";
+import useOnboardingStatus from "@/app/hooks/useOnboardingStatus";
 import NoAccessMessage from "@/components/shared/NoAccessMessage";
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ShieldLoader } from "@/components/shared/shield-loader";
 
+function DashboardLoading() {
+  return <ShieldLoader variant="route" fullPage label="Loading…" />;
+}
+
 export default function SharedDashboardPage() {
   const router = useRouter();
   const { role, isLoading, convexUser, clerkUser } = useCurrentUser();
-  const onboardingStatus = useQuery(
-    api.onboarding.queries.onboardingStatus,
-    clerkUser ? {} : "skip",
+  const { onboardingStatus, isLoading: isOnboardingLoading } = useOnboardingStatus(
+    clerkUser?.id,
   );
 
   useEffect(() => {
@@ -27,7 +29,7 @@ export default function SharedDashboardPage() {
   }, [role, onboardingStatus, router]);
 
   if (isLoading) {
-    return <ShieldLoader variant="account" fullPage />;
+    return <DashboardLoading />;
   }
 
   if (!clerkUser) {
@@ -53,8 +55,8 @@ export default function SharedDashboardPage() {
   }
 
   if (role === "tenant") {
-    if (onboardingStatus === undefined) {
-      return <ShieldLoader variant="onboarding" fullPage />;
+    if (isOnboardingLoading) {
+      return <DashboardLoading />;
     }
     if (onboardingStatus?.shouldShowOnboarding) {
       return null;

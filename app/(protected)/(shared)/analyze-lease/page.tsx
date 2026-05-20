@@ -1,78 +1,36 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { Upload, FileText, X, Search } from "lucide-react";
+import { ChevronLeft, Upload, FileText, X } from "lucide-react";
 import { GavelLoader } from "@/components/shared/gavel-loader";
 import { ShieldLoader } from "@/components/shared/shield-loader";
+import { StatePickerField } from "@/components/shared/state-picker-field";
 import { Button } from "@/components/ui/button";
-import { US_STATE_NAMES, filterUSStates, type USStateAbbr } from "@/lib/constants/us-states";
+import { US_STATE_NAMES, type USStateAbbr } from "@/lib/constants/us-states";
 import { usePrefilledUSState } from "@/app/hooks/usePrefilledUSState";
 import {
   LeaseResultsView,
   type LeaseAnalysis,
 } from "@/components/tenant/analyze-lease/lease-results-view";
-
-type AnalyzeLeaseError = { title: string; body: string };
-
-/**
- * Strip Convex client wrapper noise. Client actions use
- * `[CONVEX A(path)] ${errorMessage}\\n  Called by client` (see createHybridErrorStacktrace
- * in convex); `errorMessage` may itself include `[Request ID…] Server Error Uncaught Error:`.
- */
-function unwrapConvexClientError(message: string): string {
-  let s = message.trim();
-  s = s.replace(/\s+Called by client\s*$/i, "").trim();
-  s = s.replace(/^\[CONVEX [^\]]+\]\s*/i, "").trim();
-  s = s.replace(/^\[Request ID:[^\]]+\]\s*Server Error\s*/i, "").trim();
-  s = s.replace(/^Uncaught Error:\s*/i, "").trim();
-  const uncaught = /Uncaught Error:\s*/i;
-  const parts = s.split(uncaught);
-  if (parts.length > 1) {
-    s = (parts[parts.length - 1] ?? s).trim();
-  }
-  s = s.replace(
-    /\s*Accepted files:\s*lease agreements[\s\S]*?lease renewals\.?$/i,
-    "",
-  ).trim();
-  return s;
-}
-
-function formatLeaseCheckError(message: string): AnalyzeLeaseError {
-  const normalized = message.toLowerCase();
-
-  if (normalized.includes("does not look like a lease")) {
-    const body = message.trim();
-    return {
-      title: "This doesn’t look like a lease",
-      body,
-    };
-  }
-
-  if (normalized.includes("could not extract any text")) {
-    return {
-      title: "We could not read this file",
-      body: "Please upload a text-based PDF or a plain text file. Scanned images may not work.",
-    };
-  }
-
-  return {
-    title: "Lease analysis failed",
-    body: message,
-  };
-}
-import { PlanUpgradeDialog } from "@/components/tenant/free-plan-upgrade-dialog"
-import useCurrentUser from "@/app/hooks/useCurrentUser"
+import { PlanUpgradeDialog } from "@/components/tenant/free-plan-upgrade-dialog";
+import useCurrentUser from "@/app/hooks/useCurrentUser";
 import {
   hasReachedLeaseAnalysisLimit,
   LEASE_ANALYSIS_LIMIT_REACHED,
   resolvePlanId,
   shouldPromptFreePlanUpgrade,
-} from "@/lib/plans/plan-access"
-import { getLeaseAnalysisLimit } from "@/lib/plans/plans"
+} from "@/lib/plans/plan-access";
+import { getLeaseAnalysisLimit } from "@/lib/plans/plans";
+import {
+  resolveAnalyzeLeaseError,
+  type AnalyzeLeaseError,
+} from "@/lib/lease/analyze-lease-errors";
+
+type ProcessingStep = "upload" | "extract" | "analyze" | null;
 
 export default function AnalyzeLeasePage() {
   const router = useRouter();
@@ -84,61 +42,37 @@ export default function AnalyzeLeasePage() {
 
   const [file, setFile] = useState<File | null>(null);
   const { state, setState } = usePrefilledUSState();
-  const [stateSearch, setStateSearch] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [processingStep, setProcessingStep] = useState<ProcessingStep>(null);
   const [error, setError] = useState<AnalyzeLeaseError | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [leaseId, setLeaseId] = useState<Id<"leases"> | null>(null);
-  const [upgradeOpen, setUpgradeOpen] = useState(false)
-  const [upgradeMode, setUpgradeMode] = useState<"free" | "limit">("free")
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [upgradeMode, setUpgradeMode] = useState<"free" | "limit">("free");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const stateChipRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
-  const { convexUser } = useCurrentUser()
-  const counts = useQuery(api.dashboard.queries.countsForCurrentUser, {})
-  const planUsage = useQuery(api.planUsage.queries.current, {})
-  const plan = resolvePlanId(planUsage?.plan ?? convexUser?.plan)
-  const billingPeriod = planUsage?.planType ?? "monthly"
-  const usedLeaseAnalyses = planUsage?.usedLeaseAnalyses ?? 0
-  const leaseAnalysisLimit = getLeaseAnalysisLimit(plan, billingPeriod)
+  const { convexUser } = useCurrentUser();
+  const counts = useQuery(api.dashboard.queries.countsForCurrentUser, {});
+  const planUsage = useQuery(api.planUsage.queries.current, {});
+  const plan = resolvePlanId(planUsage?.plan ?? convexUser?.plan);
+  const billingPeriod = planUsage?.planType ?? "monthly";
+  const usedLeaseAnalyses = planUsage?.usedLeaseAnalyses ?? 0;
+  const leaseAnalysisLimit = getLeaseAnalysisLimit(plan, billingPeriod);
 
   const lease = useQuery(
     api.lease.queries.getLeaseForCurrentUser,
     leaseId ? { leaseId } : "skip",
   );
 
-  const filteredStates = useMemo(
-    () => filterUSStates(stateSearch),
-    [stateSearch],
-  );
+  const analysis = lease?.aiAnalysis;
 
-  const chipsToShow = useMemo(() => {
-    if (!state) return filteredStates;
-    const sel = state as USStateAbbr;
-    if (filteredStates.includes(sel)) return filteredStates;
-    return [sel, ...filteredStates];
-  }, [filteredStates, state]);
+  const canSubmit = Boolean(file && state && !processingStep);
+  const showUploadForm = !processingStep && (!leaseId || error);
+  const showProcessing =
+    !error &&
+    (processingStep !== null || (leaseId !== null && !analysis));
 
-  const selectionHiddenBySearch =
-    Boolean(state) &&
-    stateSearch.trim().length > 0 &&
-    !filteredStates.includes(state as USStateAbbr);
-
-  const selectedStateName = useMemo(
-    () => (state ? US_STATE_NAMES[state as USStateAbbr] : ""),
-    [state],
-  );
-
-  useEffect(() => {
-    const el = stateChipRefs.current.get(state);
-    el?.scrollIntoView({
-      behavior: "smooth",
-      inline: "center",
-      block: "nearest",
-    });
-  }, [state]);
-
-  const canSubmit = Boolean(file && state && !isSubmitting && !isAnalyzing);
+  const analyzeDescription = state
+    ? `Our AI is reviewing every clause against ${US_STATE_NAMES[state as USStateAbbr]} tenant law. This usually takes 30–60 seconds.`
+    : "Our AI is reviewing every clause against your state's tenant law. This usually takes 30–60 seconds.";
 
   const handleFile = useCallback((incoming: File | null) => {
     setError(null);
@@ -178,19 +112,19 @@ export default function AnalyzeLeasePage() {
     if (!canSubmit || !file) return;
 
     if (shouldPromptFreePlanUpgrade(plan, counts?.leases ?? 0)) {
-      setUpgradeMode("free")
-      setUpgradeOpen(true)
-      return
+      setUpgradeMode("free");
+      setUpgradeOpen(true);
+      return;
     }
 
     if (hasReachedLeaseAnalysisLimit(plan, billingPeriod, usedLeaseAnalyses)) {
-      setUpgradeMode("limit")
-      setUpgradeOpen(true)
-      return
+      setUpgradeMode("limit");
+      setUpgradeOpen(true);
+      return;
     }
 
     setError(null);
-    setIsSubmitting(true);
+    setProcessingStep("upload");
     try {
       const uploadUrl = await generateUploadUrl();
 
@@ -205,42 +139,29 @@ export default function AnalyzeLeasePage() {
         storageId: string;
       };
 
+      setProcessingStep("extract");
+
       const { leaseId: newLeaseId } = await extractLeaseText({
-        storageId: storageId as any,
+        storageId: storageId as Id<"_storage">,
         state,
+        fileName: file.name,
       });
 
       setLeaseId(newLeaseId);
-      setIsSubmitting(false);
-      setIsAnalyzing(true);
+      setProcessingStep("analyze");
 
       await analyzeLeaseById({ leaseId: newLeaseId });
     } catch (e) {
       if (e instanceof Error && e.message === LEASE_ANALYSIS_LIMIT_REACHED) {
-        setUpgradeOpen(true)
-        return
+        setUpgradeMode("limit");
+        setUpgradeOpen(true);
+        return;
       }
-      const raw =
-        e instanceof Error ? e.message : String(e ?? "Failed to analyze lease");
-      const unwrapped = unwrapConvexClientError(raw);
-      const stillWrapped =
-        !unwrapped || /^\[CONVEX\b/i.test(unwrapped.trim());
-      if (stillWrapped) {
-        setError({
-          title: "Something went wrong",
-          body: "Please try again in a moment. If it keeps happening, contact support.",
-        });
-      } else {
-        setError(formatLeaseCheckError(unwrapped));
-      }
+      setError(resolveAnalyzeLeaseError(e));
     } finally {
-      setIsSubmitting(false);
-      setIsAnalyzing(false);
+      setProcessingStep(null);
     }
   };
-
-  const showUploadForm = !leaseId || error;
-  const analysis = lease?.aiAnalysis;
 
   return (
     <main className="flex min-h-[100dvh] flex-col bg-cream-page pb-28 pt-5 md:min-h-[calc(100vh-4rem)] md:pb-10 md:pt-6 lg:pt-8">
@@ -253,7 +174,7 @@ export default function AnalyzeLeasePage() {
             className="h-11 w-11 rounded-full border-border bg-cream-surface-soft p-0 text-foreground"
             aria-label="Back"
           >
-            <X className="size-5" />
+            <ChevronLeft className="size-5" />
           </Button>
         </header>
         {showUploadForm ? (
@@ -270,7 +191,6 @@ export default function AnalyzeLeasePage() {
               and flags illegal or one-sided terms.
             </p>
 
-            {/* Upload area */}
             <div className="mx-auto mt-8 w-full max-w-3xl md:mt-10 lg:mt-12">
               <div
                 onClick={() => fileInputRef.current?.click()}
@@ -302,12 +222,12 @@ export default function AnalyzeLeasePage() {
                     <FileText className="mt-0.5 size-8 shrink-0 text-primary sm:mt-0" />
                     <div className="min-w-0 flex-1 overflow-hidden text-left">
                       <p
-                        className="w-full max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold leading-snug text-ink-warm sm:text-base md:text-lg"
+                        className="w-full max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold leading-snug text-foreground sm:text-base md:text-lg"
                         title={file.name}
                       >
                         {file.name}
                       </p>
-                      <p className="mt-0.5 text-xs text-ink-warm-muted sm:text-sm">
+                      <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">
                         {(file.size / 1024).toFixed(0)} KB
                       </p>
                     </div>
@@ -317,7 +237,7 @@ export default function AnalyzeLeasePage() {
                         e.stopPropagation();
                         setFile(null);
                       }}
-                      className="flex size-8 shrink-0 items-center justify-center rounded-full text-ink-warm-muted transition-colors hover:bg-cream-surface-deep hover:text-ink-warm"
+                      className="flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                       aria-label="Remove file"
                     >
                       <X className="size-4" />
@@ -325,13 +245,13 @@ export default function AnalyzeLeasePage() {
                   </div>
                 ) : (
                   <>
-                    <div className="flex size-16 items-center justify-center rounded-full bg-cream-surface-soft transition-colors group-hover:bg-cream-surface-deep md:size-20">
-                      <Upload className="size-6 text-ink-warm-muted md:size-7" />
+                    <div className="flex size-16 items-center justify-center rounded-full bg-accent transition-colors group-hover:bg-muted md:size-20">
+                      <Upload className="size-6 text-muted-foreground md:size-7" />
                     </div>
-                    <p className="mt-4 text-lg font-semibold text-ink-warm md:text-xl">
+                    <p className="mt-4 text-lg font-semibold text-foreground md:text-xl">
                       Tap to upload PDF
                     </p>
-                    <p className="mt-1 text-sm text-ink-warm-muted md:text-base">
+                    <p className="mt-1 text-sm text-muted-foreground md:text-base">
                       PDF or text file
                     </p>
                   </>
@@ -339,124 +259,83 @@ export default function AnalyzeLeasePage() {
               </div>
             </div>
 
-            {/* State selector */}
             <div className="mx-auto mt-8 w-full max-w-3xl md:mt-10">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-warm-muted md:text-sm">
-                State
-              </p>
-              <div className="relative mt-3 w-full">
-                <Search
-                  className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                  aria-hidden
-                />
-                <input
-                  type="search"
-                  value={stateSearch}
-                  onChange={(e) => setStateSearch(e.target.value)}
-                  placeholder="Search by name or code…"
-                  autoComplete="off"
-                  className="h-10 w-full rounded-xl border border-border bg-background py-2 pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:h-11 md:text-base"
-                  aria-label="Search states"
-                />
-              </div>
-
-              {selectionHiddenBySearch ? (
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Selected: {selectedStateName} ({state}) — clear search to
-                  browse all, or pick below.
-                </p>
-              ) : null}
-
-              <div className="relative mt-3 w-full min-w-0">
-                <div
-                  className="-mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto overflow-y-hidden px-1 pb-2 [scrollbar-width:thin] touch-pan-x"
-                  role="listbox"
-                  aria-label="Select state"
-                >
-                  {chipsToShow.map((abbr) => {
-                    const active = state === abbr;
-                    return (
-                      <button
-                        key={abbr}
-                        type="button"
-                        role="option"
-                        aria-selected={active}
-                        ref={(el) => {
-                          if (el) stateChipRefs.current.set(abbr, el);
-                          else stateChipRefs.current.delete(abbr);
-                        }}
-                        onClick={() => setState(abbr)}
-                        title={US_STATE_NAMES[abbr]}
-                        className={[
-                          "inline-flex h-12 shrink-0 snap-start items-center justify-center rounded-2xl border px-[1.1rem] text-base transition md:min-w-[4.25rem] md:px-5 md:text-lg",
-                          active
-                            ? "border-cream-border bg-cream-surface-deep text-ink-warm shadow-sm ring-1 ring-cream-border/80 font-semibold"
-                            : "border-transparent bg-background font-medium text-foreground hover:bg-accent",
-                        ].join(" ")}
-                      >
-                        {abbr}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {stateSearch.trim() !== "" && filteredStates.length === 0 ? (
-                <p className="mt-2 text-sm font-medium text-muted-foreground">
-                  No states match your search.
-                </p>
-              ) : null}
+              <StatePickerField state={state} onStateChange={setState} />
             </div>
 
-            {/* Error */}
             {error ? (
-              <div className="mx-auto mt-4 max-w-xl rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm shadow-sm">
+              <div
+                className="mx-auto mt-4 max-w-xl rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm shadow-sm"
+                role="alert"
+              >
                 <p className="font-semibold text-destructive">{error.title}</p>
                 {error.body ? (
-                  <p className="mt-2 font-medium leading-relaxed text-pretty text-destructive">
+                  <p className="mt-2 font-medium leading-relaxed text-pretty text-destructive/95">
                     {error.body}
                   </p>
                 ) : null}
-                <p className="mt-3 border-t border-destructive/15 pt-3 text-xs font-medium text-destructive/90">
-                  Accepted files: lease agreements, lease addendums, or lease
-                  renewals.
-                </p>
+                {error.title === "This doesn't look like a lease" ||
+                error.title === "We couldn't read this file" ? (
+                  <p className="mt-3 border-t border-destructive/15 pt-3 text-xs font-medium text-destructive/90">
+                    This feature is working—try again with a lease agreement,
+                    addendum, or renewal (PDF or text). Notices, applications, and
+                    other documents are not supported.
+                  </p>
+                ) : error.title === "Something went wrong" ? null : (
+                  <p className="mt-3 border-t border-destructive/15 pt-3 text-xs font-medium text-destructive/90">
+                    Accepted files: lease agreements, lease addendums, or lease
+                    renewals.
+                  </p>
+                )}
               </div>
             ) : null}
 
-            {/* Submit */}
             <Button
               type="button"
+              variant="cta"
               disabled={!canSubmit}
               onClick={() => void onSubmit()}
-              className="mx-auto mt-8 h-14 w-full max-w-xl rounded-2xl bg-surface-strong px-6 text-lg font-semibold text-white hover:bg-surface-strong-hover disabled:bg-muted disabled:text-muted-foreground md:mt-10 md:text-xl"
+              className="mx-auto mt-8 h-14 w-full max-w-xl rounded-2xl px-6 text-lg font-semibold md:mt-10 md:text-xl"
             >
-              {isSubmitting ? (
+              {processingStep === "upload" ? (
                 <span className="flex items-center justify-center gap-3">
                   <ShieldLoader variant="upload" compact />
                   <span>Uploading…</span>
                 </span>
-              ) : isAnalyzing ? (
-                "Analyzing…"
+              ) : processingStep === "extract" ? (
+                "Reading your lease…"
               ) : (
                 "Analyze Lease"
               )}
             </Button>
           </section>
-        ) : !analysis ? (
+        ) : showProcessing ? (
           <section className="flex min-h-0 flex-1 flex-col items-center justify-center rounded-2xl border border-cream-border bg-cream-surface p-6 shadow-sm sm:p-10 md:rounded-3xl">
-            <GavelLoader
-              variant="lease"
-              embedded
-              description={`Our AI is reviewing every clause against ${state || "your state"}'s tenant law. This usually takes 30–60 seconds.`}
-            />
+            {processingStep === "upload" || processingStep === "extract" ? (
+              <ShieldLoader
+                variant="upload"
+                embedded
+                label={
+                  processingStep === "upload"
+                    ? "Uploading\nyour lease…"
+                    : "Reading\nyour lease…"
+                }
+                description={
+                  processingStep === "upload"
+                    ? "Sending your file securely. This only takes a moment."
+                    : "Extracting text from your document so we can review every clause."
+                }
+              />
+            ) : (
+              <GavelLoader variant="lease" embedded description={analyzeDescription} />
+            )}
           </section>
-        ) : (
+        ) : analysis ? (
           <LeaseResultsView
             analysis={analysis as LeaseAnalysis}
             createdUnderPlan={lease?.createdUnderPlan}
           />
-        )}
+        ) : null}
       </div>
       <PlanUpgradeDialog
         open={upgradeOpen}

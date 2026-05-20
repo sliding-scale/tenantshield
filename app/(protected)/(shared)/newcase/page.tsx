@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { useAction } from "convex/react"
 import type { Id } from "@/convex/_generated/dataModel"
 import { api } from "@/convex/_generated/api"
@@ -12,21 +12,17 @@ import {
 import { NewCaseForm } from "@/components/tenant/new-case/new-case-form"
 import { NewCaseResultView } from "@/components/tenant/new-case/new-case-result-view"
 import { DEFAULT_ISSUE_TYPE } from "@/lib/constants/issue-types"
-import { filterUSStates, type USStateAbbr } from "@/lib/constants/us-states"
 import type { PlanId } from "@/lib/plans/plan-access"
 import { usePrefilledUSState } from "@/app/hooks/usePrefilledUSState"
 
 export default function NewCasePage() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const analyzeCase = useAction(api.cases.actions.analyzeNewCase)
-  const stateChipRefs = useRef<Map<string, HTMLButtonElement>>(new Map())
-  const { state, setState } = usePrefilledUSState(searchParams.get("state"))
+  const { state, setState, isProfileStateLoading } = usePrefilledUSState(searchParams.get("state"))
 
   const [issueType, setIssueType] = useState<string>(DEFAULT_ISSUE_TYPE)
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [stateSearch, setStateSearch] = useState("")
   const [city, setCity] = useState("")
   const [landlord, setLandlord] = useState("")
   const [propertyAddress, setPropertyAddress] = useState("")
@@ -38,25 +34,6 @@ export default function NewCasePage() {
     details: NewCaseDetailsSnapshot
     createdUnderPlan?: PlanId | null
   } | null>(null)
-
-  const filteredStates = useMemo(() => filterUSStates(stateSearch), [stateSearch])
-
-  const chipsToShow = useMemo(() => {
-    if (!state) return filteredStates
-    const sel = state as USStateAbbr
-    if (filteredStates.includes(sel)) return filteredStates
-    return [sel, ...filteredStates]
-  }, [filteredStates, state])
-
-  useEffect(() => {
-    const el = stateChipRefs.current.get(state)
-    el?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" })
-  }, [state])
-
-  const selectionHiddenBySearch =
-    Boolean(state) &&
-    stateSearch.trim().length > 0 &&
-    !filteredStates.includes(state as USStateAbbr)
 
   const canSubmit = Boolean(issueType && title.trim() && description.trim() && state && !isSubmitting)
 
@@ -74,7 +51,6 @@ export default function NewCasePage() {
         landlordName: landlord.trim() || undefined,
         propertyAddress: propertyAddress.trim() || undefined,
       })
-      console.log("analyzeNewCase response", result)
       const details: NewCaseDetailsSnapshot = {
         issueType,
         title: title.trim(),
@@ -118,11 +94,6 @@ export default function NewCasePage() {
       setDescription={setDescription}
       state={state}
       setState={setState}
-      stateSearch={stateSearch}
-      setStateSearch={setStateSearch}
-      chipsToShow={chipsToShow}
-      selectionHiddenBySearch={selectionHiddenBySearch}
-      filteredStatesCount={filteredStates.length}
       city={city}
       setCity={setCity}
       landlord={landlord}
@@ -132,9 +103,8 @@ export default function NewCasePage() {
       error={error}
       canSubmit={canSubmit}
       isSubmitting={isSubmitting}
+      isStateReady={!isProfileStateLoading}
       onSubmit={() => void onSubmit()}
-      onClose={() => router.back()}
-      stateChipRefs={stateChipRefs}
     />
   )
 }

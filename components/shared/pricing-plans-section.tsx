@@ -52,13 +52,13 @@ function BillingPeriodToggle({
       role='group'
       aria-label='Billing period'
     >
-      <div className='inline-flex w-full rounded-full border border-cream-border bg-cream-surface p-1 shadow-sm'>
+      <div className='inline-flex w-full rounded-full border border-border bg-card p-1 shadow-sm'>
         <button
           type='button'
           onClick={() => onChange('monthly')}
           className={cn(
             'h-11 flex-1 rounded-full px-4 text-sm font-semibold transition-colors',
-            billingPeriod === 'monthly' ? 'bg-surface-strong text-white' : 'text-ink-warm hover:text-foreground',
+            billingPeriod === 'monthly' ? 'bg-foreground text-background' : 'text-foreground hover:text-foreground',
           )}
         >
           Monthly
@@ -68,13 +68,13 @@ function BillingPeriodToggle({
           onClick={() => onChange('yearly')}
           className={cn(
             'h-11 flex-1 rounded-full px-4 text-sm font-semibold transition-colors',
-            billingPeriod === 'yearly' ? 'bg-surface-strong text-white' : 'text-ink-warm hover:text-foreground',
+            billingPeriod === 'yearly' ? 'bg-foreground text-background' : 'text-foreground hover:text-foreground',
           )}
         >
           Yearly
         </button>
       </div>
-      <p className='text-sm text-ink-warm-muted'>Save with annual billing on paid plans.</p>
+      <p className='text-sm text-muted-foreground'>Save with annual billing on paid plans.</p>
     </div>
   );
 }
@@ -115,66 +115,68 @@ function PricingPlanCard({
   const usesBillingSelection =
     (audience === 'billing' || audience === 'onboarding') && planId !== 'free' && Boolean(onSelectPlan);
   const ctaClassName = cn(
-    'block w-full rounded-full px-4 py-3 text-center text-sm font-bold transition-all duration-200 active:scale-95',
+    'block w-full rounded-xl px-4 py-3 text-center text-sm font-semibold transition-colors',
     popular
-      ? 'bg-amber-500 text-white shadow-md hover:bg-amber-600 hover:shadow-lg'
-      : 'border-2 border-gray-300 bg-white text-gray-700 hover:border-amber-500 hover:text-amber-600',
+      ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+      : 'border border-border bg-card text-foreground hover:bg-accent',
   );
 
   return (
     <div
       className={cn(
-        'relative rounded-xl border-2 bg-white p-6 transition-all duration-300 sm:p-8',
+        'relative rounded-3xl border bg-card p-6 transition-colors sm:p-8',
         isCurrentPlan
-          ? 'border-primary shadow-md ring-2 ring-primary/15'
+          ? 'border-primary shadow-sm ring-2 ring-primary/15'
           : popular
-            ? 'border-amber-500 hover:border-amber-500 hover:shadow-lg'
-            : 'border-gray-200 hover:border-amber-200 hover:shadow-lg',
+            ? 'border-primary'
+            : 'border-border hover:border-primary/40',
       )}
     >
       {isCurrentPlan ? (
         <div
           className={cn(
             'absolute -top-3 left-1/2 -translate-x-1/2 rounded-full px-3 py-1 text-xs font-bold shadow-md',
-            cancellationNotice ? 'bg-surface-strong text-cream-surface-soft' : 'bg-primary text-primary-foreground',
+            cancellationNotice ? 'bg-foreground text-background' : 'bg-primary text-primary-foreground',
           )}
         >
           {cancellationNotice ? 'Ends soon' : 'Current plan'}
         </div>
       ) : popular ? (
-        <div className='absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-amber-500 px-3 py-1 text-xs font-bold text-white shadow-md'>
+        <div className='absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground shadow-sm'>
           Most Popular
         </div>
       ) : null}
 
       {yearlySavingsPercent ? (
-        <div className='absolute top-4 right-4 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800'>
+        <div className='absolute top-4 right-4 rounded-full bg-secondary/15 px-3 py-1 text-xs font-bold text-secondary'>
           Save {yearlySavingsPercent}%
         </div>
       ) : null}
 
-      <h3 className='mb-2 text-xl font-bold text-gray-900'>{name}</h3>
+      <h3 className='mb-2 font-heading text-xl font-semibold text-foreground'>{name}</h3>
 
       <div className='mb-6'>
-        <span className='text-3xl font-bold text-gray-900'>{displayPrice}</span>
-        {priceSuffix ? <span className='text-sm text-gray-600'>{priceSuffix}</span> : null}
-        {yearlyReference ? <p className='mt-2 text-sm font-medium text-gray-600'>{yearlyReference}</p> : null}
+        <span className='font-heading text-3xl font-semibold text-foreground'>{displayPrice}</span>
+        {priceSuffix ? <span className='text-sm text-muted-foreground'>{priceSuffix}</span> : null}
+        {yearlyReference ? (
+          <p className='mt-2 text-sm font-medium text-muted-foreground'>{yearlyReference}</p>
+        ) : null}
         {trial && billingPeriod === 'monthly' ? (
-          <p className='mt-2 text-xs font-medium text-gray-500'>{trial}</p>
+          <p className='mt-2 text-xs font-medium text-muted-foreground'>{trial}</p>
         ) : null}
       </div>
 
       <ul className='mb-8 space-y-3'>
         {displayFeatures.map((feature) => (
           <li key={feature} className='flex items-center gap-2'>
-            <Check className='h-5 w-5 shrink-0 text-emerald-600' />
-            <span className='text-sm text-gray-600'>{feature}</span>
+            <Check className='size-5 shrink-0 text-secondary' aria-hidden />
+            <span className='text-sm text-muted-foreground'>{feature}</span>
           </li>
         ))}
       </ul>
 
       {cancellationNotice ? (
-        <p className='mb-4 rounded-lg border border-cream-border bg-cream-surface px-3 py-2.5 text-center text-sm leading-snug text-ink-warm-muted'>
+        <p className='mb-4 rounded-lg border border-border bg-card px-3 py-2.5 text-center text-sm leading-snug text-muted-foreground'>
           {cancellationNotice}
         </p>
       ) : null}
@@ -188,10 +190,10 @@ function PricingPlanCard({
             onManageSubscription?.();
           }}
           className={cn(
-            'block w-full rounded-full px-4 py-3 text-center text-sm font-bold transition-all duration-200 active:scale-95',
+            'block w-full rounded-xl px-4 py-3 text-center text-sm font-semibold transition-colors',
             popular
-              ? 'bg-amber-500 text-white shadow-md hover:bg-amber-600 hover:shadow-lg'
-              : 'border-2 border-primary bg-primary text-primary-foreground hover:bg-primary/90',
+              ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+              : 'border border-primary bg-primary text-primary-foreground hover:bg-primary/90',
             isManagingSubscription && 'cursor-wait opacity-80',
           )}
           aria-current='true'
@@ -201,8 +203,8 @@ function PricingPlanCard({
       ) : isCurrentPlan ? (
         <div
           className={cn(
-            'block w-full rounded-full px-4 py-3 text-center text-sm font-bold',
-            popular ? 'bg-amber-500/80 text-white shadow-md' : 'border-2 border-gray-300 bg-gray-50 text-gray-500',
+            'block w-full rounded-xl px-4 py-3 text-center text-sm font-semibold',
+            popular ? 'bg-primary/80 text-primary-foreground' : 'border border-border bg-muted text-muted-foreground',
           )}
           aria-current='true'
         >
@@ -385,7 +387,7 @@ export function PricingPlansSection({
         description='Plan changes and billing are handled in the secure customer portal. Open it to switch tiers, update payment, or cancel.'
         cancelLabel='Not now'
         actionLabel='Manage subscription'
-        actionVariant='surface-strong'
+        actionVariant='default'
         isActionLoading={portalLoading}
         onAction={() => {
           void handleManageSubscription();
@@ -394,8 +396,8 @@ export function PricingPlansSection({
       <div className='mx-auto max-w-6xl'>
         {!hideHeader ? (
           <div className='mb-12 text-center'>
-            <h2 className='mb-4 text-3xl font-bold tracking-tight text-ink-warm'>{title}</h2>
-            <p className='text-lg text-ink-warm-muted'>{subtitle}</p>
+            <h2 className='mb-4 font-heading text-3xl font-semibold tracking-tight text-foreground sm:text-4xl'>{title}</h2>
+            <p className='text-lg text-muted-foreground'>{subtitle}</p>
           </div>
         ) : null}
 
@@ -443,7 +445,7 @@ export function PricingPlansSection({
                   onClick={() => setCarouselIndex(index)}
                   className={cn(
                     'h-2 rounded-full transition-all duration-300',
-                    index === carouselIndex ? 'w-8 bg-primary' : 'w-2 bg-cream-border hover:bg-cream-surface-deep',
+                    index === carouselIndex ? 'w-8 bg-primary' : 'w-2 bg-border hover:bg-muted',
                     isCurrent && index !== carouselIndex && 'ring-2 ring-primary/40',
                   )}
                   aria-label={isCurrent ? `Go to ${plan.name} (current plan)` : `Go to ${plan.name}`}

@@ -21,7 +21,7 @@ export default function VerifyEmailPage() {
 
   if (!verification) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4">
+      <div className="flex min-h-svh flex-col items-center justify-center gap-4 px-4">
         <h1 className="text-2xl font-semibold">Verify your email</h1>
         <p className="text-center text-muted-foreground">
           Check your email and click the link to verify your address. You can
@@ -36,7 +36,7 @@ export default function VerifyEmailPage() {
 
   if (verification.status === "failed") {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4">
+      <div className="flex min-h-svh flex-col items-center justify-center gap-4 px-4">
         <h1 className="text-2xl font-semibold">Verification failed</h1>
         <p className="text-center text-muted-foreground">
           The email link verification failed. Please try again.
@@ -50,7 +50,7 @@ export default function VerifyEmailPage() {
 
   if (verification.status === "expired") {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4">
+      <div className="flex min-h-svh flex-col items-center justify-center gap-4 px-4">
         <h1 className="text-2xl font-semibold">Link expired</h1>
         <p className="text-center text-muted-foreground">
           The email link has expired. Please request a new one.
@@ -64,7 +64,7 @@ export default function VerifyEmailPage() {
 
   if (verification.status === "client_mismatch") {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4">
+      <div className="flex min-h-svh flex-col items-center justify-center gap-4 px-4">
         <h1 className="text-2xl font-semibold">Wrong device</h1>
         <p className="text-center text-muted-foreground">
           You must complete the email verification on the same device and
@@ -78,7 +78,7 @@ export default function VerifyEmailPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4">
+    <div className="flex min-h-svh flex-col items-center justify-center gap-4 px-4">
       <h1 className="text-2xl font-semibold">Email verified</h1>
       <p className="text-center text-muted-foreground">
         Your email has been successfully verified. You can close this tab.

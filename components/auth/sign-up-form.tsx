@@ -1,37 +1,69 @@
 "use client"
 
 import { useSignUp } from "@clerk/nextjs"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { firstClerkErrorMessage } from "@/lib/auth/clerk-errors"
-import { splitFullName } from "@/lib/auth/signup-metadata"
+import { useForm } from "react-hook-form"
+import { AuthEnter } from "@/components/auth/auth-enter"
+import { AuthPasswordInput } from "@/components/auth/auth-password-input"
+import { AuthStateSelect } from "@/components/auth/auth-state-select"
 import { Button } from "@/components/ui/button"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { US_STATES, US_STATE_NAMES } from "@/lib/constants/us-states"
-
-const authFieldClass =
-  "h-12 rounded-full border-border bg-popover px-5 text-base shadow-sm placeholder:text-muted-foreground md:text-sm"
+import { firstClerkErrorMessage } from "@/lib/auth/clerk-errors"
+import {
+  emailVerificationSchema,
+  signUpSchema,
+  type EmailVerificationValues,
+  type SignUpValues,
+} from "@/lib/auth/auth-schemas"
+import { splitFullName } from "@/lib/auth/signup-metadata"
+import { authButtonClass, authFieldClass } from "@/lib/ui/auth-field-styles"
 
 type Props = {
   unsafeMetadata?: Record<string, unknown>
+  animationBaseIndex?: number
 }
 
-export function SignUpForm({ unsafeMetadata }: Props) {
+export function SignUpForm({ unsafeMetadata, animationBaseIndex = 0 }: Props) {
   const { signUp, errors, fetchStatus } = useSignUp()
   const router = useRouter()
 
-  const [fullName, setFullName] = useState("")
-  const [emailAddress, setEmailAddress] = useState("")
-  const [password, setPassword] = useState("")
-  const [state, setState] = useState("")
-  const [code, setCode] = useState("")
   const [awaitingEmailCode, setAwaitingEmailCode] = useState(false)
+  const [pendingEmail, setPendingEmail] = useState("")
   const [formError, setFormError] = useState<string | null>(null)
+
+  const form = useForm<SignUpValues>({
+    resolver: zodResolver(signUpSchema),
+    defaultValues: {
+      fullName: "",
+      emailAddress: "",
+      password: "",
+      state: "",
+    },
+  })
+
+  const verifyForm = useForm<EmailVerificationValues>({
+    resolver: zodResolver(emailVerificationSchema),
+    defaultValues: {
+      code: "",
+    },
+  })
 
   const resetFlow = async () => {
     await signUp?.reset()
     setAwaitingEmailCode(false)
-    setCode("")
+    setPendingEmail("")
+    verifyForm.reset()
+    form.reset()
     setFormError(null)
   }
 
@@ -53,28 +85,20 @@ export function SignUpForm({ unsafeMetadata }: Props) {
     }
   }
 
-  const handleCredentialsSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const onCredentialsSubmit = async (values: SignUpValues) => {
     setFormError(null)
 
     if (!signUp) return
-    if (!fullName.trim()) {
-      setFormError("Enter your full name.")
-      return
-    }
-    if (!emailAddress.trim() || !password) {
-      setFormError("Enter email and password.")
-      return
-    }
 
-    const { firstName, lastName } = splitFullName(fullName)
+    const { firstName, lastName } = splitFullName(values.fullName)
+    const state = values.state.trim()
 
     const { error: signUpError } = await signUp.password({
-      emailAddress: emailAddress.trim(),
-      password,
+      emailAddress: values.emailAddress.trim(),
+      password: values.password,
       firstName,
       lastName,
-      unsafeMetadata: { ...unsafeMetadata, ...(state ? { state } : {}) },
+      unsafeMetadata: { ...unsafeMetadata, state },
     })
 
     if (signUpError) {
@@ -88,6 +112,8 @@ export function SignUpForm({ unsafeMetadata }: Props) {
       setFormError(firstClerkErrorMessage(sendError) ?? "Could not send verification email.")
       return
     }
+
+    setPendingEmail(values.emailAddress.trim())
 
     if (
       signUp.status === "missing_requirements" &&
@@ -106,12 +132,11 @@ export function SignUpForm({ unsafeMetadata }: Props) {
     setAwaitingEmailCode(true)
   }
 
-  const handleVerifySubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const onVerifySubmit = async (values: EmailVerificationValues) => {
     setFormError(null)
     if (!signUp) return
 
-    const { error } = await signUp.verifications.verifyEmailCode({ code })
+    const { error } = await signUp.verifications.verifyEmailCode({ code: values.code })
     if (error) {
       console.error(error)
       setFormError(firstClerkErrorMessage(error) ?? "Invalid code.")
@@ -134,39 +159,45 @@ export function SignUpForm({ unsafeMetadata }: Props) {
         <div>
           <h2 className="font-heading text-2xl font-semibold tracking-tight">Verify your email</h2>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            We sent a code to {emailAddress.trim()}. Enter it below to finish creating your account.
+            We sent a code to {pendingEmail}. Enter it below to finish creating your account.
           </p>
         </div>
-        <form onSubmit={handleVerifySubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="signup-code" className="sr-only">
-              Verification code
-            </label>
-            <Input
-              id="signup-code"
+        <Form {...verifyForm}>
+          <form onSubmit={verifyForm.handleSubmit(onVerifySubmit)} className="flex flex-col gap-4">
+            <FormField
+              control={verifyForm.control}
               name="code"
-              type="text"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              value={code}
-              onChange={(ev) => setCode(ev.target.value)}
-              placeholder="Verification code"
-              className={authFieldClass}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="sr-only">Verification code</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      placeholder="Verification code"
+                      className={authFieldClass}
+                    />
+                  </FormControl>
+                  {errors.fields.code ? (
+                    <p className="text-sm text-destructive">{errors.fields.code.message}</p>
+                  ) : null}
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.fields.code ? (
-              <p className="text-sm text-destructive">{errors.fields.code.message}</p>
-            ) : null}
-          </div>
-          {formError ? <p className="text-sm text-destructive">{formError}</p> : null}
-          <Button
-            type="submit"
-            variant="cta"
-            disabled={fetchStatus === "fetching"}
-            className="h-12 w-full rounded-full text-base font-semibold"
-          >
-            Verify
-          </Button>
-        </form>
+            {formError ? <p className="text-sm text-destructive">{formError}</p> : null}
+            <Button
+              type="submit"
+              variant="cta"
+              disabled={fetchStatus === "fetching" || verifyForm.formState.isSubmitting}
+              className="h-12 w-full rounded-full text-base font-semibold"
+            >
+              Verify
+            </Button>
+          </form>
+        </Form>
         <div className="flex flex-wrap gap-4 text-sm">
           <button
             type="button"
@@ -189,90 +220,108 @@ export function SignUpForm({ unsafeMetadata }: Props) {
   }
 
   return (
-    <form onSubmit={handleCredentialsSubmit} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="fullName" className="sr-only">
-          Full name
-        </label>
-        <Input
-          id="fullName"
-          name="fullName"
-          type="text"
-          autoComplete="name"
-          value={fullName}
-          onChange={(ev) => setFullName(ev.target.value)}
-          required
-          placeholder="Full name"
-          className={authFieldClass}
-        />
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="signup-email" className="sr-only">
-          Email
-        </label>
-        <Input
-          id="signup-email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          value={emailAddress}
-          onChange={(ev) => setEmailAddress(ev.target.value)}
-          required
-          placeholder="Email"
-          className={authFieldClass}
-        />
-        {errors.fields.emailAddress ? (
-          <p className="text-sm text-destructive">{errors.fields.emailAddress.message}</p>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onCredentialsSubmit)} className="flex flex-col gap-4">
+        <AuthEnter index={animationBaseIndex}>
+          <FormField
+            control={form.control}
+            name="fullName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="sr-only">Full name</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    type="text"
+                    autoComplete="name"
+                    placeholder="Full name"
+                    className={authFieldClass}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </AuthEnter>
+        <AuthEnter index={animationBaseIndex + 1}>
+          <FormField
+            control={form.control}
+            name="emailAddress"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="sr-only">Email</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    type="email"
+                    autoComplete="email"
+                    placeholder="Email"
+                    className={authFieldClass}
+                  />
+                </FormControl>
+                {errors.fields.emailAddress ? (
+                  <p className="text-sm text-destructive">{errors.fields.emailAddress.message}</p>
+                ) : null}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </AuthEnter>
+        <AuthEnter index={animationBaseIndex + 2}>
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="sr-only">Password</FormLabel>
+                <AuthPasswordInput
+                  {...field}
+                  autoComplete="new-password"
+                  placeholder="Password (6+ characters)"
+                  className={authFieldClass}
+                />
+                {errors.fields.password ? (
+                  <p className="text-sm text-destructive">{errors.fields.password.message}</p>
+                ) : null}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </AuthEnter>
+        <AuthEnter index={animationBaseIndex + 3}>
+          <FormField
+            control={form.control}
+            name="state"
+            render={({ field }) => (
+              <FormItem>
+                <AuthStateSelect
+                  id="signup-state"
+                  value={field.value ?? ""}
+                  onValueChange={field.onChange}
+                  placeholder="Select your state"
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </AuthEnter>
+        {formError ? (
+          <AuthEnter index={animationBaseIndex + 4}>
+            <p className="text-sm text-destructive">{formError}</p>
+          </AuthEnter>
         ) : null}
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="signup-password" className="sr-only">
-          Password
-        </label>
-        <Input
-          id="signup-password"
-          name="password"
-          type="password"
-          autoComplete="new-password"
-          value={password}
-          onChange={(ev) => setPassword(ev.target.value)}
-          required
-          placeholder="Password (6+ characters)"
-          className={authFieldClass}
-        />
-        {errors.fields.password ? (
-          <p className="text-sm text-destructive">{errors.fields.password.message}</p>
-        ) : null}
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="signup-state" className="sr-only">
-          Your state
-        </label>
-        <select
-          id="signup-state"
-          name="state"
-          value={state}
-          onChange={(ev) => setState(ev.target.value)}
-          className={`${authFieldClass} appearance-none`}
-        >
-          <option value="">State (optional)</option>
-          {US_STATES.map((abbr) => (
-            <option key={abbr} value={abbr}>
-              {US_STATE_NAMES[abbr]} ({abbr})
-            </option>
-          ))}
-        </select>
-      </div>
-      {formError ? <p className="text-sm text-destructive">{formError}</p> : null}
-      <Button
-        type="submit"
-        variant="cta"
-        disabled={fetchStatus === "fetching"}
-        className="mt-1 h-12 w-full rounded-full text-base font-semibold"
-      >
-        Create My Shield
-      </Button>
-      <div id="clerk-captcha" />
-    </form>
+        <AuthEnter index={animationBaseIndex + (formError ? 5 : 4)}>
+          <Button
+            type="submit"
+            variant="cta"
+            disabled={fetchStatus === "fetching" || form.formState.isSubmitting}
+            className={`${authButtonClass} mt-1 text-base font-semibold`}
+          >
+            Create My Shield
+          </Button>
+        </AuthEnter>
+        <div id="clerk-captcha" />
+      </form>
+    </Form>
   )
 }

@@ -35,7 +35,7 @@ export function PlanUpgradeDialog({
       iconVariant="warning"
       cancelLabel="Not now"
       actionLabel={primaryActionLabel}
-      actionVariant="surface-strong"
+      actionVariant="default"
       onAction={() => router.push(primaryActionHref)}
     />
   )

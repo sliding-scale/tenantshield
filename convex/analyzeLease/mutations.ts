@@ -18,6 +18,7 @@ export const saveLeaseToDB = internalMutation({
     state: v.string(),
     leaseText: v.string(),
     pdfFile: v.optional(v.id("_storage")),
+    pdfFileName: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     await assertCanCreateLeaseAnalysis(ctx, args.userId);
@@ -27,6 +28,7 @@ export const saveLeaseToDB = internalMutation({
       state: args.state,
       leaseText: args.leaseText,
       pdfFile: args.pdfFile,
+      pdfFileName: args.pdfFileName,
     });
     await incrementUsedLeaseAnalyses(ctx, args.userId)
     return leaseId;
