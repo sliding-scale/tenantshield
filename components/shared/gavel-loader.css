@@ -41,29 +41,26 @@
   }
 }
 
-.gavel-loader__whole {
-  transform-origin: 50px 14px;
+/* Pivot at right grip (92, 38); head on left swings down onto block */
+.gavel-loader__arm {
+  transform-origin: 92px 38px;
   animation: gavel-loader-swing 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 @keyframes gavel-loader-swing {
-  0% {
-    transform: rotate(-40deg);
-  }
+  0%,
   30% {
     transform: rotate(-40deg);
   }
-  52% {
-    transform: rotate(4deg);
+  50% {
+    transform: rotate(28deg);
   }
-  58% {
-    transform: rotate(-4deg);
+  56% {
+    transform: rotate(22deg);
   }
-  64% {
-    transform: rotate(3deg);
-  }
+  62%,
   76% {
-    transform: rotate(3deg);
+    transform: rotate(27deg);
   }
   100% {
     transform: rotate(-40deg);
@@ -72,16 +69,16 @@
 
 .gavel-loader__sound-block {
   animation: gavel-loader-block-bump 2s ease-in-out infinite;
-  transform-origin: 50px 94px;
+  transform-origin: 55px 83px;
 }
 
 @keyframes gavel-loader-block-bump {
   0%,
-  50% {
+  48% {
     transform: translateY(0);
   }
-  53% {
-    transform: translateY(2px);
+  52% {
+    transform: translateY(2.5px);
   }
   57% {
     transform: translateY(0);
@@ -105,25 +102,25 @@
 
 .gavel-loader__ring--delayed {
   stroke-width: 1;
-  animation-delay: 0.08s;
+  animation-delay: 0.09s;
 }
 
 @keyframes gavel-loader-ring-out {
   0%,
-  50% {
+  49% {
     r: 4;
     opacity: 0;
   }
-  53% {
+  52% {
     r: 4;
-    opacity: 0.65;
+    opacity: 0.7;
   }
   70% {
-    r: 18;
+    r: 20;
     opacity: 0;
   }
   100% {
-    r: 18;
+    r: 20;
     opacity: 0;
   }
 }
@@ -135,13 +132,13 @@
 
 @keyframes gavel-loader-spark-show {
   0%,
-  50% {
+  49% {
     opacity: 0;
   }
-  53% {
+  52% {
     opacity: 1;
   }
-  64%,
+  63%,
   100% {
     opacity: 0;
   }

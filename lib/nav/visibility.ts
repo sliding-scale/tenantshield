@@ -43,6 +43,17 @@ export function shouldShowMobileTabBar(pathname: string | null, isSignedIn: bool
   return true
 }
 
+/** Ask AI uses a full-viewport chat shell above the tab bar — no extra document spacer. */
+export function shouldShowMobileTabBarSpacer(
+  pathname: string | null,
+  isSignedIn: boolean,
+) {
+  if (!pathname || !shouldShowMobileTabBar(pathname, isSignedIn)) return false
+  if (pathname.toLowerCase().startsWith("/ask-ai")) return false
+  if (pathname.toLowerCase().startsWith("/newcase")) return false
+  return true
+}
+
 /** Signed-in mobile uses bottom tab bar / page chrome — no top navbar on any route. */
 export function shouldHideTopNavbarOnMobile(pathname: string | null, isSignedIn: boolean) {
   if (!isSignedIn || !pathname) return false

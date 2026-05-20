@@ -1,8 +1,8 @@
-﻿"use client";
+"use client";
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { UIMessage } from "ai";
 import type { Id } from "@/convex/_generated/dataModel";
 import { AskAiEmptyState } from "@/components/ask-ai/ask-ai-empty-state";
@@ -64,7 +64,7 @@ function ChatRetryBanner({
         ) : (
           <RefreshCw className="size-3.5" aria-hidden />
         )}
-        {retrying ? "RetryingΓÇª" : "Retry"}
+        {retrying ? "Retrying…" : "Retry"}
       </Button>
       {onDismiss ? (
         <Button type="button" variant="ghost" size="sm" onClick={onDismiss}>
@@ -124,7 +124,7 @@ export default function ChatThread({
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-3 text-muted-foreground">
         <Loader2 className="size-8 animate-spin text-primary" aria-hidden />
-        <p className="text-sm">Loading conversationΓÇª</p>
+        <p className="text-sm">Loading conversation…</p>
       </div>
     );
   }
@@ -161,6 +161,8 @@ function ChatThreadLoaded({
   );
 
   const messageListRef = useRef<HTMLDivElement>(null);
+  const scrollAnchorRef = useRef<HTMLDivElement>(null);
+  const stickToBottomRef = useRef(true);
 
   const { messages, sendMessage, status, stop, error, clearError, regenerate } =
     useChat({
@@ -221,14 +223,24 @@ function ChatThreadLoaded({
   useEffect(() => {
     const list = messageListRef.current;
     if (!list) return;
-    const id = requestAnimationFrame(() => {
-      list.scrollTop = list.scrollHeight;
-    });
-    return () => cancelAnimationFrame(id);
+    const onScroll = () => {
+      const distanceFromBottom =
+        list.scrollHeight - list.scrollTop - list.clientHeight;
+      stickToBottomRef.current = distanceFromBottom < 96;
+    };
+    list.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => list.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!stickToBottomRef.current) return;
+    scrollAnchorRef.current?.scrollIntoView({ block: "end" });
   }, [messages, status, showThinkingRow]);
 
   async function handleSuggestion(text: string) {
     if (busy || isLimitReached) return;
+    stickToBottomRef.current = true;
     await sendMessage(
       { text },
       {
@@ -242,6 +254,7 @@ function ChatThreadLoaded({
     const text = draft.trim();
     if (!text || busy) return;
     setDraft("");
+    stickToBottomRef.current = true;
     await sendMessage(
       { text },
       {
@@ -254,7 +267,7 @@ function ChatThreadLoaded({
     <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
       <div
         ref={messageListRef}
-        className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-6 pb-4 max-md:pb-[calc(5.75rem+env(safe-area-inset-bottom,0px))] md:px-8"
+        className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain px-4 py-6 pb-6 md:px-8"
       >
           {messages.length === 0 ? (
             <AskAiEmptyState
@@ -312,7 +325,7 @@ function ChatThreadLoaded({
               {showThinkingRow ? (
                 <li className="text-muted-foreground flex items-center gap-2 text-sm">
                   <Loader2 className="size-4 animate-spin" aria-hidden />
-                  ThinkingΓÇª
+                  Thinking…
                 </li>
               ) : null}
               {showRetryForResponse ? (
@@ -350,10 +363,11 @@ function ChatThreadLoaded({
               )}
             </ul>
           )}
+        <div ref={scrollAnchorRef} className="h-px w-full shrink-0" aria-hidden />
       </div>
 
       {error ? (
-        <div className="mx-auto mb-2 max-w-3xl shrink-0 px-4 max-md:pb-2 md:px-8">
+        <div className="mx-auto mb-2 max-w-3xl shrink-0 px-4 md:px-8">
           <ChatRetryBanner
             onRetry={() => void handleRetryLast()}
             retrying={retrying}
@@ -365,7 +379,7 @@ function ChatThreadLoaded({
 
       <form
         onSubmit={handleSubmit}
-        className="border-cream-border bg-cream-page/95 max-md:fixed max-md:inset-x-0 max-md:bottom-0 max-md:z-30 shrink-0 border-t px-4 pt-4 pb-[max(1rem,calc(0.75rem+env(safe-area-inset-bottom,0px)))] backdrop-blur-md dark:bg-background/95 md:relative md:z-0 md:px-8 md:pb-4"
+        className="border-cream-border bg-cream-page/95 shrink-0 border-t px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] backdrop-blur-md dark:bg-background/95 md:px-8 md:pt-4 md:pb-4"
       >
           <div className="mx-auto flex max-w-3xl items-center gap-2">
             <textarea

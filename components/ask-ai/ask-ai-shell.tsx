@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useAuth } from '@clerk/nextjs';
 import { useMutation, useQuery } from 'convex/react';
@@ -14,6 +14,7 @@ import { normalizeUserStateAbbr } from '@/lib/constants/us-states';
 import { resolvePlanId, shouldPromptFreePlanChatUpgrade } from '@/lib/plans/plan-access';
 import { PlanUpgradeDialog } from '@/components/tenant/free-plan-upgrade-dialog';
 import { GavelLoader } from '@/components/shared/gavel-loader';
+import { MOBILE_ASK_AI_SHELL_HEIGHT_CLASS } from '@/lib/nav/mobile-chrome';
 import { cn } from '@/lib/utils';
 
 export default function AskAiShell() {
@@ -88,7 +89,7 @@ export default function AskAiShell() {
   if (!isLoaded || !userId) {
     return (
       <div className='flex min-h-[50vh] items-center justify-center px-4'>
-        <GavelLoader variant='ask-ai' embedded label='LoadingΓÇª' description='' />
+        <GavelLoader variant="ask-ai" embedded />
       </div>
     );
   }
@@ -102,8 +103,13 @@ export default function AskAiShell() {
   }
 
   return (
-    <div className="bg-cream-page flex h-[calc(100dvh-4rem)] max-h-[calc(100dvh-4rem)] flex-col overflow-hidden">
-      <div className="flex min-h-0 flex-1 flex-col md:flex-row md:items-stretch">
+    <div
+      className={cn(
+        "bg-cream-page flex min-h-0 flex-1 flex-col overflow-hidden",
+        MOBILE_ASK_AI_SHELL_HEIGHT_CLASS,
+      )}
+    >
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden md:flex-row md:items-stretch">
         <ChatSidebar
           conversations={conversations}
           activeConversationId={activeConversationId}
@@ -113,7 +119,7 @@ export default function AskAiShell() {
           onClose={() => setSidebarOpen(false)}
         />
 
-        <section className='flex min-h-0 min-w-0 flex-1 flex-col'>
+        <section className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <AskAiPageHeader
             selectedStateCode={selectedStateCode}
             onStateChange={handleStateChange}

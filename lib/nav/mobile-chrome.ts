@@ -5,6 +5,18 @@
 export const MOBILE_TAB_BAR_HEIGHT =
   "calc(3.75rem + env(safe-area-inset-bottom, 0px))"
 
+/** Full-height Ask AI column on mobile (viewport minus fixed tab bar). */
+export const MOBILE_ASK_AI_SHELL_HEIGHT_CLASS =
+  "max-md:h-[calc(100svh-3.75rem-env(safe-area-inset-bottom,0px))] max-md:max-h-[calc(100svh-3.75rem-env(safe-area-inset-bottom,0px))] max-md:flex-none"
+
+/** New case result — tab bar visible; bounded column above it. */
+export const MOBILE_CASE_RESULT_SHELL_CLASS =
+  "max-md:flex-none max-md:overflow-hidden max-md:h-[calc(100svh-3.75rem-env(safe-area-inset-bottom,0px))] max-md:max-h-[calc(100svh-3.75rem-env(safe-area-inset-bottom,0px))]"
+
+/** Case detail (/cases/[id]) — no tab bar; full viewport column. */
+export const MOBILE_CASE_DETAIL_SHELL_CLASS =
+  "max-md:flex-none max-md:overflow-hidden max-md:h-svh max-md:max-h-svh"
+
 /** Bottom padding so content clears the tab bar on small screens (md+ unchanged). */
 export const MOBILE_TAB_BAR_PAGE_PADDING = "max-md:pb-24"
 

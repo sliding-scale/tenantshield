@@ -6,6 +6,7 @@ import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { ChevronLeft, Upload, FileText, X } from "lucide-react";
+import { LeasePdfSidebarCard } from "@/components/tenant/leases/lease-pdf-access";
 import { GavelLoader, GavelLoaderOverlay } from "@/components/shared/gavel-loader";
 import {
   ShieldLoader,
@@ -75,6 +76,10 @@ export default function AnalyzeLeasePage() {
   const analyzeDescription = state
     ? `Our AI is reviewing every clause against ${US_STATE_NAMES[state as USStateAbbr]} tenant law. This usually takes 30–60 seconds.`
     : "Our AI is reviewing every clause against your state's tenant law. This usually takes 30–60 seconds.";
+
+  const showResults = Boolean(analysis && leaseId && lease);
+  const pdfDisplayName = lease?.pdfFileName ?? null;
+  const hasPdf = Boolean(lease?.pdfFile);
 
   const handleFile = useCallback((incoming: File | null) => {
     setError(null);
@@ -180,6 +185,15 @@ export default function AnalyzeLeasePage() {
             <ChevronLeft className="size-5" />
           </Button>
         </header>
+        {showResults && hasPdf && leaseId && lease ? (
+          <div className="mb-5 lg:hidden">
+            <LeasePdfSidebarCard
+              leaseId={leaseId}
+              pdfUrl={lease.pdfUrl}
+              pdfDisplayName={pdfDisplayName}
+            />
+          </div>
+        ) : null}
         {showUploadForm ? (
           <section className="flex min-h-0 flex-1 flex-col rounded-2xl border border-cream-border bg-cream-surface p-5 shadow-sm sm:p-7 md:rounded-3xl md:p-10 lg:p-12 xl:p-14">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary md:text-sm">
@@ -314,11 +328,27 @@ export default function AnalyzeLeasePage() {
           <section className="flex min-h-0 flex-1 flex-col items-center justify-center rounded-2xl border border-cream-border bg-cream-surface p-6 shadow-sm sm:p-10 md:rounded-3xl">
             <GavelLoader variant="lease" embedded description={analyzeDescription} />
           </section>
-        ) : analysis ? (
-          <LeaseResultsView
-            analysis={analysis as LeaseAnalysis}
-            createdUnderPlan={lease?.createdUnderPlan}
-          />
+        ) : showResults && leaseId && lease ? (
+          <div className="flex w-full flex-1 flex-col lg:flex-row lg:gap-6">
+            <div className="min-w-0 flex-1">
+              <LeaseResultsView
+                analysis={analysis as LeaseAnalysis}
+                createdUnderPlan={lease.createdUnderPlan}
+              />
+            </div>
+
+            {hasPdf ? (
+              <aside className="hidden w-72 shrink-0 self-start lg:block">
+                <div className="sticky top-[calc(var(--navbar-height)+1.5rem)]">
+                  <LeasePdfSidebarCard
+                    leaseId={leaseId}
+                    pdfUrl={lease.pdfUrl}
+                    pdfDisplayName={pdfDisplayName}
+                  />
+                </div>
+              </aside>
+            ) : null}
+          </div>
         ) : null}
       </div>
       <ShieldLoaderOverlay show={isSubmitting} variant="upload" />

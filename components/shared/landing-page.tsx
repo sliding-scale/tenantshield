@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { BrandLogo } from "@/components/shared/navbar-logo";
 import {
   Check,
   FileText,
@@ -19,8 +20,6 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 const HERO_IMAGE_SRC = "/tenantshield_hero_image_v2.svg";
-const APP_LOGO_SRC =
-  "/vecteezy_stylized-yellow-shield-icon-flat-design_54786290.png";
 
 const FOOTER_PRODUCT_LINKS = [
   { href: "#features", label: "Features" },
@@ -263,13 +262,7 @@ export default function LandingPage() {
                 href="/"
                 className="inline-flex items-center gap-2.5 font-heading text-xl font-semibold text-secondary-dark-foreground"
               >
-                <Image
-                  src={APP_LOGO_SRC}
-                  alt=""
-                  width={36}
-                  height={36}
-                  className="size-9 shrink-0 object-contain"
-                />
+                <BrandLogo variant="icon" />
                 TenantShield
               </Link>
               <p className="mt-4 max-w-sm text-sm leading-relaxed text-secondary-dark-foreground/75">

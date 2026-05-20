@@ -45,14 +45,15 @@ export default function Navbar() {
         hideOnDesktop && "md:hidden",
       )}
     >
-      <div className="mx-auto flex min-h-16 max-w-7xl items-center justify-between gap-4 px-4 py-2 sm:min-h-[4.25rem] sm:gap-6 sm:px-6 lg:min-h-[4.5rem]">
-        <div className="flex min-w-0 flex-1 items-center gap-4 sm:gap-8">
-          <Link href="/" className="inline-flex shrink-0 items-center">
-            <NavbarLogo priority />
-          </Link>
-        </div>
+      <div className="mx-auto grid min-h-16 w-full min-w-0 max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-2 sm:min-h-[4.25rem] sm:gap-4 sm:px-6 lg:min-h-[4.5rem] lg:gap-6">
+        <Link
+          href="/"
+          className="inline-flex min-w-0 max-w-full items-center overflow-hidden [&_img]:min-w-0 [&_img]:max-w-full [&_img]:shrink"
+        >
+          <NavbarLogo priority />
+        </Link>
 
-        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+        <div className="flex shrink-0 items-center justify-self-end gap-2 sm:gap-3">
           <Show when="signed-out">
             <Button variant="default" className="h-10 rounded-full px-4 sm:px-5" asChild>
               <Link href="/login">Sign in</Link>

@@ -19,7 +19,10 @@ import {
   type AppNavItem,
   isMobileMoreNavActive,
 } from "@/lib/nav/items"
-import { shouldShowMobileTabBar } from "@/lib/nav/visibility"
+import {
+  shouldShowMobileTabBar,
+  shouldShowMobileTabBarSpacer,
+} from "@/lib/nav/visibility"
 import { MOBILE_TAB_BAR_HEIGHT } from "@/lib/nav/mobile-chrome"
 import { cn } from "@/lib/utils"
 
@@ -120,10 +123,11 @@ export default function MobileTabBar() {
   }
 
   const closeSidebar = () => setOpenMobile(false)
+  const showSpacer = shouldShowMobileTabBarSpacer(pathname, Boolean(isSignedIn))
 
   return (
     <>
-      <TabBarSpacer />
+      {showSpacer ? <TabBarSpacer /> : null}
       <nav
         className="fixed inset-x-0 bottom-0 z-[100] border-t border-border bg-background md:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}

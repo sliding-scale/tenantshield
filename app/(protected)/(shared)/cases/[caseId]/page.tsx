@@ -24,6 +24,8 @@ import {
   resolvePlanId,
 } from "@/lib/plans/plan-access"
 import { getActiveCaseLimit } from "@/lib/plans/plans"
+import { MOBILE_CASE_DETAIL_SHELL_CLASS, MOBILE_PAGE_TOP_PADDING } from "@/lib/nav/mobile-chrome"
+import { cn } from "@/lib/utils"
 
 export default function CaseDetailsPage() {
   const params = useParams<{ caseId: string }>()
@@ -113,8 +115,14 @@ export default function CaseDetailsPage() {
   }
 
   return (
-    <main className="flex min-h-[100dvh] flex-col bg-cream-page pt-5 md:min-h-[calc(100vh-4rem)] md:pt-6 lg:pt-8">
-      <div className="flex w-full flex-1 flex-col px-4 sm:px-6 md:px-10 lg:px-14 xl:px-16">
+    <main
+      className={cn(
+        "flex min-h-0 flex-1 flex-col overflow-hidden bg-background pt-5 md:min-h-[calc(100vh-4rem)] md:pt-6 lg:pt-8",
+        MOBILE_PAGE_TOP_PADDING,
+        MOBILE_CASE_DETAIL_SHELL_CLASS,
+      )}
+    >
+      <div className="flex min-h-0 w-full flex-1 flex-col px-4 sm:px-6 md:px-10 lg:px-14 xl:px-16">
         <NewCaseAnalysisResult
           details={details}
           aiAnalysis={row.aiAnalysis}

@@ -33,264 +33,230 @@ const VARIANT_COPY: Record<
 function GavelLoaderSvg({ className }: { className?: string }) {
   return (
     <svg
-      width={110}
+      width={120}
       height={120}
-      viewBox="0 0 110 120"
+      viewBox="0 0 120 120"
       overflow="visible"
       className={className}
       aria-hidden
     >
       <g className="gavel-loader__sound-block">
         <rect
-          x={12}
-          y={100}
-          width={86}
+          x={18}
+          y={98}
+          width={74}
           height={6}
           rx={3}
           className="gavel-loader__fill-block-strike gavel-loader__stroke-deep"
           strokeWidth={1}
         />
         <rect
-          x={20}
-          y={87}
-          width={70}
-          height={15}
+          x={22}
+          y={82}
+          width={66}
+          height={18}
           rx={4}
           className="gavel-loader__fill-mid gavel-loader__stroke-body"
           strokeWidth={1.2}
         />
-        <rect x={22} y={88} width={66} height={5} rx={3} className="gavel-loader__fill-face" />
+        <rect x={24} y={83} width={62} height={6} rx={3} className="gavel-loader__fill-face" />
+        <rect x={22} y={82} width={66} height={3} rx={2} className="gavel-loader__fill-body" opacity={0.55} />
         <line
-          x1={35}
-          y1={88}
-          x2={35}
-          y2={102}
+          x1={38}
+          y1={83}
+          x2={38}
+          y2={100}
           className="gavel-loader__stroke-body"
           strokeWidth={0.7}
-          opacity={0.4}
+          opacity={0.35}
         />
         <line
           x1={55}
-          y1={88}
+          y1={83}
           x2={55}
-          y2={102}
+          y2={100}
           className="gavel-loader__stroke-body"
           strokeWidth={0.7}
-          opacity={0.4}
+          opacity={0.35}
         />
         <line
-          x1={75}
-          y1={88}
-          x2={75}
-          y2={102}
+          x1={72}
+          y1={83}
+          x2={72}
+          y2={100}
           className="gavel-loader__stroke-body"
           strokeWidth={0.7}
-          opacity={0.4}
-        />
-        <rect
-          x={20}
-          y={87}
-          width={70}
-          height={3}
-          rx={2}
-          className="gavel-loader__fill-body"
-          opacity={0.5}
+          opacity={0.35}
         />
       </g>
 
-      <circle className="gavel-loader__ring" cx={54} cy={86} r={4} />
-      <circle className="gavel-loader__ring gavel-loader__ring--delayed" cx={54} cy={86} r={4} />
+      <circle className="gavel-loader__ring" cx={55} cy={83} r={4} />
+      <circle className="gavel-loader__ring gavel-loader__ring--delayed" cx={55} cy={83} r={4} />
 
       <g className="gavel-loader__sparks">
         <line
-          x1={54}
-          y1={82}
-          x2={51}
-          y2={76}
+          x1={43}
+          y1={80}
+          x2={38}
+          y2={73}
           className="gavel-loader__spark-line"
-          strokeWidth={1.2}
+          strokeWidth={1.3}
           strokeLinecap="round"
         />
         <line
-          x1={54}
-          y1={82}
-          x2={57}
-          y2={76}
+          x1={50}
+          y1={79}
+          x2={48}
+          y2={72}
           className="gavel-loader__spark-line"
-          strokeWidth={1.2}
+          strokeWidth={1.3}
           strokeLinecap="round"
         />
         <line
-          x1={47}
-          y1={83}
-          x2={41}
-          y2={79}
+          x1={57}
+          y1={79}
+          x2={58}
+          y2={72}
           className="gavel-loader__spark-line"
-          strokeWidth={1}
+          strokeWidth={1.3}
           strokeLinecap="round"
         />
         <line
-          x1={61}
-          y1={83}
-          x2={67}
-          y2={79}
+          x1={63}
+          y1={80}
+          x2={68}
+          y2={74}
           className="gavel-loader__spark-line"
-          strokeWidth={1}
+          strokeWidth={1.1}
           strokeLinecap="round"
         />
       </g>
 
-      <g className="gavel-loader__whole">
-        <rect
-          x={45}
-          y={10}
-          width={10}
-          height={8}
-          rx={3}
-          className="gavel-loader__fill-deep gavel-loader__stroke-shadow"
-          strokeWidth={1}
-        />
+      <g className="gavel-loader__arm">
         <line
-          x1={50}
-          y1={17}
-          x2={50}
-          y2={67}
+          x1={89}
+          y1={38}
+          x2={44}
+          y2={38}
           className="gavel-loader__stroke-deep"
-          strokeWidth={6}
+          strokeWidth={7}
           strokeLinecap="round"
         />
         <line
-          x1={50}
-          y1={17}
-          x2={50}
-          y2={67}
+          x1={89}
+          y1={38}
+          x2={44}
+          y2={38}
           className="gavel-loader__stroke-body"
-          strokeWidth={4}
+          strokeWidth={5}
           strokeLinecap="round"
         />
         <line
-          x1={48}
-          y1={18}
-          x2={48}
-          y2={66}
+          x1={88}
+          y1={36}
+          x2={45}
+          y2={36}
           className="gavel-loader__stroke-mid"
-          strokeWidth={1.5}
+          strokeWidth={2}
           strokeLinecap="round"
-          opacity={0.5}
+          opacity={0.45}
         />
         <rect
-          x={44}
-          y={64}
-          width={12}
-          height={7}
+          x={39}
+          y={33}
+          width={9}
+          height={10}
           rx={2}
           className="gavel-loader__fill-brass gavel-loader__stroke-brass"
-          strokeWidth={1}
+          strokeWidth={0.9}
         />
         <rect
-          x={44}
-          y={65}
-          width={12}
-          height={3}
+          x={39.5}
+          y={34}
+          width={8}
+          height={4}
           rx={1}
           className="gavel-loader__fill-brass-light"
-          opacity={0.6}
-        />
-        <rect
-          x={25}
-          y={69}
-          width={60}
-          height={18}
-          rx={5}
-          className="gavel-loader__fill-shadow"
-          opacity={0.25}
-        />
-        <rect
-          x={24}
-          y={67}
-          width={60}
-          height={18}
-          rx={5}
-          className="gavel-loader__fill-deep gavel-loader__stroke-shadow"
-          strokeWidth={1.2}
-        />
-        <rect x={26} y={68} width={56} height={7} rx={4} className="gavel-loader__fill-mid" />
-        <rect
-          x={28}
-          y={68}
-          width={52}
-          height={3}
-          rx={2}
-          className="gavel-loader__fill-light"
           opacity={0.55}
         />
-        <line
-          x1={40}
-          y1={68}
-          x2={40}
-          y2={85}
-          className="gavel-loader__stroke-shadow"
-          strokeWidth={0.7}
-          opacity={0.3}
-        />
-        <line
-          x1={56}
-          y1={68}
-          x2={56}
-          y2={85}
-          className="gavel-loader__stroke-shadow"
-          strokeWidth={0.7}
-          opacity={0.3}
-        />
-        <line
-          x1={70}
-          y1={68}
-          x2={70}
-          y2={85}
-          className="gavel-loader__stroke-shadow"
-          strokeWidth={0.7}
-          opacity={0.3}
-        />
         <rect
           x={24}
-          y={67}
-          width={8}
-          height={18}
+          y={22}
+          width={21}
+          height={34}
           rx={4}
-          className="gavel-loader__fill-brass gavel-loader__stroke-body"
-          strokeWidth={0.8}
-        />
-        <rect x={25} y={68} width={6} height={16} rx={3} className="gavel-loader__fill-brass-light" />
-        <rect
-          x={25}
-          y={68}
-          width={6}
-          height={6}
-          rx={2}
-          className="gavel-loader__fill-face"
-          opacity={0.6}
+          className="gavel-loader__fill-shadow"
+          opacity={0.2}
         />
         <rect
-          x={76}
-          y={67}
-          width={8}
-          height={18}
+          x={22}
+          y={20}
+          width={21}
+          height={34}
           rx={4}
-          className="gavel-loader__fill-brass gavel-loader__stroke-body"
-          strokeWidth={0.8}
+          className="gavel-loader__fill-deep gavel-loader__stroke-shadow"
+          strokeWidth={1.3}
         />
-        <rect x={77} y={68} width={6} height={16} rx={3} className="gavel-loader__fill-brass-light" />
+        <rect x={24} y={22} width={17} height={30} rx={3} className="gavel-loader__fill-mid" />
+        <rect x={25} y={22} width={15} height={10} rx={2} className="gavel-loader__fill-light" opacity={0.55} />
+        <line
+          x1={24}
+          y1={30}
+          x2={41}
+          y2={30}
+          className="gavel-loader__stroke-shadow"
+          strokeWidth={0.7}
+          opacity={0.3}
+        />
+        <line
+          x1={24}
+          y1={38}
+          x2={41}
+          y2={38}
+          className="gavel-loader__stroke-shadow"
+          strokeWidth={0.7}
+          opacity={0.3}
+        />
+        <line
+          x1={24}
+          y1={46}
+          x2={41}
+          y2={46}
+          className="gavel-loader__stroke-shadow"
+          strokeWidth={0.7}
+          opacity={0.3}
+        />
         <rect
-          x={77}
-          y={68}
-          width={6}
-          height={6}
-          rx={2}
-          className="gavel-loader__fill-face"
-          opacity={0.6}
+          x={22}
+          y={20}
+          width={21}
+          height={7}
+          rx={3}
+          className="gavel-loader__fill-brass gavel-loader__stroke-body"
+          strokeWidth={0.9}
         />
-        <rect x={26} y={82} width={56} height={3} rx={1} className="gavel-loader__fill-shadow" opacity={0.6} />
+        <rect x={23} y={21} width={19} height={4} rx={2} className="gavel-loader__fill-brass-light" opacity={0.7} />
+        <rect
+          x={22}
+          y={47}
+          width={21}
+          height={7}
+          rx={3}
+          className="gavel-loader__fill-brass gavel-loader__stroke-body"
+          strokeWidth={0.9}
+        />
+        <rect x={23} y={48} width={19} height={4} rx={2} className="gavel-loader__fill-brass-light" opacity={0.7} />
+        <rect x={23} y={51} width={19} height={2} rx={1} className="gavel-loader__fill-shadow" opacity={0.5} />
       </g>
+
+      <circle
+        cx={92}
+        cy={38}
+        r={5}
+        className="gavel-loader__fill-deep gavel-loader__stroke-shadow"
+        strokeWidth={1}
+      />
+      <circle cx={92} cy={38} r={2.5} className="gavel-loader__fill-body" />
     </svg>
   )
 }

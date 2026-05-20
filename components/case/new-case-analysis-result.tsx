@@ -1,7 +1,7 @@
-﻿"use client"
+"use client"
 
 import Link from "next/link"
-import { useEffect, useState, type ReactNode } from "react"
+import { useState, type ReactNode } from "react"
 import type { z } from "zod"
 import type { Id } from "@/convex/_generated/dataModel"
 import { ArrowLeft, FileText, MapPin } from "lucide-react"
@@ -36,7 +36,7 @@ type Props = {
   caseId?: Id<"cases">
   /** When set, hide generate CTA and show link to the existing letter. */
   attachedLetterId?: Id<"letters"> | null
-  /** e.g. Archive / Restore ΓÇö rendered top-right next to the title */
+  /** e.g. Archive / Restore — rendered top-right next to the title */
   headerTrailing?: ReactNode
 }
 
@@ -208,16 +208,12 @@ export function NewCaseAnalysisResult({
   const blurAnalysis = shouldBlurFreeCaseAnalysis(createdUnderPlan)
   const [showFullDescription, setShowFullDescription] = useState(false)
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "instant" })
-  }, [])
-
   const stateName =
     details.state && details.state in US_STATE_NAMES
       ? US_STATE_NAMES[details.state as USStateAbbr]
-      : details.state || "ΓÇö"
+      : details.state || "—"
 
-  const metaLine = stateName !== "ΓÇö" ? stateName.toUpperCase() : "YOUR CASE"
+  const metaLine = stateName !== "—" ? stateName.toUpperCase() : "YOUR CASE"
   const descriptionText = details.description?.trim() || ""
   const descriptionWords = descriptionText ? descriptionText.split(/\s+/) : []
   const isDescriptionLong = descriptionWords.length > 10
@@ -241,8 +237,8 @@ export function NewCaseAnalysisResult({
   } as const
 
   return (
-    <div className="flex w-full flex-1 flex-col">
-      <header className="mb-6 grid grid-cols-[2.75rem_1fr_auto] items-center gap-2 sm:gap-3">
+    <div className="flex min-h-0 w-full flex-1 flex-col">
+      <header className="mb-6 grid shrink-0 grid-cols-[2.75rem_1fr_auto] items-center gap-2 sm:gap-3">
         <Button
           type="button"
           variant="outline"
@@ -258,7 +254,8 @@ export function NewCaseAnalysisResult({
         <div className="flex min-h-11 min-w-0 justify-end">{headerTrailing ?? <span className="w-11 shrink-0" aria-hidden />}</div>
       </header>
 
-      <div className="w-full space-y-6 pb-[calc(5.75rem+env(safe-area-inset-bottom,0px))] md:space-y-8 lg:mx-auto lg:max-w-4xl">
+      <div className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain">
+        <div className="w-full space-y-6 pb-6 md:space-y-8 lg:mx-auto lg:max-w-4xl">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">{metaLine}</p>
           <h2 className="mt-2 font-heading text-3xl font-semibold leading-tight text-foreground text-balance sm:text-4xl md:text-5xl">
@@ -353,16 +350,16 @@ export function NewCaseAnalysisResult({
             </div>
           )}
         </div>
-
+        </div>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-cream-border bg-cream-page/95 px-4 pb-[max(1rem,calc(0.75rem+env(safe-area-inset-bottom,0px)))] pt-3 backdrop-blur-md sm:px-6 md:px-10 lg:px-14 xl:px-16">
+      <div className="relative z-[101] shrink-0 border-t border-border bg-card px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] sm:px-6 md:px-10 md:pb-4 lg:px-14 xl:px-16">
         <div className="mx-auto w-full lg:max-w-4xl">
           {attachedLetterId ? (
             <Button
               asChild
               variant="outline"
-              className="h-14 w-full rounded-2xl border-cream-border bg-cream-surface-deep px-6 text-lg font-semibold text-ink-warm hover:bg-cream-surface md:text-xl"
+              className="h-14 w-full rounded-2xl px-6 text-lg font-semibold md:text-xl"
             >
               <Link href={`/letters/${attachedLetterId}`} className="inline-flex items-center justify-center gap-2">
                 <FileText className="size-5 shrink-0" aria-hidden />
@@ -372,7 +369,8 @@ export function NewCaseAnalysisResult({
           ) : (
             <Button
               asChild
-              className="h-14 w-full rounded-2xl bg-surface-strong px-6 text-lg font-semibold text-white hover:bg-surface-strong-hover md:text-xl"
+              variant="cta"
+              className="h-14 w-full rounded-2xl px-6 text-lg font-semibold md:text-xl"
             >
               <Link href={letterHref}>Generate a letter</Link>
             </Button>

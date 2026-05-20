@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useAction, useQuery } from "convex/react"
 import type { Id } from "@/convex/_generated/dataModel"
@@ -75,6 +74,12 @@ export default function WriteLettersPage() {
   }, [description, landlordName, propertyAddress, searchParams])
 
   const caseAlreadyHasLetter = Boolean(caseId && attachedLetterId)
+  const isCheckingAttachedLetter = Boolean(caseId && attachedLetterId === undefined)
+
+  useEffect(() => {
+    if (!caseId || !attachedLetterId) return
+    router.replace(`/letters/${attachedLetterId}`)
+  }, [caseId, attachedLetterId, router])
 
   const canSubmit = Boolean(
     letterType &&
@@ -95,6 +100,7 @@ export default function WriteLettersPage() {
     setError(null)
     setSuccess(null)
     setIsSubmitting(true)
+    let navigated = false
     try {
       const result = await generateLetter({
         letterType,
@@ -109,25 +115,30 @@ export default function WriteLettersPage() {
         deadlineDays: deadlineDays.trim(),
         ...(caseId ? { caseId } : {}),
       })
-      router.push(`/letters/${result.letterId}`)
+      navigated = true
+      router.replace(`/letters/${result.letterId}`)
     } catch (e) {
       const message = e instanceof Error ? e.message : "Failed to generate letter"
+      if (
+        caseId &&
+        attachedLetterId &&
+        /already has a letter/i.test(message)
+      ) {
+        navigated = true
+        router.replace(`/letters/${attachedLetterId}`)
+        return
+      }
       setError(message)
       console.error(e)
     } finally {
-      setIsSubmitting(false)
+      if (!navigated) {
+        setIsSubmitting(false)
+      }
     }
   }
 
-  const topBanner =
-    caseId && attachedLetterId ? (
-      <div className="mb-4 rounded-2xl border border-border bg-muted px-4 py-3 text-sm text-foreground">
-        This case already has a letter.{" "}
-        <Link href={`/letters/${attachedLetterId}`} className="font-semibold text-primary hover:underline">
-          View attached letter
-        </Link>
-      </div>
-    ) : null
+  const showLetterLoader =
+    isSubmitting || caseAlreadyHasLetter || isCheckingAttachedLetter
 
   return (
     <NewLetterForm
@@ -154,9 +165,8 @@ export default function WriteLettersPage() {
       error={error}
       success={success}
       canSubmit={canSubmit}
-      isSubmitting={isSubmitting}
+      isSubmitting={showLetterLoader}
       isStateReady={!isProfileStateLoading}
-      topBanner={topBanner}
       onSubmit={() => void onSubmit()}
     />
   )

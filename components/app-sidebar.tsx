@@ -1,8 +1,8 @@
 "use client"
 
-import Image from "next/image"
 import Link from "next/link"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
+import { BrandLogo } from "@/components/shared/navbar-logo"
 import { NavAppLinks } from "@/components/nav-app-links"
 import { NavUser } from "@/components/nav-user"
 import {
@@ -22,9 +22,6 @@ import {
   MOBILE_MORE_NAV_ITEMS,
   type AppNavItem,
 } from "@/lib/nav/items"
-
-const APP_LOGO_SRC =
-  "/vecteezy_stylized-yellow-shield-icon-flat-design_54786290.png"
 
 const SIDEBAR_EXCLUDED_HREFS = new Set(["/billing", "/profile"])
 
@@ -50,15 +47,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href={homeHref}>
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Image
-                    src={APP_LOGO_SRC}
-                    alt=""
-                    width={32}
-                    height={32}
-                    className="size-7 object-contain"
-                    priority
-                  />
+                <div className="flex aspect-square size-8 shrink-0 items-center justify-center">
+                  <BrandLogo variant="icon" priority className="size-8" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-heading font-semibold">TenantShield</span>
