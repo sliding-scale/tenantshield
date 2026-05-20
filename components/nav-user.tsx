@@ -13,7 +13,6 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
@@ -81,19 +80,6 @@ export function NavUser() {
           >
             {isAdmin ? null : (
               <>
-                <DropdownMenuLabel className="p-0 font-normal">
-                  <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                    <Avatar className="size-8 rounded-lg">
-                      <AvatarImage src={avatar} alt={name} />
-                      <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
-                    </Avatar>
-                    <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-medium">{name}</span>
-                      <span className="truncate text-xs text-muted-foreground">{email}</span>
-                    </div>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                   <DropdownMenuItem asChild>
                     <Link href="/profile">
@@ -113,7 +99,7 @@ export function NavUser() {
             )}
             <SignOutButton signOutOptions={{ redirectUrl: "/" }}>
               <DropdownMenuItem
-                variant={isAdmin ? "destructive" : "default"}
+                variant="destructive"
                 onSelect={(event) => event.preventDefault()}
               >
                 <LogOut className="size-4" />

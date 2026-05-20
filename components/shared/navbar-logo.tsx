@@ -35,7 +35,7 @@ function LandingWordmark({
         className="size-11 shrink-0 object-contain xl:size-12"
       />
       <span
-        className="font-heading text-[1.65rem] font-semibold leading-none tracking-tight text-ink-warm-muted xl:text-[1.85rem]"
+        className="font-heading text-[1.65rem] font-semibold leading-none tracking-tight text-muted-foreground xl:text-[1.85rem]"
         aria-label="TenantShield"
       >
         Tenant

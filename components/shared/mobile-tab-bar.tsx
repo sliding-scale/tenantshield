@@ -129,7 +129,7 @@ export default function MobileTabBar() {
     <>
       {showSpacer ? <TabBarSpacer /> : null}
       <nav
-        className="fixed inset-x-0 bottom-0 z-[100] border-t border-border bg-background md:hidden"
+        className="fixed inset-x-0 bottom-0 z-[100] border-t border-border bg-card md:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         aria-label="Main"
       >

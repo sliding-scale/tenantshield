@@ -53,6 +53,7 @@ import type * as stateLaws_actions from "../stateLaws/actions.js";
 import type * as stateLaws_aiSchema from "../stateLaws/aiSchema.js";
 import type * as stateLaws_mutations from "../stateLaws/mutations.js";
 import type * as stateLaws_queries from "../stateLaws/queries.js";
+import type * as stateLaws_validators from "../stateLaws/validators.js";
 import type * as stripe_node from "../stripe/node.js";
 import type * as stripe_subscriptionMutations from "../stripe/subscriptionMutations.js";
 import type * as stripe_subscriptionQueries from "../stripe/subscriptionQueries.js";
@@ -112,6 +113,7 @@ declare const fullApi: ApiFromModules<{
   "stateLaws/aiSchema": typeof stateLaws_aiSchema;
   "stateLaws/mutations": typeof stateLaws_mutations;
   "stateLaws/queries": typeof stateLaws_queries;
+  "stateLaws/validators": typeof stateLaws_validators;
   "stripe/node": typeof stripe_node;
   "stripe/subscriptionMutations": typeof stripe_subscriptionMutations;
   "stripe/subscriptionQueries": typeof stripe_subscriptionQueries;

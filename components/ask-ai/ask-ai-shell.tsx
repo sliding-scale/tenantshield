@@ -105,7 +105,7 @@ export default function AskAiShell() {
   return (
     <div
       className={cn(
-        "bg-cream-page flex min-h-0 flex-1 flex-col overflow-hidden",
+        "bg-background flex min-h-0 flex-1 flex-col overflow-hidden",
         MOBILE_ASK_AI_SHELL_HEIGHT_CLASS,
       )}
     >

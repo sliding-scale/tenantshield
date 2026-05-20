@@ -14,7 +14,7 @@ import { US_STATES, US_STATE_NAMES, type USStateAbbr } from "@/lib/constants/us-
 import { cn } from "@/lib/utils"
 
 const fieldClass =
-  "h-11 w-full rounded-2xl border border-border bg-background px-4 text-left text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+  "h-11 w-full rounded-2xl border border-border bg-card px-4 text-left text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 
 type StatePickerFieldProps = {
   state: string
@@ -66,7 +66,7 @@ export function StatePickerField({
       ) : (
         <div
           className={cn(
-            "flex items-center justify-between gap-3 rounded-2xl border border-border bg-background px-4 py-2.5",
+            "flex items-center justify-between gap-3 rounded-2xl border border-border bg-card px-4 py-2.5",
             showLabel && "mt-2",
           )}
         >

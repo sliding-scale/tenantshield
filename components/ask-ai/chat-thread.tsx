@@ -305,8 +305,8 @@ function ChatThreadLoaded({
                       className={cn(
                         "rounded-2xl px-4 py-3 text-[15px] leading-relaxed shadow-sm",
                         m.role === "user"
-                          ? "border-border w-fit max-w-[min(100%,42rem)] border bg-background dark:bg-card/30"
-                          : "border-border mr-auto max-w-[min(100%,48rem)] border bg-background dark:bg-card/50",
+                          ? "border-border w-fit max-w-[min(100%,42rem)] border bg-card"
+                          : "border-border mr-auto max-w-[min(100%,48rem)] border bg-card",
                       )}
                     >
                       {m.role === "assistant" ? (
@@ -379,7 +379,7 @@ function ChatThreadLoaded({
 
       <form
         onSubmit={handleSubmit}
-        className="border-cream-border bg-cream-page/95 shrink-0 border-t px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] backdrop-blur-md dark:bg-background/95 md:px-8 md:pt-4 md:pb-4"
+        className="border-border bg-background/95 shrink-0 border-t px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] backdrop-blur-md md:px-8 md:pt-4 md:pb-4"
       >
           <div className="mx-auto flex max-w-3xl items-center gap-2">
             <textarea

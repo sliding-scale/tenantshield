@@ -4,7 +4,7 @@ import { useState, type ChangeEvent, type ComponentProps } from "react"
 import { cn } from "@/lib/utils"
 
 const inputBaseClass =
-  "w-full rounded-2xl border border-border bg-background px-4 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+  "w-full rounded-2xl border border-border bg-card px-4 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 
 const floatedLabelClass = "top-1.5 text-[9px] leading-none text-muted-foreground"
 

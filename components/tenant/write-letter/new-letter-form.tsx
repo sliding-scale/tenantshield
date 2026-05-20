@@ -56,7 +56,7 @@ const ISSUE_TYPE_ICONS: Record<IssueTypeIconKey, ComponentType<{ className?: str
 }
 
 const fieldClass =
-  "h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+  "h-11 w-full rounded-2xl border border-border bg-card px-4 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 
 type NewLetterFormProps = {
   letterType: IssueTypeValue
@@ -234,7 +234,7 @@ export function NewLetterForm({
                     </SelectContent>
                   </Select>
                 ) : (
-                  <div className="mt-2 flex items-center justify-between gap-3 rounded-2xl border border-border bg-background px-4 py-2.5">
+                  <div className="mt-2 flex items-center justify-between gap-3 rounded-2xl border border-border bg-card px-4 py-2.5">
                     <div className="flex min-w-0 items-center gap-2.5">
                       <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent text-foreground">
                         <MapPin className="size-4" aria-hidden />

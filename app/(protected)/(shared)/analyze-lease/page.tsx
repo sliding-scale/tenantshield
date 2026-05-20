@@ -195,7 +195,7 @@ export default function AnalyzeLeasePage() {
           </div>
         ) : null}
         {showUploadForm ? (
-          <section className="flex min-h-0 flex-1 flex-col rounded-2xl border border-cream-border bg-cream-surface p-5 shadow-sm sm:p-7 md:rounded-3xl md:p-10 lg:p-12 xl:p-14">
+          <section className="flex min-h-0 flex-1 flex-col rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-7 md:rounded-3xl md:p-10 lg:p-12 xl:p-14">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary md:text-sm">
               AI &middot; Red Flag Detector
             </p>
@@ -325,7 +325,7 @@ export default function AnalyzeLeasePage() {
             </Button>
           </section>
         ) : showAnalyzing ? (
-          <section className="flex min-h-0 flex-1 flex-col items-center justify-center rounded-2xl border border-cream-border bg-cream-surface p-6 shadow-sm sm:p-10 md:rounded-3xl">
+          <section className="flex min-h-0 flex-1 flex-col items-center justify-center rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-10 md:rounded-3xl">
             <GavelLoader variant="lease" embedded description={analyzeDescription} />
           </section>
         ) : showResults && leaseId && lease ? (
