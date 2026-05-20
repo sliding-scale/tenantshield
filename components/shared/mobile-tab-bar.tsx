@@ -4,8 +4,14 @@ import { SignOutButton, useAuth } from "@clerk/nextjs"
 import { LogOut, Menu, X } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { useSidebar } from "@/components/ui/sidebar"
 import {
   ADMIN_NAV_ITEMS,
@@ -52,20 +58,47 @@ function NavTab({
   )
 }
 
-function AdminLogoutTab() {
+const tabBarActionClass =
+  "flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg py-2 text-[0.7rem] font-medium transition-colors"
+
+function AdminMoreTab() {
+  const [open, setOpen] = useState(false)
+
   return (
-    <SignOutButton signOutOptions={{ redirectUrl: "/" }}>
-      <button
-        type="button"
-        className={cn(
-          "flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg py-2 text-[0.7rem] font-medium transition-colors",
-          "text-muted-foreground hover:text-foreground/80",
-        )}
-      >
-        <LogOut className="size-6 shrink-0 text-muted-foreground" strokeWidth={1.5} aria-hidden />
-        <span className="truncate">Log out</span>
-      </button>
-    </SignOutButton>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-label={open ? "Close more menu" : "Open more menu"}
+          className={cn(
+            tabBarActionClass,
+            open ? "text-foreground" : "text-muted-foreground hover:text-foreground/80",
+          )}
+        >
+          <Menu
+            className={cn(
+              "size-6 shrink-0",
+              open ? "text-foreground" : "text-muted-foreground",
+            )}
+            strokeWidth={open ? 2.35 : 1.5}
+            aria-hidden
+          />
+          <span className="truncate">More</span>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent side="top" align="center" className="z-110 min-w-40">
+        <SignOutButton signOutOptions={{ redirectUrl: "/" }}>
+          <DropdownMenuItem
+            variant="destructive"
+            onSelect={(event) => event.preventDefault()}
+          >
+            <LogOut className="size-4" />
+            Log out
+          </DropdownMenuItem>
+        </SignOutButton>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 
@@ -108,7 +141,7 @@ export default function MobileTabBar() {
             />
           ))}
           {isAdmin ? (
-            <AdminLogoutTab />
+            <AdminMoreTab />
           ) : (
             <button
               type="button"
@@ -116,7 +149,7 @@ export default function MobileTabBar() {
               aria-expanded={openMobile}
               aria-label={openMobile ? "Close navigation menu" : "Open navigation menu"}
               className={cn(
-                "flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg py-2 text-[0.7rem] font-medium transition-colors",
+                tabBarActionClass,
                 moreActive
                   ? "text-foreground"
                   : "text-muted-foreground hover:text-foreground/80",

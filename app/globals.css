@@ -23,6 +23,8 @@
   --color-muted: var(--muted);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
+  --color-secondary-dark-foreground: var(--secondary-dark-foreground);
+  --color-secondary-dark: var(--secondary-dark);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
   --color-popover-foreground: var(--popover-foreground);
@@ -47,70 +49,74 @@
 }
 
 :root {
-  /* Page canvas — warm cream */
-  --background: hsl(42 30% 97%);
-  --foreground: hsl(0 0% 8%);
-  /* Elevated surfaces — white cards on cream */
+  /* Page canvas — cool neutral gray */
+  --background: hsl(240 5% 96%);
+  --foreground: hsl(240 6% 10%);
+  /* Elevated surfaces — white cards on gray canvas */
   --card: hsl(0 0% 100%);
-  --card-foreground: hsl(0 0% 8%);
-  --popover: hsl(40 18% 98%);
-  --popover-foreground: hsl(0 0% 8%);
-  /* Primary — amber / orange */
+  --card-foreground: hsl(240 6% 10%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(240 6% 10%);
+  /* Primary — amber / orange (brand accent) */
   --primary: hsl(38 92% 50%);
   --primary-foreground: hsl(0 0% 10%);
   /* Secondary — teal / green */
   --secondary: hsl(160 65% 42%);
   --secondary-foreground: hsl(0 0% 100%);
-  /* Muted surfaces + secondary text */
-  --muted: hsl(39 35% 91%);
-  --muted-foreground: hsl(28 11% 41%);
-  --accent: hsl(38 45% 95%);
-  --accent-foreground: hsl(0 0% 8%);
+  --secondary-dark: hsl(160 52% 22%);
+  --secondary-dark-foreground: hsl(0 0% 100%);
+  /* Muted surfaces + secondary text — cool gray, not warm cream */
+  --muted: hsl(240 5% 93%);
+  --muted-foreground: hsl(240 4% 46%);
+  --accent: hsl(240 5% 95%);
+  --accent-foreground: hsl(240 6% 10%);
   --destructive: hsl(0 72% 51%);
   --warning: hsl(32 95% 45%);
   --warning-foreground: hsl(0 0% 100%);
-  --border: hsl(38 30% 80%);
-  --input: hsl(40 10% 88%);
+  --border: hsl(240 6% 86%);
+  --input: hsl(240 5% 91%);
   --ring: hsl(38 90% 48%);
   --radius: 0.625rem;
   --sidebar: hsl(0 0% 100%);
-  --sidebar-foreground: hsl(0 0% 8%);
+  --sidebar-foreground: hsl(240 6% 10%);
   --sidebar-primary: hsl(38 92% 50%);
   --sidebar-primary-foreground: hsl(0 0% 10%);
-  --sidebar-accent: hsl(38 45% 95%);
-  --sidebar-accent-foreground: hsl(0 0% 8%);
-  --sidebar-border: hsl(38 30% 80%);
+  --sidebar-accent: hsl(240 5% 95%);
+  --sidebar-accent-foreground: hsl(240 6% 10%);
+  --sidebar-border: hsl(240 6% 86%);
   --sidebar-ring: hsl(38 90% 48%);
 }
 
 .dark {
-  --background: hsl(40 8% 10%);
-  --foreground: hsl(40 12% 96%);
-  --card: hsl(0 0% 12%);
-  --card-foreground: hsl(40 10% 96%);
-  --popover: hsl(0 0% 12%);
-  --popover-foreground: hsl(40 10% 96%);
+  --background: hsl(240 6% 10%);
+  --foreground: hsl(240 5% 96%);
+  --card: hsl(240 6% 12%);
+  --card-foreground: hsl(240 5% 96%);
+  --popover: hsl(240 6% 12%);
+  --popover-foreground: hsl(240 5% 96%);
   --primary: hsl(38 88% 52%);
   --primary-foreground: hsl(0 0% 8%);
   --secondary: hsl(160 60% 48%);
   --secondary-foreground: hsl(0 0% 98%);
-  --muted: hsl(40 8% 18%);
-  --muted-foreground: hsl(40 9% 72%);
-  --accent: hsl(40 8% 18%);
-  --accent-foreground: hsl(40 12% 96%);
+  --secondary-dark: hsl(160 48% 16%);
+  --secondary-dark-foreground: hsl(0 0% 98%);
+  --muted: hsl(240 5% 16%);
+  --muted-foreground: hsl(240 4% 64%);
+  --accent: hsl(240 5% 16%);
+  --accent-foreground: hsl(240 5% 96%);
   --destructive: hsl(0 62% 48%);
   --warning: hsl(35 92% 55%);
   --warning-foreground: hsl(0 0% 8%);
-  --border: hsl(40 8% 24%);
-  --input: hsl(40 8% 18%);
+  --border: hsl(240 5% 20%);
+  --input: hsl(240 5% 16%);
   --ring: hsl(38 85% 50%);
-  --sidebar: hsl(0 0% 12%);
-  --sidebar-foreground: hsl(40 10% 96%);
+  --sidebar: hsl(240 6% 12%);
+  --sidebar-foreground: hsl(240 5% 96%);
   --sidebar-primary: hsl(38 88% 52%);
   --sidebar-primary-foreground: hsl(0 0% 8%);
-  --sidebar-accent: hsl(40 8% 18%);
-  --sidebar-accent-foreground: hsl(40 12% 96%);
-  --sidebar-border: hsl(40 8% 24%);
+  --sidebar-accent: hsl(240 5% 16%);
+  --sidebar-accent-foreground: hsl(240 5% 96%);
+  --sidebar-border: hsl(240 5% 20%);
   --sidebar-ring: hsl(38 85% 50%);
 }
 

@@ -37,9 +37,9 @@ export default function AdminLoginPage() {
     if (!isLoaded || !isSignedIn) return;
     if (role === "admin") {
       router.replace("/admin/users");
-    } else {
-      router.replace("/dashboard");
+      return;
     }
+    router.replace("/login");
   }, [isLoaded, isSignedIn, role, router]);
 
   return (
@@ -90,10 +90,21 @@ export default function AdminLoginPage() {
               <SignInForm
                 forgotOpen={forgotOpen}
                 setForgotOpen={setForgotOpen}
-                redirectTo="/dashboard"
+                redirectTo="/admin/users"
                 allowForgotPassword={false}
                 animationBaseIndex={2}
               />
+              <AuthEnter index={5}>
+                <p className="text-center text-sm text-muted-foreground">
+                  Not staff?{" "}
+                  <Link
+                    href="/login"
+                    className="font-semibold text-foreground underline underline-offset-4 hover:text-foreground/80"
+                  >
+                    Sign in as a tenant
+                  </Link>
+                </p>
+              </AuthEnter>
             </div>
           </main>
         </div>

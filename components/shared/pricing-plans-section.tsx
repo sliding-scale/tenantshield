@@ -58,7 +58,7 @@ function BillingPeriodToggle({
           onClick={() => onChange('monthly')}
           className={cn(
             'h-11 flex-1 rounded-full px-4 text-sm font-semibold transition-colors',
-            billingPeriod === 'monthly' ? 'bg-foreground text-white' : 'text-foreground hover:text-foreground',
+            billingPeriod === 'monthly' ? 'bg-foreground text-background' : 'text-foreground hover:text-foreground',
           )}
         >
           Monthly
@@ -68,7 +68,7 @@ function BillingPeriodToggle({
           onClick={() => onChange('yearly')}
           className={cn(
             'h-11 flex-1 rounded-full px-4 text-sm font-semibold transition-colors',
-            billingPeriod === 'yearly' ? 'bg-foreground text-white' : 'text-foreground hover:text-foreground',
+            billingPeriod === 'yearly' ? 'bg-foreground text-background' : 'text-foreground hover:text-foreground',
           )}
         >
           Yearly
@@ -115,21 +115,21 @@ function PricingPlanCard({
   const usesBillingSelection =
     (audience === 'billing' || audience === 'onboarding') && planId !== 'free' && Boolean(onSelectPlan);
   const ctaClassName = cn(
-    'block w-full rounded-full px-4 py-3 text-center text-sm font-bold transition-all duration-200 active:scale-95',
+    'block w-full rounded-xl px-4 py-3 text-center text-sm font-semibold transition-colors',
     popular
-      ? 'bg-amber-500 text-white shadow-md hover:bg-amber-600 hover:shadow-lg'
-      : 'border-2 border-gray-300 bg-white text-gray-700 hover:border-amber-500 hover:text-amber-600',
+      ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+      : 'border border-border bg-card text-foreground hover:bg-accent',
   );
 
   return (
     <div
       className={cn(
-        'relative rounded-xl border-2 bg-white p-6 transition-all duration-300 sm:p-8',
+        'relative rounded-3xl border bg-card p-6 transition-colors sm:p-8',
         isCurrentPlan
-          ? 'border-primary shadow-md ring-2 ring-primary/15'
+          ? 'border-primary shadow-sm ring-2 ring-primary/15'
           : popular
-            ? 'border-amber-500 hover:border-amber-500 hover:shadow-lg'
-            : 'border-gray-200 hover:border-amber-200 hover:shadow-lg',
+            ? 'border-primary'
+            : 'border-border hover:border-primary/40',
       )}
     >
       {isCurrentPlan ? (
@@ -142,33 +142,35 @@ function PricingPlanCard({
           {cancellationNotice ? 'Ends soon' : 'Current plan'}
         </div>
       ) : popular ? (
-        <div className='absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-amber-500 px-3 py-1 text-xs font-bold text-white shadow-md'>
+        <div className='absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground shadow-sm'>
           Most Popular
         </div>
       ) : null}
 
       {yearlySavingsPercent ? (
-        <div className='absolute top-4 right-4 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800'>
+        <div className='absolute top-4 right-4 rounded-full bg-secondary/15 px-3 py-1 text-xs font-bold text-secondary'>
           Save {yearlySavingsPercent}%
         </div>
       ) : null}
 
-      <h3 className='mb-2 text-xl font-bold text-gray-900'>{name}</h3>
+      <h3 className='mb-2 font-heading text-xl font-semibold text-foreground'>{name}</h3>
 
       <div className='mb-6'>
-        <span className='text-3xl font-bold text-gray-900'>{displayPrice}</span>
-        {priceSuffix ? <span className='text-sm text-gray-600'>{priceSuffix}</span> : null}
-        {yearlyReference ? <p className='mt-2 text-sm font-medium text-gray-600'>{yearlyReference}</p> : null}
+        <span className='font-heading text-3xl font-semibold text-foreground'>{displayPrice}</span>
+        {priceSuffix ? <span className='text-sm text-muted-foreground'>{priceSuffix}</span> : null}
+        {yearlyReference ? (
+          <p className='mt-2 text-sm font-medium text-muted-foreground'>{yearlyReference}</p>
+        ) : null}
         {trial && billingPeriod === 'monthly' ? (
-          <p className='mt-2 text-xs font-medium text-gray-500'>{trial}</p>
+          <p className='mt-2 text-xs font-medium text-muted-foreground'>{trial}</p>
         ) : null}
       </div>
 
       <ul className='mb-8 space-y-3'>
         {displayFeatures.map((feature) => (
           <li key={feature} className='flex items-center gap-2'>
-            <Check className='h-5 w-5 shrink-0 text-emerald-600' />
-            <span className='text-sm text-gray-600'>{feature}</span>
+            <Check className='size-5 shrink-0 text-secondary' aria-hidden />
+            <span className='text-sm text-muted-foreground'>{feature}</span>
           </li>
         ))}
       </ul>
@@ -188,10 +190,10 @@ function PricingPlanCard({
             onManageSubscription?.();
           }}
           className={cn(
-            'block w-full rounded-full px-4 py-3 text-center text-sm font-bold transition-all duration-200 active:scale-95',
+            'block w-full rounded-xl px-4 py-3 text-center text-sm font-semibold transition-colors',
             popular
-              ? 'bg-amber-500 text-white shadow-md hover:bg-amber-600 hover:shadow-lg'
-              : 'border-2 border-primary bg-primary text-primary-foreground hover:bg-primary/90',
+              ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+              : 'border border-primary bg-primary text-primary-foreground hover:bg-primary/90',
             isManagingSubscription && 'cursor-wait opacity-80',
           )}
           aria-current='true'
@@ -201,8 +203,8 @@ function PricingPlanCard({
       ) : isCurrentPlan ? (
         <div
           className={cn(
-            'block w-full rounded-full px-4 py-3 text-center text-sm font-bold',
-            popular ? 'bg-amber-500/80 text-white shadow-md' : 'border-2 border-gray-300 bg-gray-50 text-gray-500',
+            'block w-full rounded-xl px-4 py-3 text-center text-sm font-semibold',
+            popular ? 'bg-primary/80 text-primary-foreground' : 'border border-border bg-muted text-muted-foreground',
           )}
           aria-current='true'
         >
@@ -394,7 +396,7 @@ export function PricingPlansSection({
       <div className='mx-auto max-w-6xl'>
         {!hideHeader ? (
           <div className='mb-12 text-center'>
-            <h2 className='mb-4 text-3xl font-bold tracking-tight text-foreground'>{title}</h2>
+            <h2 className='mb-4 font-heading text-3xl font-semibold tracking-tight text-foreground sm:text-4xl'>{title}</h2>
             <p className='text-lg text-muted-foreground'>{subtitle}</p>
           </div>
         ) : null}
