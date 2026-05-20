@@ -253,6 +253,7 @@ export default defineSchema({
     state: v.string(),
     leaseText: v.string(),
     pdfFile: v.optional(v.id("_storage")),
+    pdfFileName: v.optional(v.string()),
     createdUnderPlan: v.optional(Plan),
     aiAnalysis: v.optional(
       v.object({

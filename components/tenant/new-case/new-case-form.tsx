@@ -1,14 +1,12 @@
 "use client"
 
-import { useMemo, useState, type ComponentType } from "react"
+import { useState, type ComponentType } from "react"
 import { useQuery } from "convex/react"
 import {
   AlertTriangle,
   CircleHelp,
   FileText,
   Gavel,
-  MapPin,
-  Pencil,
   Scale,
   Shield,
   TrendingUp,
@@ -19,21 +17,14 @@ import { api } from "@/convex/_generated/api"
 import { GavelLoaderOverlay } from "@/components/shared/gavel-loader"
 import { ShieldLoader } from "@/components/shared/shield-loader"
 import { FadeIn, FadeInStagger } from "@/components/shared/fade-in"
+import { StatePickerField } from "@/components/shared/state-picker-field"
 import { FloatingLabelInput, FloatingLabelTextarea } from "@/components/tenant/new-case/floating-label-field"
 import { PlanUpgradeDialog } from "@/components/tenant/free-plan-upgrade-dialog"
 import { Button } from "@/components/ui/button"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
   ISSUE_TYPES,
   type IssueTypeIconKey,
 } from "@/lib/constants/issue-types"
-import { US_STATES, US_STATE_NAMES, type USStateAbbr } from "@/lib/constants/us-states"
 import { MOBILE_TAB_BAR_PAGE_SHELL } from "@/lib/nav/mobile-chrome"
 import {
   ACTIVE_CASE_LIMIT_REACHED,
@@ -106,7 +97,6 @@ export function NewCaseForm({
 }: NewCaseFormProps) {
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false)
   const [upgradeDialogMode, setUpgradeDialogMode] = useState<"free" | "active-limit">("free")
-  const [isEditingState, setIsEditingState] = useState(false)
   const { convexUser } = useCurrentUser()
   const counts = useQuery(api.dashboard.queries.countsForCurrentUser, {})
   const planUsage = useQuery(api.planUsage.queries.current, {})
@@ -114,18 +104,6 @@ export function NewCaseForm({
   const billingPeriod = planUsage?.planType ?? "monthly"
   const usedActiveCases = planUsage?.usedActiveCases ?? 0
   const activeCaseLimit = getActiveCaseLimit(plan, billingPeriod)
-
-  const selectedStateName = useMemo(
-    () => (state ? US_STATE_NAMES[state as USStateAbbr] : ""),
-    [state],
-  )
-
-  const showStatePicker = !state || isEditingState
-
-  const handleStateChange = (value: string) => {
-    setState(value)
-    setIsEditingState(false)
-  }
 
   const handleSubmitClick = async () => {
     const generatedCaseCount = counts?.totalCases ?? 0
@@ -226,47 +204,7 @@ export function NewCaseForm({
             </FadeIn>
 
             <FadeIn stagger className="mt-5 w-full md:mt-6">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                State
-              </p>
-              {showStatePicker ? (
-                <Select value={state || undefined} onValueChange={handleStateChange}>
-                  <SelectTrigger className={cn(fieldClass, "mt-2")}>
-                    <SelectValue placeholder="Select your state…" />
-                  </SelectTrigger>
-                  <SelectContent position="popper">
-                    {US_STATES.map((abbr) => (
-                      <SelectItem key={abbr} value={abbr}>
-                        {US_STATE_NAMES[abbr]} ({abbr})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <div className="mt-2 flex items-center justify-between gap-3 rounded-2xl border border-border bg-background px-4 py-2.5">
-                  <div className="flex min-w-0 items-center gap-2.5">
-                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent text-foreground">
-                      <MapPin className="size-4" aria-hidden />
-                    </span>
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-foreground">
-                        {selectedStateName}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{state}</p>
-                    </div>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 shrink-0 gap-1.5 px-2 text-xs font-semibold text-primary"
-                    onClick={() => setIsEditingState(true)}
-                  >
-                    <Pencil className="size-3.5" aria-hidden />
-                    Change
-                  </Button>
-                </div>
-              )}
+              <StatePickerField state={state} onStateChange={setState} />
             </FadeIn>
 
             <FadeIn stagger className="mt-5 grid w-full gap-3 md:mt-6 lg:grid-cols-2">

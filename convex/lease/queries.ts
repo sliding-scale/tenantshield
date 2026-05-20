@@ -1,5 +1,6 @@
 import { internalQuery, query } from "../_generated/server";
 import { v } from "convex/values";
+import { resolveLeasePdfDisplayName } from "./pdfDisplayName";
 
 const PAGE_SIZE = 3;
 
@@ -11,7 +12,7 @@ export const getLeaseForCurrentUser = query({
     const lease = await ctx.db.get(args.leaseId);
     if (!lease || lease.userId !== identity.subject) return null;
     let pdfUrl: string | null = null;
-    let pdfFileName: string | null = null;
+    let urlDerivedName: string | null = null;
     if (lease.pdfFile) {
       try {
         pdfUrl = await ctx.storage.getUrl(lease.pdfFile);
@@ -19,17 +20,18 @@ export const getLeaseForCurrentUser = query({
         pdfUrl = null;
       }
 
-      // Derive filename from URL path if available
       if (pdfUrl) {
         try {
           const parsed = new URL(pdfUrl);
           const last = parsed.pathname.split("/").pop() || "";
-          pdfFileName = decodeURIComponent(last);
+          urlDerivedName = decodeURIComponent(last);
         } catch (e) {
-          pdfFileName = null;
+          urlDerivedName = null;
         }
       }
     }
+
+    const pdfFileName = resolveLeasePdfDisplayName(lease.pdfFileName, urlDerivedName);
 
     return { ...lease, pdfUrl, pdfFileName };
   },

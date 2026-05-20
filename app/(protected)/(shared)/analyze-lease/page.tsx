@@ -1,20 +1,30 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { Upload, FileText, X, Search } from "lucide-react";
-import { GavelLoader } from "@/components/shared/gavel-loader";
-import { ShieldLoader } from "@/components/shared/shield-loader";
+import { ChevronLeft, Upload, FileText, X } from "lucide-react";
+import { GavelLoader, GavelLoaderOverlay } from "@/components/shared/gavel-loader";
+import { ShieldLoaderOverlay } from "@/components/shared/shield-loader";
+import { StatePickerField } from "@/components/shared/state-picker-field";
 import { Button } from "@/components/ui/button";
-import { US_STATE_NAMES, filterUSStates, type USStateAbbr } from "@/lib/constants/us-states";
+import { US_STATE_NAMES, type USStateAbbr } from "@/lib/constants/us-states";
 import { usePrefilledUSState } from "@/app/hooks/usePrefilledUSState";
 import {
   LeaseResultsView,
   type LeaseAnalysis,
 } from "@/components/tenant/analyze-lease/lease-results-view";
+import { PlanUpgradeDialog } from "@/components/tenant/free-plan-upgrade-dialog";
+import useCurrentUser from "@/app/hooks/useCurrentUser";
+import {
+  hasReachedLeaseAnalysisLimit,
+  LEASE_ANALYSIS_LIMIT_REACHED,
+  resolvePlanId,
+  shouldPromptFreePlanUpgrade,
+} from "@/lib/plans/plan-access";
+import { getLeaseAnalysisLimit } from "@/lib/plans/plans";
 
 type AnalyzeLeaseError = { title: string; body: string };
 
@@ -64,15 +74,6 @@ function formatLeaseCheckError(message: string): AnalyzeLeaseError {
     body: message,
   };
 }
-import { PlanUpgradeDialog } from "@/components/tenant/free-plan-upgrade-dialog"
-import useCurrentUser from "@/app/hooks/useCurrentUser"
-import {
-  hasReachedLeaseAnalysisLimit,
-  LEASE_ANALYSIS_LIMIT_REACHED,
-  resolvePlanId,
-  shouldPromptFreePlanUpgrade,
-} from "@/lib/plans/plan-access"
-import { getLeaseAnalysisLimit } from "@/lib/plans/plans"
 
 export default function AnalyzeLeasePage() {
   const router = useRouter();
@@ -84,7 +85,6 @@ export default function AnalyzeLeasePage() {
 
   const [file, setFile] = useState<File | null>(null);
   const { state, setState } = usePrefilledUSState();
-  const [stateSearch, setStateSearch] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<AnalyzeLeaseError | null>(null);
@@ -93,7 +93,6 @@ export default function AnalyzeLeasePage() {
   const [upgradeOpen, setUpgradeOpen] = useState(false)
   const [upgradeMode, setUpgradeMode] = useState<"free" | "limit">("free")
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const stateChipRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
   const { convexUser } = useCurrentUser()
   const counts = useQuery(api.dashboard.queries.countsForCurrentUser, {})
   const planUsage = useQuery(api.planUsage.queries.current, {})
@@ -107,38 +106,11 @@ export default function AnalyzeLeasePage() {
     leaseId ? { leaseId } : "skip",
   );
 
-  const filteredStates = useMemo(
-    () => filterUSStates(stateSearch),
-    [stateSearch],
-  );
-
-  const chipsToShow = useMemo(() => {
-    if (!state) return filteredStates;
-    const sel = state as USStateAbbr;
-    if (filteredStates.includes(sel)) return filteredStates;
-    return [sel, ...filteredStates];
-  }, [filteredStates, state]);
-
-  const selectionHiddenBySearch =
-    Boolean(state) &&
-    stateSearch.trim().length > 0 &&
-    !filteredStates.includes(state as USStateAbbr);
-
-  const selectedStateName = useMemo(
-    () => (state ? US_STATE_NAMES[state as USStateAbbr] : ""),
-    [state],
-  );
-
-  useEffect(() => {
-    const el = stateChipRefs.current.get(state);
-    el?.scrollIntoView({
-      behavior: "smooth",
-      inline: "center",
-      block: "nearest",
-    });
-  }, [state]);
-
   const canSubmit = Boolean(file && state && !isSubmitting && !isAnalyzing);
+
+  const analyzeDescription = state
+    ? `Our AI is reviewing every clause against ${US_STATE_NAMES[state as USStateAbbr]} tenant law. This usually takes 30–60 seconds.`
+    : "Our AI is reviewing every clause against your state's tenant law. This usually takes 30–60 seconds.";
 
   const handleFile = useCallback((incoming: File | null) => {
     setError(null);
@@ -208,6 +180,7 @@ export default function AnalyzeLeasePage() {
       const { leaseId: newLeaseId } = await extractLeaseText({
         storageId: storageId as any,
         state,
+        fileName: file.name,
       });
 
       setLeaseId(newLeaseId);
@@ -253,19 +226,19 @@ export default function AnalyzeLeasePage() {
             className="h-11 w-11 rounded-full border-border bg-accent p-0 text-foreground"
             aria-label="Back"
           >
-            <X className="size-5" />
+            <ChevronLeft className="size-5" />
           </Button>
         </header>
         {showUploadForm ? (
-          <section className="flex min-h-0 flex-1 flex-col rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-7 md:rounded-3xl md:p-10 lg:p-12 xl:p-14">
+          <section className="flex min-h-0 flex-1 flex-col">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary md:text-sm">
               AI &middot; Red Flag Detector
             </p>
-            <h2 className="mt-3 max-w-5xl font-heading text-4xl font-semibold leading-[0.95] text-foreground text-balance sm:text-5xl md:text-6xl lg:text-7xl xl:max-w-6xl">
+            <h2 className="mt-3 max-w-5xl font-heading text-3xl font-semibold leading-tight text-foreground text-balance sm:text-4xl md:text-5xl lg:text-6xl xl:max-w-6xl">
               Upload your lease. <br className="hidden sm:block" />
               We&rsquo;ll find the traps.
             </h2>
-            <p className="mt-4 max-w-3xl text-lg text-muted-foreground text-pretty sm:text-xl lg:max-w-4xl lg:text-2xl">
+            <p className="mt-3 max-w-3xl text-base text-muted-foreground text-pretty sm:text-lg lg:max-w-4xl lg:text-xl">
               Our AI reviews every clause against your state&rsquo;s tenant law
               and flags illegal or one-sided terms.
             </p>
@@ -283,10 +256,8 @@ export default function AnalyzeLeasePage() {
                 className={[
                   "group flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-12 transition-colors md:rounded-3xl md:py-16",
                   isDragOver
-                    ? "border-primary bg-primary/5"
-                    : file
-                      ? "border-border bg-accent"
-                      : "border-border bg-background hover:border-primary/50 hover:bg-accent",
+                    ? "border-primary bg-card"
+                    : "border-border bg-card hover:border-primary/50",
                 ].join(" ")}
               >
                 <input
@@ -341,71 +312,7 @@ export default function AnalyzeLeasePage() {
 
             {/* State selector */}
             <div className="mx-auto mt-8 w-full max-w-3xl md:mt-10">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground md:text-sm">
-                State
-              </p>
-              <div className="relative mt-3 w-full">
-                <Search
-                  className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                  aria-hidden
-                />
-                <input
-                  type="search"
-                  value={stateSearch}
-                  onChange={(e) => setStateSearch(e.target.value)}
-                  placeholder="Search by name or code…"
-                  autoComplete="off"
-                  className="h-10 w-full rounded-xl border border-border bg-background py-2 pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:h-11 md:text-base"
-                  aria-label="Search states"
-                />
-              </div>
-
-              {selectionHiddenBySearch ? (
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Selected: {selectedStateName} ({state}) — clear search to
-                  browse all, or pick below.
-                </p>
-              ) : null}
-
-              <div className="relative mt-3 w-full min-w-0">
-                <div
-                  className="-mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto overflow-y-hidden px-1 pb-2 [scrollbar-width:thin] touch-pan-x"
-                  role="listbox"
-                  aria-label="Select state"
-                >
-                  {chipsToShow.map((abbr) => {
-                    const active = state === abbr;
-                    return (
-                      <button
-                        key={abbr}
-                        type="button"
-                        role="option"
-                        aria-selected={active}
-                        ref={(el) => {
-                          if (el) stateChipRefs.current.set(abbr, el);
-                          else stateChipRefs.current.delete(abbr);
-                        }}
-                        onClick={() => setState(abbr)}
-                        title={US_STATE_NAMES[abbr]}
-                        className={[
-                          "inline-flex h-12 shrink-0 snap-start items-center justify-center rounded-2xl border px-[1.1rem] text-base transition md:min-w-[4.25rem] md:px-5 md:text-lg",
-                          active
-                            ? "border-border bg-muted text-foreground shadow-sm ring-1 ring-border/80 font-semibold"
-                            : "border-transparent bg-background font-medium text-foreground hover:bg-accent",
-                        ].join(" ")}
-                      >
-                        {abbr}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {stateSearch.trim() !== "" && filteredStates.length === 0 ? (
-                <p className="mt-2 text-sm font-medium text-muted-foreground">
-                  No states match your search.
-                </p>
-              ) : null}
+              <StatePickerField state={state} onStateChange={setState} />
             </div>
 
             {/* Error */}
@@ -427,37 +334,35 @@ export default function AnalyzeLeasePage() {
             {/* Submit */}
             <Button
               type="button"
+              variant="cta"
               disabled={!canSubmit}
               onClick={() => void onSubmit()}
-              className="mx-auto mt-8 h-14 w-full max-w-xl rounded-2xl bg-foreground px-6 text-lg font-semibold text-white hover:bg-foreground/90 disabled:bg-muted disabled:text-muted-foreground md:mt-10 md:text-xl"
+              className="mx-auto mt-8 h-14 w-full max-w-xl rounded-2xl px-6 text-lg font-semibold md:mt-10 md:text-xl"
             >
-              {isSubmitting ? (
-                <span className="flex items-center justify-center gap-3">
-                  <ShieldLoader variant="upload" compact />
-                  <span>Uploading…</span>
-                </span>
-              ) : isAnalyzing ? (
-                "Analyzing…"
-              ) : (
-                "Analyze Lease"
-              )}
+              {isSubmitting ? "Uploading…" : isAnalyzing ? "Analyzing…" : "Analyze Lease"}
             </Button>
           </section>
-        ) : !analysis ? (
-          <section className="flex min-h-0 flex-1 flex-col items-center justify-center rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-10 md:rounded-3xl">
+        ) : !analysis && !isAnalyzing ? (
+          <section className="flex min-h-0 flex-1 flex-col items-center justify-center">
             <GavelLoader
               variant="lease"
               embedded
-              description={`Our AI is reviewing every clause against ${state || "your state"}'s tenant law. This usually takes 30–60 seconds.`}
+              description={analyzeDescription}
             />
           </section>
-        ) : (
+        ) : analysis ? (
           <LeaseResultsView
             analysis={analysis as LeaseAnalysis}
             createdUnderPlan={lease?.createdUnderPlan}
           />
-        )}
+        ) : null}
       </div>
+      <ShieldLoaderOverlay show={isSubmitting} variant="upload" />
+      <GavelLoaderOverlay
+        show={isAnalyzing}
+        variant="lease"
+        description={analyzeDescription}
+      />
       <PlanUpgradeDialog
         open={upgradeOpen}
         onOpenChange={setUpgradeOpen}

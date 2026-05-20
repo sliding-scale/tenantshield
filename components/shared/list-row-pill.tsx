@@ -11,7 +11,7 @@ const toneClass: Record<ListRowPillTone, string> = {
 }
 
 const pillBase =
-  "inline-flex max-w-full min-w-0 items-center truncate rounded-full border px-2.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-[0.12em] sm:max-w-md sm:text-xs"
+  "inline-flex h-6 max-w-full min-w-0 items-center justify-center truncate rounded-full border px-2.5 text-[0.65rem] font-semibold uppercase leading-none tracking-[0.12em] sm:h-7 sm:max-w-md sm:px-3 sm:text-xs"
 
 export function ListRowPill({
   tone,

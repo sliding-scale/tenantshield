@@ -3,12 +3,19 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useMutation } from "convex/react"
-import { FileSearch, Trash2 } from "lucide-react"
+import { ChevronRight, EllipsisVertical, Trash2 } from "lucide-react"
 import type { Id } from "@/convex/_generated/dataModel"
 import { api } from "@/convex/_generated/api"
 import { LeaseVerdictTag } from "@/components/shared/list-row-pill"
-import { Button } from "@/components/ui/button"
 import { BrandedAlertDialog } from "@/components/ui/branded-alert-dialog"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 type LeaseListItem = {
   _id: Id<"leases">
@@ -42,62 +49,78 @@ export function LeaseListRow({ item }: { item: LeaseListItem }) {
     }
   }
 
+  const stats: string[] = []
+  if (item.redFlagsCount > 0) {
+    stats.push(`${item.redFlagsCount} red flag${item.redFlagsCount === 1 ? "" : "s"}`)
+  }
+  if (item.missingClausesCount > 0) {
+    stats.push(`${item.missingClausesCount} missing clause${item.missingClausesCount === 1 ? "" : "s"}`)
+  }
+
   return (
     <>
-      <article className="flex items-stretch gap-2 rounded-3xl border border-border bg-card transition hover:bg-accent sm:gap-3">
-        <Link
-          href={`/leases/${item._id}`}
-          className="min-w-0 flex-1 p-4 sm:p-5 md:p-5"
-        >
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-              {item.state} · Lease Analysis
-            </p>
-            <LeaseVerdictTag verdict={item.verdict} />
-          </div>
-          <h2 className="mt-1.5 line-clamp-2 break-words text-balance font-heading text-xl font-semibold leading-snug text-foreground sm:text-2xl">
-            {title}
-          </h2>
-          <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
-            {item.documentSummary}
-          </p>
-          {item.issuesCount > 0 ? (
-            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs font-medium text-muted-foreground">
-              {item.redFlagsCount > 0 ? (
-                <span>
-                  {item.redFlagsCount} red flag{item.redFlagsCount === 1 ? "" : "s"}
-                </span>
-              ) : null}
-              {item.missingClausesCount > 0 ? (
-                <span>
-                  {item.missingClausesCount} missing clause
-                  {item.missingClausesCount === 1 ? "" : "s"}
-                </span>
-              ) : null}
-            </div>
-          ) : null}
-          <div className="mt-3 flex items-center gap-2 text-sm font-medium text-foreground">
-            <FileSearch className="size-4" />
-            View analysis
-          </div>
-        </Link>
-
-        <div className="flex shrink-0 flex-col items-end justify-start p-3 sm:p-4">
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            aria-label={`Delete lease: ${title}`}
-            disabled={isDeleting}
-            onClick={() => {
-              setError(null)
-              setConfirmOpen(true)
-            }}
-            className="size-10 rounded-xl border-border bg-background text-muted-foreground hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive sm:size-11"
-          >
-            <Trash2 className="size-4" />
-          </Button>
+      <article className="group relative">
+        <div className="absolute right-3 top-3 z-10 sm:right-4 sm:top-4">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label={`Lease options: ${title}`}
+                className="size-9 rounded-xl text-muted-foreground hover:bg-background hover:text-foreground"
+              >
+                <EllipsisVertical className="size-4" aria-hidden />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-40">
+              <DropdownMenuItem
+                variant="destructive"
+                disabled={isDeleting}
+                onSelect={(event) => {
+                  event.preventDefault()
+                  setError(null)
+                  setConfirmOpen(true)
+                }}
+              >
+                <Trash2 aria-hidden />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
+
+        <Link href={`/leases/${item._id}`} className="block">
+          <Card className="gap-0 rounded-3xl border border-border py-0 shadow-none ring-0 transition hover:bg-accent">
+            <div className="flex flex-col gap-2 px-4 py-4 sm:px-5 sm:py-5 md:gap-3 md:px-6 md:py-6">
+              <div className="flex flex-wrap items-center gap-2 pr-10">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+                  {item.state} · Lease Analysis
+                </p>
+                <LeaseVerdictTag verdict={item.verdict} />
+              </div>
+              <h2 className="line-clamp-2 break-words text-balance font-heading text-xl font-semibold leading-snug text-foreground sm:text-2xl md:text-3xl">
+                {title}
+              </h2>
+              <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground md:text-base">
+                {item.documentSummary}
+              </p>
+              <div className="mt-1 flex items-center justify-between gap-3">
+                {stats.length > 0 ? (
+                  <p className="text-xs font-medium text-muted-foreground md:text-sm">
+                    {stats.join(" · ")}
+                  </p>
+                ) : (
+                  <span />
+                )}
+                <ChevronRight
+                  className="size-5 shrink-0 text-muted-foreground transition group-hover:text-foreground sm:size-6"
+                  aria-hidden
+                />
+              </div>
+            </div>
+          </Card>
+        </Link>
       </article>
 
       <BrandedAlertDialog

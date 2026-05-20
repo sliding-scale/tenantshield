@@ -26,6 +26,7 @@ import type * as http from "../http.js";
 import type * as lease_actions from "../lease/actions.js";
 import type * as lease_aiSchema from "../lease/aiSchema.js";
 import type * as lease_mutations from "../lease/mutations.js";
+import type * as lease_pdfDisplayName from "../lease/pdfDisplayName.js";
 import type * as lease_queries from "../lease/queries.js";
 import type * as lease_validation from "../lease/validation.js";
 import type * as letters_actions from "../letters/actions.js";
@@ -84,6 +85,7 @@ declare const fullApi: ApiFromModules<{
   "lease/actions": typeof lease_actions;
   "lease/aiSchema": typeof lease_aiSchema;
   "lease/mutations": typeof lease_mutations;
+  "lease/pdfDisplayName": typeof lease_pdfDisplayName;
   "lease/queries": typeof lease_queries;
   "lease/validation": typeof lease_validation;
   "letters/actions": typeof letters_actions;
