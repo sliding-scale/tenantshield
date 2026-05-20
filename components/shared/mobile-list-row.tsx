@@ -13,7 +13,7 @@ type MobileListRowProps = {
   className?: string
 }
 
-const rowInnerClass =
+export const mobileListRowInnerClass =
   "group flex min-h-14 w-full items-center gap-3 px-3 py-3.5 text-left transition hover:bg-accent sm:gap-4 sm:px-4 sm:py-4 md:min-h-16"
 
 export function MobileListRow({
@@ -66,11 +66,11 @@ export function MobileListRow({
       size="sm"
     >
       {href ? (
-        <Link href={href} className={rowInnerClass}>
+        <Link href={href} className={mobileListRowInnerClass}>
           {content}
         </Link>
       ) : (
-        <button type="button" onClick={onClick} className={rowInnerClass}>
+        <button type="button" onClick={onClick} className={mobileListRowInnerClass}>
           {content}
         </button>
       )}

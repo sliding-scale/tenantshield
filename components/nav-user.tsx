@@ -22,6 +22,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { cn } from "@/lib/utils"
 import { ChevronsUpDown, CreditCard, LogOut, UserRound } from "lucide-react"
 
 export function NavUser() {
@@ -48,7 +49,7 @@ export function NavUser() {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu>
+        <DropdownMenu modal={!isMobile}>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
@@ -66,7 +67,10 @@ export function NavUser() {
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+            className={cn(
+              "w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg",
+              isMobile && "z-120",
+            )}
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}

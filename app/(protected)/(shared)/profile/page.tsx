@@ -1,6 +1,8 @@
 "use client"
 
+import { FadeIn } from "@/components/shared/fade-in"
 import { ProfileHeaderSection } from "@/components/tenant/profile/profile-header-section"
+import { ProfileLegalNote } from "@/components/tenant/profile/profile-legal-note"
 import { ProfilePlanSection } from "@/components/tenant/profile/profile-plan-section"
 import { ProfileResourcesSection } from "@/components/tenant/profile/profile-resources-section"
 import { ProfileSignOutRow } from "@/components/tenant/profile/profile-sign-out-row"
@@ -11,15 +13,22 @@ export default function ProfilePage() {
   return (
     <main
       className={cn(
-        "min-h-svh bg-background px-4 sm:px-6 md:min-h-svh md:px-8 md:py-10 md:pt-8 lg:px-10 lg:py-12",
+        "min-h-svh bg-background px-4 md:min-h-svh md:px-8 md:py-10 md:pt-8 lg:px-10 lg:py-12",
         MOBILE_TAB_BAR_PAGE_SHELL,
       )}
     >
       <div className="mx-auto w-full max-w-7xl">
-        <ProfileHeaderSection />
-        <ProfilePlanSection />
+        <FadeIn>
+          <ProfileHeaderSection />
+        </FadeIn>
+        <FadeIn>
+          <ProfilePlanSection />
+        </FadeIn>
         <ProfileResourcesSection />
         <ProfileSignOutRow />
+        <FadeIn>
+          <ProfileLegalNote />
+        </FadeIn>
       </div>
     </main>
   )
