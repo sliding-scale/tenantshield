@@ -127,7 +127,6 @@ export default function LoginContinuePage() {
                   value={state}
                   onValueChange={setState}
                   showLabel
-                  optional
                 />
               </AuthEnter>
 

@@ -24,7 +24,6 @@ export function AppChrome({ children }: AppChromeProps) {
       <div className="flex min-h-svh flex-col bg-background">
         <Navbar />
         {children}
-        <MobileTabBar />
       </div>
     )
   }
@@ -33,7 +32,7 @@ export function AppChrome({ children }: AppChromeProps) {
     <TooltipProvider delayDuration={0}>
       <SidebarProvider>
         <AppSidebar />
-        <SidebarInset>
+        <SidebarInset className="min-w-0 overflow-x-hidden">
           <AppShellHeader />
           <Navbar />
           {children}

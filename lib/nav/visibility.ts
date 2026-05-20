@@ -27,7 +27,6 @@ export function isSharedPagePath(pathname: string | null) {
   if (!pathname) return false
   const p = pathname.toLowerCase()
   return (
-    p.startsWith("/newcase") ||
     p.startsWith("/ask-ai") ||
     p.startsWith("/write-letters") ||
     p.startsWith("/analyze-lease") ||
@@ -46,9 +45,12 @@ export function shouldShowMobileTabBar(pathname: string | null, isSignedIn: bool
   return true
 }
 
-/** Tab-bar routes use bottom nav only on mobile — no duplicate top navbar. */
+/** Signed-in mobile uses bottom tab bar / page chrome — no top navbar on any route. */
 export function shouldHideTopNavbarOnMobile(pathname: string | null, isSignedIn: boolean) {
-  return shouldShowMobileTabBar(pathname, isSignedIn)
+  if (!isSignedIn || !pathname) return false
+  if (isAuthPagePath(pathname)) return false
+  if (isVerifyEmailPath(pathname)) return false
+  return true
 }
 
 /** Desktop sidebar for signed-in app routes (replaces top navbar links). */

@@ -10,8 +10,7 @@ import useCurrentUser from "@/app/hooks/useCurrentUser"
 import { api } from "@/convex/_generated/api";
 import { planDisplayLabel } from "@/lib/plans/plan-access";
 import { cn } from "@/lib/utils";
-import { isAuthPagePath, shouldHideTopNavbarOnMobile, shouldShowDesktopSidebar } from "@/lib/nav/visibility";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { isAuthPagePath, shouldHideTopNavbarOnMobile } from "@/lib/nav/visibility";
 
 const APP_LOGO_SRC =
   "/vecteezy_stylized-yellow-shield-icon-flat-design_54786290.png";
@@ -34,10 +33,6 @@ export default function Navbar() {
 
   const hideOnMobile = shouldHideTopNavbarOnMobile(pathname, Boolean(isSignedIn));
   const hideOnDesktop = Boolean(isSignedIn);
-  const showSidebarTrigger =
-    Boolean(isSignedIn) &&
-    shouldShowDesktopSidebar(pathname, true) &&
-    !hideOnMobile;
 
   return (
     <header
@@ -49,7 +44,6 @@ export default function Navbar() {
     >
       <div className="flex h-16 items-center justify-between gap-4 px-4 sm:gap-6 sm:px-6">
         <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
-          {showSidebarTrigger ? <SidebarTrigger className="-ml-1" /> : null}
           <Link
             href="/"
             className="inline-flex shrink-0 items-center gap-2 font-heading text-lg font-bold tracking-tight text-foreground sm:gap-2.5 sm:text-xl"

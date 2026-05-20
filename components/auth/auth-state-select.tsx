@@ -14,7 +14,6 @@ type AuthStateSelectProps = {
   onValueChange: (value: string) => void;
   label?: string;
   showLabel?: boolean;
-  optional?: boolean;
   placeholder?: string;
   className?: string;
 };
@@ -25,7 +24,6 @@ export function AuthStateSelect({
   onValueChange,
   label = 'Your state',
   showLabel = false,
-  optional = false,
   placeholder = 'Select your state…',
   className,
 }: AuthStateSelectProps) {
@@ -34,7 +32,6 @@ export function AuthStateSelect({
       {showLabel ? (
         <Label htmlFor={id}>
           {label}
-          {optional ? <span className='font-normal text-muted-foreground'> (optional)</span> : null}
         </Label>
       ) : null}
       <Select value={value || STATE_NONE} onValueChange={(next) => onValueChange(next === STATE_NONE ? '' : next)}>
