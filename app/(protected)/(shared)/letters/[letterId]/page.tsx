@@ -104,6 +104,7 @@ export default function LetterDetailPage() {
       createdUnderPlan={row.createdUnderPlan}
       letterType={row.inputData.letterType}
       landlordName={row.inputData.landlordName}
+      propertyAddress={row.inputData.propertyAddress}
       didCopy={didCopy}
       letterBodyOverride={isEditing ? undefined : row.fullLetterText}
       heroTitle={isEditing ? "Edit your letter" : undefined}

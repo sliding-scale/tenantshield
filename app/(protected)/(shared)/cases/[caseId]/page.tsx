@@ -4,12 +4,19 @@ import { useMemo, useState } from "react"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { useMutation, useQuery } from "convex/react"
+import { Archive, ArchiveRestore, EllipsisVertical, Star } from "lucide-react"
 import type { Id } from "@/convex/_generated/dataModel"
 import { api } from "@/convex/_generated/api"
 import { NewCaseAnalysisResult } from "@/components/case/new-case-analysis-result"
 import { PlanUpgradeDialog } from "@/components/tenant/free-plan-upgrade-dialog"
 import { ShieldLoader } from "@/components/shared/shield-loader"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
 import {
   ACTIVE_CASE_LIMIT_REACHED,
@@ -116,28 +123,42 @@ export default function CaseDetailsPage() {
           attachedLetterId={attachedLetterId ?? null}
           onBack={() => router.push("/cases")}
           headerTrailing={
-            <div className="flex max-w-[min(100vw-8rem,20rem)] flex-wrap items-center justify-end gap-2 sm:max-w-none">
-              <Button
-                size="sm"
-                className="h-10 shrink-0 rounded-xl border-0 bg-foreground px-3 text-xs font-semibold text-white shadow-sm hover:bg-foreground/90 sm:px-4 sm:text-sm"
-                asChild
-              >
-                <Link href="/ratings">Rate your experience</Link>
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={statusBusy}
-                onClick={() => void toggleArchive()}
-                className="h-10 shrink-0 rounded-xl border-border bg-muted px-3 text-sm font-semibold text-foreground hover:bg-card sm:h-11 sm:px-4 sm:text-base"
-              >
-                {statusBusy
-                  ? "…"
-                  : effectiveStatus === "active"
-                    ? "Archive"
-                    : "Restore"}
-              </Button>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label="Case options"
+                  className="size-11 shrink-0 rounded-full border-border bg-accent text-foreground"
+                >
+                  <EllipsisVertical className="size-5" aria-hidden />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-48">
+                <DropdownMenuItem asChild>
+                  <Link href="/ratings">
+                    <Star aria-hidden />
+                    Rate your experience
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  disabled={statusBusy}
+                  onSelect={() => void toggleArchive()}
+                >
+                  {effectiveStatus === "active" ? (
+                    <Archive aria-hidden />
+                  ) : (
+                    <ArchiveRestore aria-hidden />
+                  )}
+                  {statusBusy
+                    ? "Updating…"
+                    : effectiveStatus === "active"
+                      ? "Archive"
+                      : "Restore"}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           }
         />
         <PlanUpgradeDialog

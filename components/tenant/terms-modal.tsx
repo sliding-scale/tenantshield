@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { createPortal } from "react-dom"
 import { useMutation } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
@@ -38,9 +39,9 @@ export function TermsModal() {
     }
   }
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm sm:p-6">
-      <div className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-3xl border border-border bg-card p-5 shadow-2xl md:max-w-3xl md:rounded-[2rem] md:p-8">
+  return createPortal(
+    <div className="fixed inset-0 z-[120] flex items-end justify-center bg-black/60 p-4 backdrop-blur-sm sm:items-center sm:p-6">
+      <div className="flex max-h-[min(92svh,calc(100svh-2rem-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px)))] w-full max-w-lg flex-col overflow-hidden rounded-3xl border border-border bg-card p-5 shadow-2xl md:max-h-[90vh] md:max-w-3xl md:rounded-[2rem] md:p-8">
         <h2 className="mb-2 shrink-0 font-heading text-xl font-semibold text-foreground md:text-3xl">
           Terms &amp; Conditions
         </h2>
@@ -78,7 +79,8 @@ export function TermsModal() {
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 

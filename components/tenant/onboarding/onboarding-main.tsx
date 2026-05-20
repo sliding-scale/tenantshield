@@ -3,11 +3,14 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useMutation, useQuery } from "convex/react"
+import { Check, ChevronLeft } from "lucide-react"
 import { api } from "@/convex/_generated/api"
 import useCurrentUser from "@/app/hooks/useCurrentUser"
 import { ShieldLoader } from "@/components/shared/shield-loader"
+import { StatePickerField } from "@/components/shared/state-picker-field"
 import { Button } from "@/components/ui/button"
-import { US_STATES, US_STATE_NAMES } from "@/lib/constants/us-states"
+import { Card } from "@/components/ui/card"
+import { cn } from "@/lib/utils"
 
 type OptionKey = "option1" | "option2" | "option3" | "option4"
 
@@ -65,7 +68,6 @@ export default function OnboardingMain() {
       return
     }
 
-    // Keep the user on their in-progress step after data refreshes.
     setCurrentIndex((prev) => Math.min(prev, questions.length - 1))
   }, [questions])
 
@@ -159,58 +161,55 @@ export default function OnboardingMain() {
 
   if (needsStateGate) {
     return (
-      <main className="flex min-h-svh w-full flex-col md:min-h-svh">
-        <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-8 pt-8 sm:px-6 lg:max-w-lg lg:px-10 lg:pt-12">
-          <p className="text-sm font-semibold tracking-[0.2em] text-primary">Before we start</p>
-          <h1 className="mt-3 font-heading text-4xl leading-tight text-foreground lg:text-5xl">
-            Where are you renting?
-          </h1>
-          <p className="mt-3 text-lg text-muted-foreground">
-            Pick your state so we can tailor laws, letters, and case guidance to your location. You can
-            change this anytime in your profile.
-          </p>
+      <main className="flex min-h-svh w-full flex-col bg-background">
+        <div className="mx-auto flex w-full max-w-lg flex-1 flex-col justify-center px-4 pb-8 pt-8 sm:px-6 lg:px-8">
+          <Card className="gap-0 rounded-3xl border border-border py-0 shadow-none ring-0">
+            <div className="p-6 text-center sm:p-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                Before we start
+              </p>
+              <h1 className="mt-3 font-heading text-3xl font-semibold leading-tight text-foreground sm:text-4xl">
+                Where are you renting?
+              </h1>
+              <p className="mx-auto mt-3 max-w-md text-base leading-relaxed text-muted-foreground sm:text-lg">
+                Pick your state so we can tailor laws, letters, and case guidance to your
+                location. You can change this anytime in your profile.
+              </p>
 
-          <div className="mt-8 flex flex-col gap-4">
-            <label htmlFor="onboarding-state" className="text-sm font-medium text-foreground">
-              Your state
-            </label>
-            <select
-              id="onboarding-state"
-              value={selectedState}
-              onChange={(e) => {
-                setSelectedState(e.target.value)
-                setStateGateError(null)
-              }}
-              className="h-14 w-full appearance-none rounded-2xl border border-border bg-background px-5 text-lg text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <option value="">Select your state…</option>
-              {US_STATES.map((abbr) => (
-                <option key={abbr} value={abbr}>
-                  {US_STATE_NAMES[abbr]} ({abbr})
-                </option>
-              ))}
-            </select>
-            {stateGateError ? (
-              <p className="text-sm font-medium text-destructive">{stateGateError}</p>
-            ) : null}
+              <div className="mx-auto mt-8 flex w-full max-w-sm flex-col items-center gap-4">
+                <StatePickerField
+                  className="w-full"
+                  showLabel={false}
+                  state={selectedState}
+                  onStateChange={(value) => {
+                    setSelectedState(value)
+                    setStateGateError(null)
+                  }}
+                />
+                {stateGateError ? (
+                  <p className="text-sm font-medium text-destructive">{stateGateError}</p>
+                ) : null}
 
-            <Button
-              type="button"
-              onClick={() => void handleStateContinue()}
-              disabled={isSavingState}
-              className="mt-2 h-14 w-full rounded-2xl border border-border bg-card px-6 text-lg font-semibold text-foreground hover:bg-accent disabled:opacity-60 lg:h-16"
-            >
-              {isSavingState ? "Saving…" : "Continue"}
-            </Button>
-            <button
-              type="button"
-              onClick={handleStateSkip}
-              disabled={isSavingState}
-              className="text-center text-sm font-medium text-muted-foreground underline underline-offset-4 hover:text-foreground disabled:opacity-50"
-            >
-              Skip for now
-            </button>
-          </div>
+                <Button
+                  type="button"
+                  onClick={() => void handleStateContinue()}
+                  disabled={isSavingState}
+                  className="mt-2 h-12 w-full rounded-full text-base font-semibold sm:h-14"
+                >
+                  {isSavingState ? "Saving…" : "Continue"}
+                </Button>
+              </div>
+            </div>
+          </Card>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={handleStateSkip}
+            disabled={isSavingState}
+            className="mx-auto mt-4 h-auto py-2 text-sm font-medium text-muted-foreground"
+          >
+            Skip for now
+          </Button>
         </div>
       </main>
     )
@@ -221,11 +220,13 @@ export default function OnboardingMain() {
   }
 
   return (
-    <main className="flex min-h-svh w-full flex-col md:min-h-svh">
+    <main className="flex min-h-svh w-full flex-col bg-background">
       <div className="flex w-full items-center gap-3 px-4 pb-4 pt-5 sm:px-6 lg:gap-4 lg:px-10">
-        <button
+        <Button
           type="button"
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border text-xl leading-none disabled:cursor-not-allowed disabled:opacity-50"
+          variant="outline"
+          size="icon"
+          className="size-10 shrink-0 rounded-full"
           onClick={() => {
             if (!canGoBack) return
             setCurrentIndex((prev) => Math.max(0, prev - 1))
@@ -233,86 +234,91 @@ export default function OnboardingMain() {
           disabled={!canGoBack}
           aria-label="Go back"
         >
-          ←
-        </button>
-        <div className="h-2.5 min-w-0 flex-1 rounded-full bg-accent lg:h-3">
+          <ChevronLeft className="size-5" aria-hidden />
+        </Button>
+        <div className="h-2 min-w-0 flex-1 rounded-full bg-muted">
           <div
             className="h-full rounded-full bg-primary transition-[width] duration-300 ease-out"
             style={{ width: `${Math.max(2, progress * 100)}%` }}
           />
         </div>
-        <button
+        <Button
           type="button"
+          variant="ghost"
           onClick={handleSkip}
           disabled={isSaving || isSkipping}
-          className="hidden shrink-0 text-sm font-medium text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground disabled:opacity-50 lg:inline"
+          className="hidden shrink-0 text-sm font-medium text-muted-foreground lg:inline-flex"
         >
           Skip for now
-        </button>
+        </Button>
       </div>
-      <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-6 sm:px-6 lg:mx-0 lg:max-w-6xl lg:px-10">
-      <p className="text-sm font-semibold tracking-[0.2em] text-primary">
-        QUESTION {currentIndex + 1} OF {totalQuestions}
-      </p>
-      <h1 className="mt-3 font-heading text-4xl leading-tight text-foreground lg:text-5xl lg:whitespace-pre-wrap">
-        {currentQuestion.title}
-      </h1>
-      {currentQuestion.description ? (
-        <p className="mt-3 text-xl text-muted-foreground lg:max-w-2xl">{currentQuestion.description}</p>
-      ) : null}
 
-      <div className="mt-8 flex w-full max-w-md flex-1 flex-col lg:max-w-6xl">
-        <div className="flex w-full flex-col gap-3">
-        {optionOrder.map((optionKey) => {
-          const isSelected = currentSelection === optionKey
-          const label = currentQuestion[optionKey]
-          return (
-            <button
-              key={optionKey}
+      <div className="mx-auto flex w-full max-w-lg flex-1 flex-col px-4 pb-6 sm:px-6 lg:max-w-2xl lg:px-10">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          Question {currentIndex + 1} of {totalQuestions}
+        </p>
+        <h1 className="mt-3 font-heading text-3xl font-semibold leading-tight text-foreground sm:text-4xl lg:whitespace-pre-wrap">
+          {currentQuestion.title}
+        </h1>
+        {currentQuestion.description ? (
+          <p className="mt-3 text-lg leading-relaxed text-muted-foreground lg:max-w-2xl">
+            {currentQuestion.description}
+          </p>
+        ) : null}
+
+        <div className="mt-8 flex w-full flex-1 flex-col">
+          <div className="flex w-full flex-col gap-3">
+            {optionOrder.map((optionKey) => {
+              const isSelected = currentSelection === optionKey
+              const label = currentQuestion[optionKey]
+              return (
+                <button
+                  key={optionKey}
+                  type="button"
+                  onClick={() => handleSelect(optionKey)}
+                  className={cn(
+                    "flex min-h-14 items-center gap-3 rounded-2xl border px-4 py-3 text-left text-base transition sm:min-h-16 sm:text-lg",
+                    isSelected
+                      ? "border-primary/30 bg-card text-foreground ring-1 ring-primary/20"
+                      : "border-border bg-card text-foreground hover:bg-accent",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "inline-flex size-7 shrink-0 items-center justify-center rounded-full border",
+                      isSelected
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-background",
+                    )}
+                  >
+                    {isSelected ? <Check className="size-4" aria-hidden /> : null}
+                  </span>
+                  <span>{label}</span>
+                </button>
+              )
+            })}
+          </div>
+
+          <div className="flex w-full flex-col gap-3 pt-8">
+            <Button
               type="button"
-              onClick={() => handleSelect(optionKey)}
-              className={[
-                "flex min-h-16 items-center gap-3 rounded-2xl border px-4 text-left text-xl transition",
-                isSelected
-                  ? "border-border bg-card text-foreground"
-                  : "border-border bg-background text-foreground",
-              ].join(" ")}
+              onClick={handleContinue}
+              disabled={!canContinue}
+              className="h-12 w-full rounded-2xl text-base font-semibold sm:h-14 sm:text-lg"
             >
-              <span
-                className={[
-                  "inline-flex h-7 w-7 items-center justify-center rounded-full border",
-                  isSelected
-                    ? "border-foreground bg-foreground text-background"
-                    : "border-border bg-background",
-                ].join(" ")}
-              >
-                {isSelected ? "✓" : ""}
-              </span>
-              <span>{label}</span>
-            </button>
-          )
-        })}
+              {currentIndex >= totalQuestions - 1 ? "See My Impact Score" : "Continue"}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handleSkip}
+              disabled={isSaving || isSkipping}
+              className="h-auto py-2 text-sm font-medium text-muted-foreground lg:hidden"
+            >
+              Skip for now
+            </Button>
+          </div>
         </div>
-
-        <div className="flex w-full flex-col gap-4 pt-8">
-          <Button
-            type="button"
-            onClick={handleContinue}
-            disabled={!canContinue}
-            className="h-14 w-full rounded-2xl border border-border bg-card px-6 text-lg font-semibold text-foreground hover:bg-accent disabled:border-border disabled:bg-muted disabled:text-muted-foreground lg:h-16 lg:text-xl"
-          >
-            {currentIndex >= totalQuestions - 1 ? "See My Impact Score" : "Continue"}
-          </Button>
-          <button
-            type="button"
-            onClick={handleSkip}
-            disabled={isSaving || isSkipping}
-            className="text-center text-sm font-medium text-muted-foreground underline underline-offset-4 disabled:opacity-50 lg:hidden"
-          >
-            Skip for now
-          </button>
-        </div>
-      </div>
       </div>
     </main>
   )

@@ -98,6 +98,7 @@ type LetterResultViewProps = {
   onEditLetter?: () => void;
   headerBeforeCopy?: ReactNode;
   caseId?: Id<'cases'>;
+  propertyAddress?: string;
 };
 
 export function LetterResultView({
@@ -115,12 +116,13 @@ export function LetterResultView({
   onEditLetter,
   headerBeforeCopy,
   caseId,
+  propertyAddress,
 }: LetterResultViewProps) {
   const blurLetter = shouldBlurFreeLetterPreview(createdUnderPlan);
   const fullText = letterBodyOverride ?? buildFullLetterText(letterData);
   const fileBaseName = toSafeFileName(letterData.header.subjectLine || letterData.metadata.letterTitle || letterType);
   const subjectLine = letterData.header.subjectLine || letterData.metadata.letterTitle || 'Demand Letter';
-  const titleText = heroTitle ?? letterDisplayTitle(subjectLine);
+  const titleText = heroTitle ?? letterDisplayTitle(subjectLine, 'Demand Letter', propertyAddress);
 
   const onDownloadDoc = () => {
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8" /></head><body><pre style="white-space: pre-wrap; font-family: Arial, sans-serif; font-size: 12pt; line-height: 1.5;">${escapeHtml(

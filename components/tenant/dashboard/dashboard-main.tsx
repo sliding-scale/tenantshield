@@ -7,6 +7,7 @@ import {
   MessageSquareShare,
   PlusCircle,
   Scale,
+  Shield,
   Sparkles,
   Star,
   UserRound,
@@ -94,6 +95,9 @@ export default function TenantDashboardMain() {
   const userName = clerkUser?.firstName || convexUser.name || 'there';
   const plan = resolvePlanId(planUsage?.plan ?? convexUser.plan);
   const showProBadge = isPaidPlan(plan);
+  const activeCases = counts?.activeCases ?? 0;
+  const letters = counts?.letters ?? 0;
+  const hasProtectionActivity = activeCases > 0 || letters > 0;
   const protectionIndex = Math.round(counts?.protectionIndex ?? 0);
   const protectionLabel = caseStrengthLabel(protectionIndex).toUpperCase();
   const protectionAngle = Math.max(0, Math.min(360, (protectionIndex / 100) * 360));
@@ -136,18 +140,26 @@ export default function TenantDashboardMain() {
                 <div className="mt-4 grid grid-cols-[1fr_auto] items-start gap-4 sm:flex sm:flex-row sm:items-end sm:justify-between lg:items-center">
                   <div className="min-w-0 max-w-[14.5rem] sm:max-w-[20rem] lg:max-w-[52rem]">
                     <h2 className="font-heading text-[1.3rem] font-semibold leading-[1.06] text-background sm:text-[2.2rem] lg:text-[2.8rem] lg:leading-[0.98]">
-                      Your case strength across all active disputes.
+                      {hasProtectionActivity
+                        ? 'Your case strength across all active disputes.'
+                        : 'Your protection profile starts here.'}
                     </h2>
-                    <div className="col-span-2 mt-5 flex gap-3 sm:mt-4">
-                      <StatPill value={String(counts?.activeCases ?? 0)} label="Cases" />
-                      <StatPill value={String(counts?.letters ?? 0)} label="Letters" />
-                    </div>
+                    {hasProtectionActivity ? (
+                      <div className="col-span-2 mt-5 flex gap-3 sm:mt-4">
+                        <StatPill value={String(activeCases)} label="Cases" />
+                        <StatPill value={String(letters)} label="Letters" />
+                      </div>
+                    ) : null}
                   </div>
-                  <ProtectionGauge
-                    protectionIndex={protectionIndex}
-                    protectionLabel={protectionLabel}
-                    protectionAngle={protectionAngle}
-                  />
+                  {hasProtectionActivity ? (
+                    <ProtectionGauge
+                      protectionIndex={protectionIndex}
+                      protectionLabel={protectionLabel}
+                      protectionAngle={protectionAngle}
+                    />
+                  ) : (
+                    <EmptyProtectionGauge />
+                  )}
                 </div>
               </div>
             </Card>
@@ -225,6 +237,25 @@ function StatPill({ value, label }: { value: string; label: string }) {
   );
 }
 
+function EmptyProtectionGauge() {
+  return (
+    <div
+      className="grid size-[8.5rem] shrink-0 place-items-center self-start rounded-full border-2 border-dashed border-background/25 sm:size-[14rem] lg:size-[16.5rem]"
+      role="img"
+      aria-label="No protection activity yet"
+    >
+      <div className="flex max-w-[6rem] flex-col items-center gap-2 text-center sm:max-w-[8rem]">
+        <span className="flex size-10 items-center justify-center rounded-full bg-background/10 sm:size-12">
+          <Shield className="size-5 text-primary sm:size-6" aria-hidden />
+        </span>
+        <span className="font-heading text-xs font-semibold uppercase leading-tight tracking-[0.12em] text-background/75 sm:text-sm">
+          Get started
+        </span>
+      </div>
+    </div>
+  );
+}
+
 function ProtectionGauge({
   protectionIndex,
   protectionLabel,
@@ -243,8 +274,11 @@ function ProtectionGauge({
       role="img"
       aria-label={`Protection index ${protectionIndex}, ${protectionLabel.toLowerCase()}`}
     >
-      <div className="grid size-[7rem] place-items-center rounded-full bg-foreground sm:size-[12.1rem] lg:size-[14.25rem]">
-        <span className="max-w-[5rem] text-center font-heading text-sm font-semibold uppercase leading-tight tracking-[0.12em] text-background sm:max-w-[7rem] sm:text-lg lg:text-xl">
+      <div className="flex size-[7rem] flex-col items-center justify-center rounded-full bg-foreground sm:size-[12.1rem] lg:size-[14.25rem]">
+        <span className="font-heading text-4xl font-semibold leading-none text-background sm:text-6xl lg:text-7xl">
+          {protectionIndex}
+        </span>
+        <span className="mt-1.5 max-w-[5rem] text-center font-heading text-[0.65rem] font-semibold uppercase leading-tight tracking-[0.12em] text-primary sm:mt-2 sm:max-w-[7rem] sm:text-xs lg:text-sm">
           {protectionLabel}
         </span>
       </div>

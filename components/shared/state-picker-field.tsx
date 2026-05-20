@@ -14,7 +14,7 @@ import { US_STATES, US_STATE_NAMES, type USStateAbbr } from "@/lib/constants/us-
 import { cn } from "@/lib/utils"
 
 const fieldClass =
-  "h-11 w-full rounded-2xl border border-border bg-background px-4 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+  "h-11 w-full rounded-2xl border border-border bg-background px-4 text-left text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 
 type StatePickerFieldProps = {
   state: string
@@ -74,9 +74,9 @@ export function StatePickerField({
             <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent text-foreground">
               <MapPin className="size-4" aria-hidden />
             </span>
-            <div className="min-w-0">
+            <div className="min-w-0 text-left">
               <p className="truncate text-sm font-semibold text-foreground">{selectedStateName}</p>
-              <p className="text-xs text-muted-foreground">{state}</p>
+              <p className="text-left text-xs text-muted-foreground">{state}</p>
             </div>
           </div>
           <Button

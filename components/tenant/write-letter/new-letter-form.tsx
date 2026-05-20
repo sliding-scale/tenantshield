@@ -204,7 +204,7 @@ export function NewLetterForm({
                         className={cn(
                           "inline-flex h-9 items-center gap-1.5 rounded-full border px-3 text-xs font-medium transition sm:text-sm",
                           active
-                            ? "border-border bg-muted text-foreground shadow-sm ring-1 ring-border/80 font-semibold"
+                            ? "border-primary bg-primary font-semibold text-primary-foreground shadow-sm"
                             : "border-border bg-background text-foreground hover:bg-accent",
                         )}
                       >

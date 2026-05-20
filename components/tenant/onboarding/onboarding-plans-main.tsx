@@ -82,8 +82,8 @@ function PlanOptionCard({
         isFeatured ? "max-lg:max-w-md max-lg:mx-auto" : "p-6 lg:p-7",
         isSelecting && "cursor-wait opacity-80",
         selected
-          ? "border-primary/40 bg-[#2f2a23] text-white shadow-lg ring-1 ring-primary/25"
-          : "border-white/10 bg-[#2f2a23] text-white shadow-sm hover:bg-[#362f27]",
+          ? "border-primary/40 bg-card text-foreground shadow-lg ring-1 ring-primary/25"
+          : "border-border bg-card text-foreground shadow-sm hover:border-primary/30 hover:bg-accent",
         isCurrentPlan && !selected && "ring-1 ring-primary/20",
       )}
     >
@@ -105,7 +105,7 @@ function PlanOptionCard({
           <span
             className={cn(
               "text-xs font-bold uppercase tracking-[0.15em]",
-              selected ? "text-primary" : "text-white/60",
+              selected ? "text-primary" : "text-muted-foreground",
             )}
           >
             {option.headerLabel}
@@ -127,7 +127,7 @@ function PlanOptionCard({
         {!isFeatured ? (
           <ul className="mt-4 hidden min-h-0 flex-1 flex-col justify-center gap-2.5 overflow-hidden lg:flex">
             {option.features.map((feature) => (
-              <li key={feature} className="flex items-start gap-2.5 text-sm leading-snug text-white/80">
+              <li key={feature} className="flex items-start gap-2.5 text-sm leading-snug text-muted-foreground">
                 <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                 <span>{feature}</span>
               </li>
@@ -139,19 +139,19 @@ function PlanOptionCard({
         <div className="flex items-baseline gap-1">
           <span
             className={cn(
-              "font-heading font-semibold tracking-tight text-white",
+              "font-heading font-semibold tracking-tight text-foreground",
               isFeatured ? "text-5xl" : "text-4xl lg:text-[2.75rem]",
             )}
           >
             {option.price}
           </span>
-          <span className={cn("text-white/65", isFeatured ? "text-xl" : "text-lg")}>
+          <span className={cn("text-muted-foreground", isFeatured ? "text-xl" : "text-lg")}>
             {option.suffix}
           </span>
         </div>
         <p
           className={cn(
-            "text-sm text-white/70",
+            "text-sm text-muted-foreground",
             isFeatured ? "mt-3 text-center" : "mt-2",
           )}
         >
@@ -163,7 +163,7 @@ function PlanOptionCard({
             {option.features.map((feature) => (
               <div key={feature} className="flex items-start gap-3">
                 <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                <span className="text-[0.95rem] text-white">{feature}</span>
+                <span className="text-[0.95rem] text-foreground">{feature}</span>
               </div>
             ))}
           </div>
@@ -192,7 +192,7 @@ function CheckoutFooter({
   return (
     <div
       className={cn(
-        "rounded-[2rem] border border-white/10 bg-[#2f2a23] p-6 text-white shadow-sm",
+        "rounded-[2rem] border border-border bg-card p-6 text-foreground shadow-sm",
         className,
       )}
     >
@@ -329,23 +329,25 @@ export function OnboardingPlansMain() {
 
   return (
     <main className="min-h-svh w-full bg-background text-foreground">
-      <div
-        className="relative overflow-hidden border-b border-border bg-cover bg-center px-6 pb-10 pt-16 md:px-10 lg:px-12 lg:pb-14 lg:pt-20"
-        style={{
-          backgroundImage: `linear-gradient(to bottom, rgba(15,15,15,0.32), rgba(15,15,15,0.9)), url('${HERO_BG_URL}')`,
-        }}
-      >
+      <div className="relative overflow-hidden border-b border-border">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url('${HERO_BG_URL}')` }}
+          aria-hidden
+        />
+        <div className="absolute inset-0 bg-foreground/80" aria-hidden />
+        <div className="relative px-6 pb-10 pt-16 md:px-10 lg:px-12 lg:pb-14 lg:pt-20">
         <div className="mx-auto grid w-full max-w-7xl gap-8 lg:grid-cols-[1fr_1.15fr] lg:items-end lg:gap-14">
           <div className="max-w-2xl">
-            <p className="mb-2 text-xs font-bold uppercase tracking-widest text-primary">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-primary">
               Unlock TenantShield
             </p>
-            <h1 className="font-heading text-[3.25rem] font-semibold leading-[1.02] text-white text-balance sm:text-6xl lg:text-6xl xl:text-7xl">
+            <h1 className="font-heading text-[3.25rem] font-semibold leading-[1.02] text-background text-balance sm:text-6xl lg:text-6xl xl:text-7xl">
               Pick your
               <br />
               protection.
             </h1>
-            <p className="mt-4 max-w-xl text-lg leading-snug text-white/90 lg:text-xl">
+            <p className="mt-4 max-w-xl text-lg leading-snug text-background/90 lg:text-xl">
               Full access unlocks the moment you subscribe. Cancel anytime.
             </p>
           </div>
@@ -356,11 +358,11 @@ export function OnboardingPlansMain() {
               return (
                 <div
                   key={item.title}
-                  className="rounded-2xl border border-white/10 bg-[#2f2a23]/90 p-4 text-white shadow-sm backdrop-blur-sm"
+                  className="rounded-2xl border border-background/15 bg-background/10 p-4 text-background shadow-sm backdrop-blur-sm"
                 >
                   <Icon className="h-5 w-5 text-primary" />
                   <p className="mt-3 text-sm font-semibold">{item.title}</p>
-                  <p className="mt-1 text-sm leading-relaxed text-white/75">
+                  <p className="mt-1 text-sm leading-relaxed text-background/75">
                     {item.description}
                   </p>
                 </div>
@@ -368,22 +370,23 @@ export function OnboardingPlansMain() {
             })}
           </div>
         </div>
+        </div>
       </div>
 
       <div className="mx-auto w-full max-w-7xl px-5 py-8 md:px-8 lg:px-12 lg:py-12">
         <div className="lg:grid lg:grid-cols-[minmax(0,22rem)_1fr] lg:items-stretch lg:gap-10 xl:grid-cols-[minmax(0,24rem)_1fr] xl:gap-12">
           <aside className="max-lg:mx-auto max-lg:max-w-md lg:sticky lg:top-8">
-            <div className="rounded-[2rem] border border-white/10 bg-[#2f2a23] p-6 text-white shadow-sm lg:p-8">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
+            <div className="rounded-[2rem] border border-border bg-card p-6 text-foreground shadow-sm lg:p-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 Current selection
               </p>
-              <h2 className="mt-3 font-heading text-2xl font-semibold text-white sm:text-3xl">
+              <h2 className="mt-3 font-heading text-2xl font-semibold sm:text-3xl">
                 {selected.title}
               </h2>
-              <p className="mt-2 text-sm leading-relaxed text-white/75">{selected.description}</p>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{selected.description}</p>
 
-              <div className="mt-6 rounded-3xl border border-white/10 bg-white p-5 text-foreground shadow-sm">
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
+              <div className="mt-6 rounded-3xl border border-border bg-muted/30 p-5 text-foreground shadow-sm">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                   {selected.kicker}
                 </p>
                 <div className="mt-3 flex items-baseline gap-2">
@@ -401,10 +404,10 @@ export function OnboardingPlansMain() {
                 {selected.features.map((feature) => (
                   <div
                     key={feature}
-                    className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/10 px-4 py-3"
+                    className="flex items-start gap-3 rounded-2xl border border-border bg-muted/30 px-4 py-3"
                   >
                     <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                    <span className="text-sm leading-relaxed text-white">{feature}</span>
+                    <span className="text-sm leading-relaxed text-foreground">{feature}</span>
                   </div>
                 ))}
               </div>
@@ -422,7 +425,7 @@ export function OnboardingPlansMain() {
 
           <section className="mt-8 flex flex-col space-y-4 max-lg:mx-auto max-lg:max-w-md lg:mt-0 lg:min-h-0 lg:flex-1 lg:space-y-5">
             <div className="hidden lg:block">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 Compare plans
               </p>
               <p className="mt-2 text-sm text-muted-foreground">
