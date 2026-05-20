@@ -205,6 +205,12 @@ export function PrivacyPolicyContent() {
             <br />
             Attn: Privacy Officer
             <br />
+            1000 Brickell Ave
+            <br />
+            Ste 715 PMB 1918
+            <br />
+            Miami, FL 33131
+            <br />
             Email: <SupportEmail />
             <br />
             Website:{" "}
@@ -1169,6 +1175,12 @@ export function PrivacyPolicyContent() {
               Response time: Within 30 days
               <br />
               Mailing: TenantShield, Inc., Attn: Privacy Officer
+              <br />
+              1000 Brickell Ave
+              <br />
+              Ste 715 PMB 1918
+              <br />
+              Miami, FL 33131
             </p>
           </div>
         </PolicySection>
