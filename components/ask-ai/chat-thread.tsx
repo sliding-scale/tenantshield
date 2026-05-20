@@ -251,11 +251,17 @@ function ChatThreadLoaded({
   }
 
   return (
+<<<<<<< HEAD
     <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
       <div
         ref={messageListRef}
-        className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-6 pb-4 max-md:pb-[calc(5.75rem+env(safe-area-inset-bottom,0px))] md:px-6 md:px-8"
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-6 pb-4 max-md:pb-[calc(5.75rem+env(safe-area-inset-bottom,0px))] md:px-8"
       >
+=======
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-4 md:px-6">
+>>>>>>> c1b356a6b729e07b614112749a0cda5244f518ee
           {messages.length === 0 ? (
             <AskAiEmptyState
               selectedStateCode={selectedStateCode}
@@ -363,11 +369,30 @@ function ChatThreadLoaded({
         </div>
       ) : null}
 
+<<<<<<< HEAD
       <form
         onSubmit={handleSubmit}
-        className="max-md:fixed max-md:inset-x-0 max-md:bottom-0 max-md:z-30 shrink-0 border-t border-border bg-background/95 px-4 pt-4 pb-[max(1rem,calc(0.75rem+env(safe-area-inset-bottom,0px)))] backdrop-blur-md md:relative md:z-0 md:px-6 md:py-4 md:pb-4"
+        className="border-cream-border bg-cream-page/95 max-md:fixed max-md:inset-x-0 max-md:bottom-0 max-md:z-30 shrink-0 border-t px-4 pt-4 pb-[max(1rem,calc(0.75rem+env(safe-area-inset-bottom,0px)))] backdrop-blur-md dark:bg-background/95 md:relative md:z-0 md:px-8 md:pb-4"
       >
-        <div className="mx-auto flex max-w-3xl items-end gap-2">
+          <div className="mx-auto flex max-w-3xl items-center gap-2">
+=======
+        {error ? (
+          <div className="mx-auto mb-2 max-w-3xl px-4 md:px-8">
+            <ChatRetryBanner
+              onRetry={() => void handleRetryLast()}
+              retrying={retrying}
+              onDismiss={() => clearError()}
+              message={error.message}
+            />
+          </div>
+        ) : null}
+
+        <form
+          onSubmit={handleSubmit}
+          className="mt-auto shrink-0 border-t border-border bg-background px-4 py-3 md:px-6 md:py-4"
+        >
+          <div className="mx-auto flex max-w-lg items-end gap-2">
+>>>>>>> c1b356a6b729e07b614112749a0cda5244f518ee
             <textarea
               value={draft}
               onChange={(e) => setDraft(e.target.value)}

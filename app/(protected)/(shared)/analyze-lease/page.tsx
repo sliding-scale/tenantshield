@@ -6,8 +6,8 @@ import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { ChevronLeft, Upload, FileText, X } from "lucide-react";
-import { GavelLoader } from "@/components/shared/gavel-loader";
-import { ShieldLoader } from "@/components/shared/shield-loader";
+import { GavelLoader, GavelLoaderOverlay } from "@/components/shared/gavel-loader";
+import { ShieldLoaderOverlay } from "@/components/shared/shield-loader";
 import { StatePickerField } from "@/components/shared/state-picker-field";
 import { Button } from "@/components/ui/button";
 import { US_STATE_NAMES, type USStateAbbr } from "@/lib/constants/us-states";
@@ -25,12 +25,68 @@ import {
   shouldPromptFreePlanUpgrade,
 } from "@/lib/plans/plan-access";
 import { getLeaseAnalysisLimit } from "@/lib/plans/plans";
+
+type AnalyzeLeaseError = { title: string; body: string };
+
+/**
+ * Strip Convex client wrapper noise. Client actions use
+ * `[CONVEX A(path)] ${errorMessage}\\n  Called by client` (see createHybridErrorStacktrace
+ * in convex); `errorMessage` may itself include `[Request ID…] Server Error Uncaught Error:`.
+ */
+function unwrapConvexClientError(message: string): string {
+  let s = message.trim();
+  s = s.replace(/\s+Called by client\s*$/i, "").trim();
+  s = s.replace(/^\[CONVEX [^\]]+\]\s*/i, "").trim();
+  s = s.replace(/^\[Request ID:[^\]]+\]\s*Server Error\s*/i, "").trim();
+  s = s.replace(/^Uncaught Error:\s*/i, "").trim();
+  const uncaught = /Uncaught Error:\s*/i;
+  const parts = s.split(uncaught);
+  if (parts.length > 1) {
+    s = (parts[parts.length - 1] ?? s).trim();
+  }
+  s = s.replace(
+    /\s*Accepted files:\s*lease agreements[\s\S]*?lease renewals\.?$/i,
+    "",
+  ).trim();
+  return s;
+}
+
+function formatLeaseCheckError(message: string): AnalyzeLeaseError {
+  const normalized = message.toLowerCase();
+
+  if (normalized.includes("does not look like a lease")) {
+    const body = message.trim();
+    return {
+      title: "This doesn’t look like a lease",
+      body,
+    };
+  }
+
+  if (normalized.includes("could not extract any text")) {
+    return {
+      title: "We could not read this file",
+      body: "Please upload a text-based PDF or a plain text file. Scanned images may not work.",
+    };
+  }
+
+  return {
+    title: "Lease analysis failed",
+    body: message,
+  };
+}
+import { PlanUpgradeDialog } from "@/components/tenant/free-plan-upgrade-dialog";
+import useCurrentUser from "@/app/hooks/useCurrentUser";
+import {
+  hasReachedLeaseAnalysisLimit,
+  LEASE_ANALYSIS_LIMIT_REACHED,
+  resolvePlanId,
+  shouldPromptFreePlanUpgrade,
+} from "@/lib/plans/plan-access";
+import { getLeaseAnalysisLimit } from "@/lib/plans/plans";
 import {
   resolveAnalyzeLeaseError,
   type AnalyzeLeaseError,
 } from "@/lib/lease/analyze-lease-errors";
-
-type ProcessingStep = "upload" | "extract" | "analyze" | null;
 
 export default function AnalyzeLeasePage() {
   const router = useRouter();
@@ -42,20 +98,22 @@ export default function AnalyzeLeasePage() {
 
   const [file, setFile] = useState<File | null>(null);
   const { state, setState } = usePrefilledUSState();
-  const [processingStep, setProcessingStep] = useState<ProcessingStep>(null);
+  const [stateSearch, setStateSearch] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<AnalyzeLeaseError | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [leaseId, setLeaseId] = useState<Id<"leases"> | null>(null);
-  const [upgradeOpen, setUpgradeOpen] = useState(false);
-  const [upgradeMode, setUpgradeMode] = useState<"free" | "limit">("free");
+  const [upgradeOpen, setUpgradeOpen] = useState(false)
+  const [upgradeMode, setUpgradeMode] = useState<"free" | "limit">("free")
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { convexUser } = useCurrentUser();
-  const counts = useQuery(api.dashboard.queries.countsForCurrentUser, {});
-  const planUsage = useQuery(api.planUsage.queries.current, {});
-  const plan = resolvePlanId(planUsage?.plan ?? convexUser?.plan);
-  const billingPeriod = planUsage?.planType ?? "monthly";
-  const usedLeaseAnalyses = planUsage?.usedLeaseAnalyses ?? 0;
-  const leaseAnalysisLimit = getLeaseAnalysisLimit(plan, billingPeriod);
+  const { convexUser } = useCurrentUser()
+  const counts = useQuery(api.dashboard.queries.countsForCurrentUser, {})
+  const planUsage = useQuery(api.planUsage.queries.current, {})
+  const plan = resolvePlanId(planUsage?.plan ?? convexUser?.plan)
+  const billingPeriod = planUsage?.planType ?? "monthly"
+  const usedLeaseAnalyses = planUsage?.usedLeaseAnalyses ?? 0
+  const leaseAnalysisLimit = getLeaseAnalysisLimit(plan, billingPeriod)
 
   const lease = useQuery(
     api.lease.queries.getLeaseForCurrentUser,
@@ -112,15 +170,15 @@ export default function AnalyzeLeasePage() {
     if (!canSubmit || !file) return;
 
     if (shouldPromptFreePlanUpgrade(plan, counts?.leases ?? 0)) {
-      setUpgradeMode("free");
-      setUpgradeOpen(true);
-      return;
+      setUpgradeMode("free")
+      setUpgradeOpen(true)
+      return
     }
 
     if (hasReachedLeaseAnalysisLimit(plan, billingPeriod, usedLeaseAnalyses)) {
-      setUpgradeMode("limit");
-      setUpgradeOpen(true);
-      return;
+      setUpgradeMode("limit")
+      setUpgradeOpen(true)
+      return
     }
 
     setError(null);
@@ -142,7 +200,7 @@ export default function AnalyzeLeasePage() {
       setProcessingStep("extract");
 
       const { leaseId: newLeaseId } = await extractLeaseText({
-        storageId: storageId as Id<"_storage">,
+        storageId: storageId as any,
         state,
         fileName: file.name,
       });
@@ -153,9 +211,8 @@ export default function AnalyzeLeasePage() {
       await analyzeLeaseById({ leaseId: newLeaseId });
     } catch (e) {
       if (e instanceof Error && e.message === LEASE_ANALYSIS_LIMIT_REACHED) {
-        setUpgradeMode("limit");
-        setUpgradeOpen(true);
-        return;
+        setUpgradeOpen(true)
+        return
       }
       setError(resolveAnalyzeLeaseError(e));
     } finally {
@@ -164,14 +221,14 @@ export default function AnalyzeLeasePage() {
   };
 
   return (
-    <main className="flex min-h-[100dvh] flex-col bg-cream-page pb-28 pt-5 md:min-h-[calc(100vh-4rem)] md:pb-10 md:pt-6 lg:pt-8">
+    <main className="flex min-h-svh flex-col bg-background pb-28 pt-5 md:min-h-svh md:pb-10 md:pt-6 lg:pt-8">
       <div className="flex w-full flex-1 flex-col px-4 sm:px-6 md:px-10 lg:px-14 xl:px-16">
         <header className="mb-5 flex shrink-0 items-center justify-between md:hidden">
           <Button
             type="button"
             variant="outline"
             onClick={() => router.back()}
-            className="h-11 w-11 rounded-full border-border bg-cream-surface-soft p-0 text-foreground"
+            className="h-11 w-11 rounded-full border-border bg-accent p-0 text-foreground"
             aria-label="Back"
           >
             <ChevronLeft className="size-5" />
@@ -182,15 +239,16 @@ export default function AnalyzeLeasePage() {
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary md:text-sm">
               AI &middot; Red Flag Detector
             </p>
-            <h2 className="mt-3 max-w-5xl font-heading text-4xl font-semibold leading-[0.95] text-ink-warm text-balance sm:text-5xl md:text-6xl lg:text-7xl xl:max-w-6xl">
+            <h2 className="mt-3 max-w-5xl font-heading text-3xl font-semibold leading-tight text-foreground text-balance sm:text-4xl md:text-5xl lg:text-6xl xl:max-w-6xl">
               Upload your lease. <br className="hidden sm:block" />
               We&rsquo;ll find the traps.
             </h2>
-            <p className="mt-4 max-w-3xl text-lg text-ink-warm-muted text-pretty sm:text-xl lg:max-w-4xl lg:text-2xl">
+            <p className="mt-3 max-w-3xl text-base text-muted-foreground text-pretty sm:text-lg lg:max-w-4xl lg:text-xl">
               Our AI reviews every clause against your state&rsquo;s tenant law
               and flags illegal or one-sided terms.
             </p>
 
+            {/* Upload area */}
             <div className="mx-auto mt-8 w-full max-w-3xl md:mt-10 lg:mt-12">
               <div
                 onClick={() => fileInputRef.current?.click()}
@@ -203,10 +261,8 @@ export default function AnalyzeLeasePage() {
                 className={[
                   "group flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-12 transition-colors md:rounded-3xl md:py-16",
                   isDragOver
-                    ? "border-primary bg-primary/5"
-                    : file
-                      ? "border-cream-border bg-cream-surface-soft"
-                      : "border-cream-border bg-background hover:border-primary/50 hover:bg-cream-surface-soft",
+                    ? "border-primary bg-card"
+                    : "border-border bg-card hover:border-primary/50",
                 ].join(" ")}
               >
                 <input
@@ -259,10 +315,12 @@ export default function AnalyzeLeasePage() {
               </div>
             </div>
 
+            {/* State selector */}
             <div className="mx-auto mt-8 w-full max-w-3xl md:mt-10">
               <StatePickerField state={state} onStateChange={setState} />
             </div>
 
+            {/* Error */}
             {error ? (
               <div
                 className="mx-auto mt-4 max-w-xl rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm shadow-sm"
@@ -274,8 +332,8 @@ export default function AnalyzeLeasePage() {
                     {error.body}
                   </p>
                 ) : null}
-                {error.title === "This doesn't look like a lease" ||
-                error.title === "We couldn't read this file" ? (
+                {error.title === "This doesn’t look like a lease" ||
+                error.title === "We couldn’t read this file" ? (
                   <p className="mt-3 border-t border-destructive/15 pt-3 text-xs font-medium text-destructive/90">
                     This feature is working—try again with a lease agreement,
                     addendum, or renewal (PDF or text). Notices, applications, and
@@ -290,6 +348,7 @@ export default function AnalyzeLeasePage() {
               </div>
             ) : null}
 
+            {/* Submit */}
             <Button
               type="button"
               variant="cta"
@@ -297,46 +356,39 @@ export default function AnalyzeLeasePage() {
               onClick={() => void onSubmit()}
               className="mx-auto mt-8 h-14 w-full max-w-xl rounded-2xl px-6 text-lg font-semibold md:mt-10 md:text-xl"
             >
-              {processingStep === "upload" ? (
+              {isSubmitting ? (
                 <span className="flex items-center justify-center gap-3">
                   <ShieldLoader variant="upload" compact />
                   <span>Uploading…</span>
                 </span>
-              ) : processingStep === "extract" ? (
-                "Reading your lease…"
+              ) : isAnalyzing ? (
+                "Analyzing…"
               ) : (
                 "Analyze Lease"
               )}
             </Button>
           </section>
-        ) : showProcessing ? (
+        ) : !analysis ? (
           <section className="flex min-h-0 flex-1 flex-col items-center justify-center rounded-2xl border border-cream-border bg-cream-surface p-6 shadow-sm sm:p-10 md:rounded-3xl">
-            {processingStep === "upload" || processingStep === "extract" ? (
-              <ShieldLoader
-                variant="upload"
-                embedded
-                label={
-                  processingStep === "upload"
-                    ? "Uploading\nyour lease…"
-                    : "Reading\nyour lease…"
-                }
-                description={
-                  processingStep === "upload"
-                    ? "Sending your file securely. This only takes a moment."
-                    : "Extracting text from your document so we can review every clause."
-                }
-              />
-            ) : (
-              <GavelLoader variant="lease" embedded description={analyzeDescription} />
-            )}
+            <GavelLoader
+              variant="lease"
+              embedded
+              description={`Our AI is reviewing every clause against ${state || "your state"}'s tenant law. This usually takes 30–60 seconds.`}
+            />
           </section>
-        ) : analysis ? (
+        ) : (
           <LeaseResultsView
             analysis={analysis as LeaseAnalysis}
             createdUnderPlan={lease?.createdUnderPlan}
           />
         ) : null}
       </div>
+      <ShieldLoaderOverlay show={isSubmitting} variant="upload" />
+      <GavelLoaderOverlay
+        show={isAnalyzing}
+        variant="lease"
+        description={analyzeDescription}
+      />
       <PlanUpgradeDialog
         open={upgradeOpen}
         onOpenChange={setUpgradeOpen}

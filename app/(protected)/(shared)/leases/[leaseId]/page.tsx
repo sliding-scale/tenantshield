@@ -240,9 +240,16 @@ export default function LeaseDetailPage() {
           />
         </div>
 
+<<<<<<< HEAD
+        <aside className="hidden self-start lg:block lg:w-72 lg:pl-6">
+          <div className="sticky top-[calc(var(--navbar-height)+1.5rem)]">
+            {pdfCard}
+          </div>
+        </aside>
+=======
         {hasPdf ? (
-          <aside className="hidden self-start lg:block lg:w-72 lg:pl-6">
-            <div className="sticky top-[calc(var(--navbar-height)+1.5rem)]">
+          <aside className="hidden lg:block lg:w-72 lg:pl-6">
+            <div className="sticky top-6">
               <LeasePdfSidebarCard
                 leaseId={leaseId}
                 pdfUrl={lease.pdfUrl}
@@ -251,6 +258,7 @@ export default function LeaseDetailPage() {
             </div>
           </aside>
         ) : null}
+>>>>>>> c1b356a6b729e07b614112749a0cda5244f518ee
       </div>
     </main>
   )
