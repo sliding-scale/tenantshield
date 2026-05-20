@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import Link from "next/link"
 import { useEffect, useState, type ReactNode } from "react"
@@ -36,7 +36,7 @@ type Props = {
   caseId?: Id<"cases">
   /** When set, hide generate CTA and show link to the existing letter. */
   attachedLetterId?: Id<"letters"> | null
-  /** e.g. Archive / Restore — rendered top-right next to the title */
+  /** e.g. Archive / Restore ΓÇö rendered top-right next to the title */
   headerTrailing?: ReactNode
 }
 
@@ -215,9 +215,9 @@ export function NewCaseAnalysisResult({
   const stateName =
     details.state && details.state in US_STATE_NAMES
       ? US_STATE_NAMES[details.state as USStateAbbr]
-      : details.state || "—"
+      : details.state || "ΓÇö"
 
-  const metaLine = stateName !== "—" ? stateName.toUpperCase() : "YOUR CASE"
+  const metaLine = stateName !== "ΓÇö" ? stateName.toUpperCase() : "YOUR CASE"
   const descriptionText = details.description?.trim() || ""
   const descriptionWords = descriptionText ? descriptionText.split(/\s+/) : []
   const isDescriptionLong = descriptionWords.length > 10
@@ -354,7 +354,6 @@ export function NewCaseAnalysisResult({
           )}
         </div>
 
-<<<<<<< HEAD
       </div>
 
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-cream-border bg-cream-page/95 px-4 pb-[max(1rem,calc(0.75rem+env(safe-area-inset-bottom,0px)))] pt-3 backdrop-blur-md sm:px-6 md:px-10 lg:px-14 xl:px-16">
@@ -364,36 +363,6 @@ export function NewCaseAnalysisResult({
               asChild
               variant="outline"
               className="h-14 w-full rounded-2xl border-cream-border bg-cream-surface-deep px-6 text-lg font-semibold text-ink-warm hover:bg-cream-surface md:text-xl"
-=======
-        {attachedLetterId ? (
-          <Button
-            asChild
-            variant="outline"
-            className="h-14 w-full rounded-2xl border-border bg-muted px-6 text-lg font-semibold text-foreground hover:bg-card md:text-xl"
-          >
-            <Link href={`/letters/${attachedLetterId}`} className="inline-flex items-center justify-center gap-2">
-              <FileText className="size-5 shrink-0" aria-hidden />
-              Attached letter
-            </Link>
-          </Button>
-        ) : (
-          <Button
-            asChild
-            className="h-14 w-full rounded-2xl bg-foreground px-6 text-lg font-semibold text-white hover:bg-foreground/90 md:text-xl"
-          >
-            <Link
-              href={{
-                pathname: "/write-letters",
-                query: {
-                  ...(caseId ? { caseId } : {}),
-                  issueType: details.issueType,
-                  issue: details.description || details.title,
-                  state: details.state || "",
-                  landlord: details.landlord || "",
-                  propertyAddress: details.propertyAddress || "",
-                },
-              }}
->>>>>>> c1b356a6b729e07b614112749a0cda5244f518ee
             >
               <Link href={`/letters/${attachedLetterId}`} className="inline-flex items-center justify-center gap-2">
                 <FileText className="size-5 shrink-0" aria-hidden />

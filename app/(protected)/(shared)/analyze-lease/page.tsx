@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -7,7 +7,10 @@ import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { ChevronLeft, Upload, FileText, X } from "lucide-react";
 import { GavelLoader, GavelLoaderOverlay } from "@/components/shared/gavel-loader";
-import { ShieldLoaderOverlay } from "@/components/shared/shield-loader";
+import {
+  ShieldLoader,
+  ShieldLoaderOverlay,
+} from "@/components/shared/shield-loader";
 import { StatePickerField } from "@/components/shared/state-picker-field";
 import { Button } from "@/components/ui/button";
 import { US_STATE_NAMES, type USStateAbbr } from "@/lib/constants/us-states";
@@ -16,64 +19,6 @@ import {
   LeaseResultsView,
   type LeaseAnalysis,
 } from "@/components/tenant/analyze-lease/lease-results-view";
-import { PlanUpgradeDialog } from "@/components/tenant/free-plan-upgrade-dialog";
-import useCurrentUser from "@/app/hooks/useCurrentUser";
-import {
-  hasReachedLeaseAnalysisLimit,
-  LEASE_ANALYSIS_LIMIT_REACHED,
-  resolvePlanId,
-  shouldPromptFreePlanUpgrade,
-} from "@/lib/plans/plan-access";
-import { getLeaseAnalysisLimit } from "@/lib/plans/plans";
-
-type AnalyzeLeaseError = { title: string; body: string };
-
-/**
- * Strip Convex client wrapper noise. Client actions use
- * `[CONVEX A(path)] ${errorMessage}\\n  Called by client` (see createHybridErrorStacktrace
- * in convex); `errorMessage` may itself include `[Request ID…] Server Error Uncaught Error:`.
- */
-function unwrapConvexClientError(message: string): string {
-  let s = message.trim();
-  s = s.replace(/\s+Called by client\s*$/i, "").trim();
-  s = s.replace(/^\[CONVEX [^\]]+\]\s*/i, "").trim();
-  s = s.replace(/^\[Request ID:[^\]]+\]\s*Server Error\s*/i, "").trim();
-  s = s.replace(/^Uncaught Error:\s*/i, "").trim();
-  const uncaught = /Uncaught Error:\s*/i;
-  const parts = s.split(uncaught);
-  if (parts.length > 1) {
-    s = (parts[parts.length - 1] ?? s).trim();
-  }
-  s = s.replace(
-    /\s*Accepted files:\s*lease agreements[\s\S]*?lease renewals\.?$/i,
-    "",
-  ).trim();
-  return s;
-}
-
-function formatLeaseCheckError(message: string): AnalyzeLeaseError {
-  const normalized = message.toLowerCase();
-
-  if (normalized.includes("does not look like a lease")) {
-    const body = message.trim();
-    return {
-      title: "This doesn’t look like a lease",
-      body,
-    };
-  }
-
-  if (normalized.includes("could not extract any text")) {
-    return {
-      title: "We could not read this file",
-      body: "Please upload a text-based PDF or a plain text file. Scanned images may not work.",
-    };
-  }
-
-  return {
-    title: "Lease analysis failed",
-    body: message,
-  };
-}
 import { PlanUpgradeDialog } from "@/components/tenant/free-plan-upgrade-dialog";
 import useCurrentUser from "@/app/hooks/useCurrentUser";
 import {
@@ -98,22 +43,21 @@ export default function AnalyzeLeasePage() {
 
   const [file, setFile] = useState<File | null>(null);
   const { state, setState } = usePrefilledUSState();
-  const [stateSearch, setStateSearch] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<AnalyzeLeaseError | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [leaseId, setLeaseId] = useState<Id<"leases"> | null>(null);
-  const [upgradeOpen, setUpgradeOpen] = useState(false)
-  const [upgradeMode, setUpgradeMode] = useState<"free" | "limit">("free")
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [upgradeMode, setUpgradeMode] = useState<"free" | "limit">("free");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { convexUser } = useCurrentUser()
-  const counts = useQuery(api.dashboard.queries.countsForCurrentUser, {})
-  const planUsage = useQuery(api.planUsage.queries.current, {})
-  const plan = resolvePlanId(planUsage?.plan ?? convexUser?.plan)
-  const billingPeriod = planUsage?.planType ?? "monthly"
-  const usedLeaseAnalyses = planUsage?.usedLeaseAnalyses ?? 0
-  const leaseAnalysisLimit = getLeaseAnalysisLimit(plan, billingPeriod)
+  const { convexUser } = useCurrentUser();
+  const counts = useQuery(api.dashboard.queries.countsForCurrentUser, {});
+  const planUsage = useQuery(api.planUsage.queries.current, {});
+  const plan = resolvePlanId(planUsage?.plan ?? convexUser?.plan);
+  const billingPeriod = planUsage?.planType ?? "monthly";
+  const usedLeaseAnalyses = planUsage?.usedLeaseAnalyses ?? 0;
+  const leaseAnalysisLimit = getLeaseAnalysisLimit(plan, billingPeriod);
 
   const lease = useQuery(
     api.lease.queries.getLeaseForCurrentUser,
@@ -121,12 +65,12 @@ export default function AnalyzeLeasePage() {
   );
 
   const analysis = lease?.aiAnalysis;
+  const isBusy = isSubmitting || isAnalyzing;
 
-  const canSubmit = Boolean(file && state && !processingStep);
-  const showUploadForm = !processingStep && (!leaseId || error);
-  const showProcessing =
-    !error &&
-    (processingStep !== null || (leaseId !== null && !analysis));
+  const canSubmit = Boolean(file && state && !isBusy);
+  const showUploadForm = !isBusy && (!leaseId || error);
+  const showAnalyzing =
+    !error && (isAnalyzing || (leaseId !== null && !analysis));
 
   const analyzeDescription = state
     ? `Our AI is reviewing every clause against ${US_STATE_NAMES[state as USStateAbbr]} tenant law. This usually takes 30–60 seconds.`
@@ -170,19 +114,19 @@ export default function AnalyzeLeasePage() {
     if (!canSubmit || !file) return;
 
     if (shouldPromptFreePlanUpgrade(plan, counts?.leases ?? 0)) {
-      setUpgradeMode("free")
-      setUpgradeOpen(true)
-      return
+      setUpgradeMode("free");
+      setUpgradeOpen(true);
+      return;
     }
 
     if (hasReachedLeaseAnalysisLimit(plan, billingPeriod, usedLeaseAnalyses)) {
-      setUpgradeMode("limit")
-      setUpgradeOpen(true)
-      return
+      setUpgradeMode("limit");
+      setUpgradeOpen(true);
+      return;
     }
 
     setError(null);
-    setProcessingStep("upload");
+    setIsSubmitting(true);
     try {
       const uploadUrl = await generateUploadUrl();
 
@@ -197,26 +141,28 @@ export default function AnalyzeLeasePage() {
         storageId: string;
       };
 
-      setProcessingStep("extract");
+      setIsSubmitting(false);
+      setIsAnalyzing(true);
 
       const { leaseId: newLeaseId } = await extractLeaseText({
-        storageId: storageId as any,
+        storageId: storageId as Id<"_storage">,
         state,
         fileName: file.name,
       });
 
       setLeaseId(newLeaseId);
-      setProcessingStep("analyze");
 
       await analyzeLeaseById({ leaseId: newLeaseId });
     } catch (e) {
       if (e instanceof Error && e.message === LEASE_ANALYSIS_LIMIT_REACHED) {
-        setUpgradeOpen(true)
-        return
+        setUpgradeMode("limit");
+        setUpgradeOpen(true);
+        return;
       }
       setError(resolveAnalyzeLeaseError(e));
     } finally {
-      setProcessingStep(null);
+      setIsSubmitting(false);
+      setIsAnalyzing(false);
     }
   };
 
@@ -248,7 +194,6 @@ export default function AnalyzeLeasePage() {
               and flags illegal or one-sided terms.
             </p>
 
-            {/* Upload area */}
             <div className="mx-auto mt-8 w-full max-w-3xl md:mt-10 lg:mt-12">
               <div
                 onClick={() => fileInputRef.current?.click()}
@@ -315,12 +260,10 @@ export default function AnalyzeLeasePage() {
               </div>
             </div>
 
-            {/* State selector */}
             <div className="mx-auto mt-8 w-full max-w-3xl md:mt-10">
               <StatePickerField state={state} onStateChange={setState} />
             </div>
 
-            {/* Error */}
             {error ? (
               <div
                 className="mx-auto mt-4 max-w-xl rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm shadow-sm"
@@ -348,7 +291,6 @@ export default function AnalyzeLeasePage() {
               </div>
             ) : null}
 
-            {/* Submit */}
             <Button
               type="button"
               variant="cta"
@@ -368,15 +310,11 @@ export default function AnalyzeLeasePage() {
               )}
             </Button>
           </section>
-        ) : !analysis ? (
+        ) : showAnalyzing ? (
           <section className="flex min-h-0 flex-1 flex-col items-center justify-center rounded-2xl border border-cream-border bg-cream-surface p-6 shadow-sm sm:p-10 md:rounded-3xl">
-            <GavelLoader
-              variant="lease"
-              embedded
-              description={`Our AI is reviewing every clause against ${state || "your state"}'s tenant law. This usually takes 30–60 seconds.`}
-            />
+            <GavelLoader variant="lease" embedded description={analyzeDescription} />
           </section>
-        ) : (
+        ) : analysis ? (
           <LeaseResultsView
             analysis={analysis as LeaseAnalysis}
             createdUnderPlan={lease?.createdUnderPlan}
@@ -392,7 +330,9 @@ export default function AnalyzeLeasePage() {
       <PlanUpgradeDialog
         open={upgradeOpen}
         onOpenChange={setUpgradeOpen}
-        eyebrow={upgradeMode === "free" ? "Free plan limit" : "Lease analysis limit"}
+        eyebrow={
+          upgradeMode === "free" ? "Free plan limit" : "Lease analysis limit"
+        }
         title={
           upgradeMode === "free"
             ? "Upgrade to analyze more leases"
@@ -403,8 +343,12 @@ export default function AnalyzeLeasePage() {
             ? "Your free plan includes one lease analysis. Choose a plan to analyze another lease."
             : `Your current plan allows up to ${leaseAnalysisLimit} lease analyses per ${billingPeriod === "yearly" ? "year" : "month"}. Upgrade on billing to run a new one.`
         }
-        primaryActionLabel={upgradeMode === "free" ? "View plans" : "Go to billing"}
-        primaryActionHref={upgradeMode === "free" ? "/onboarding/plans" : "/billing"}
+        primaryActionLabel={
+          upgradeMode === "free" ? "View plans" : "Go to billing"
+        }
+        primaryActionHref={
+          upgradeMode === "free" ? "/onboarding/plans" : "/billing"
+        }
       />
     </main>
   );

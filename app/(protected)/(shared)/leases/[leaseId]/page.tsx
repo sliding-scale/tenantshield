@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useParams, useRouter } from "next/navigation"
 import { useQuery, useAction } from "convex/react"
@@ -103,7 +103,7 @@ function LeaseDocumentMenu({
       <DropdownMenuContent align="end" className="min-w-44">
         <DropdownMenuItem disabled={loading} onSelect={() => void openPdf()}>
           <FileText aria-hidden />
-          {loading ? "Opening…" : actionLabel}
+          {loading ? "OpeningΓÇª" : actionLabel}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -146,7 +146,7 @@ function TryLoadPdfButton({
         {loading ? (
           <span className="inline-flex items-center gap-2">
             <ShieldLoader variant="lease" compact />
-            Loading…
+            LoadingΓÇª
           </span>
         ) : (
           label
@@ -240,16 +240,9 @@ export default function LeaseDetailPage() {
           />
         </div>
 
-<<<<<<< HEAD
-        <aside className="hidden self-start lg:block lg:w-72 lg:pl-6">
-          <div className="sticky top-[calc(var(--navbar-height)+1.5rem)]">
-            {pdfCard}
-          </div>
-        </aside>
-=======
         {hasPdf ? (
-          <aside className="hidden lg:block lg:w-72 lg:pl-6">
-            <div className="sticky top-6">
+          <aside className="hidden self-start lg:block lg:w-72 lg:pl-6">
+            <div className="sticky top-[calc(var(--navbar-height)+1.5rem)]">
               <LeasePdfSidebarCard
                 leaseId={leaseId}
                 pdfUrl={lease.pdfUrl}
@@ -258,7 +251,6 @@ export default function LeaseDetailPage() {
             </div>
           </aside>
         ) : null}
->>>>>>> c1b356a6b729e07b614112749a0cda5244f518ee
       </div>
     </main>
   )

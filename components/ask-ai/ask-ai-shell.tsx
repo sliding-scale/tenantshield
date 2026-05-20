@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useAuth } from '@clerk/nextjs';
 import { useMutation, useQuery } from 'convex/react';
@@ -88,7 +88,7 @@ export default function AskAiShell() {
   if (!isLoaded || !userId) {
     return (
       <div className='flex min-h-[50vh] items-center justify-center px-4'>
-        <GavelLoader variant='ask-ai' embedded label='Loading…' description='' />
+        <GavelLoader variant='ask-ai' embedded label='LoadingΓÇª' description='' />
       </div>
     );
   }
@@ -102,18 +102,8 @@ export default function AskAiShell() {
   }
 
   return (
-<<<<<<< HEAD
     <div className="bg-cream-page flex h-[calc(100dvh-4rem)] max-h-[calc(100dvh-4rem)] flex-col overflow-hidden">
       <div className="flex min-h-0 flex-1 flex-col md:flex-row md:items-stretch">
-=======
-    <div
-      className={cn(
-        'flex min-h-0 flex-1 flex-col overflow-hidden bg-background',
-        'max-md:max-h-[calc(100svh-3.75rem-env(safe-area-inset-bottom,0px))] md:h-svh md:max-h-svh',
-      )}
-    >
-      <div className='flex min-h-0 flex-1 flex-col md:flex-row md:items-stretch'>
->>>>>>> c1b356a6b729e07b614112749a0cda5244f518ee
         <ChatSidebar
           conversations={conversations}
           activeConversationId={activeConversationId}
