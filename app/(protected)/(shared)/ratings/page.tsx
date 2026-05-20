@@ -2,22 +2,33 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
-import { MapPin, Plus, Search, Star } from "lucide-react"
-import { ShieldLoader } from "@/components/shared/shield-loader"
+import { ChevronDown, ListFilter, Plus, Search } from "lucide-react"
 import { usePaginatedQuery } from "convex/react"
 import { api } from "@/convex/_generated/api"
+import { FadeIn, FadeInStagger } from "@/components/shared/fade-in"
+import { ShieldLoader } from "@/components/shared/shield-loader"
+import { PropertyRatingCard } from "@/components/tenant/rating/property-rating-card"
 import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
 import {
   RATING_FILTER_TAGS,
   type IssueTypeValue,
   type RatingFilterTag,
 } from "@/lib/constants/issue-types"
-import { PropertyCardImage } from "@/components/tenant/rating/property-card-image"
 import { MOBILE_TAB_BAR_PAGE_SHELL } from "@/lib/nav/mobile-chrome"
 import { cn } from "@/lib/utils"
 
 const PAGE_SIZE = 15
-/** Delay Convex search until typing pauses — avoids a query per keystroke. */
 const SEARCH_DEBOUNCE_MS = 500
 
 export default function RatingsPage() {
@@ -88,197 +99,167 @@ export default function RatingsPage() {
     ? `/ratings/create?name=${encodeURIComponent(nameForCreate)}`
     : "/ratings/create"
 
+  const filterActive = selectedTag !== "All Properties"
+
   return (
     <main
       className={cn(
-        "min-h-svh bg-background px-4 md:min-h-svh md:px-8 md:py-8",
+        "min-h-svh bg-background px-4 md:min-h-svh md:px-8 md:py-10",
         MOBILE_TAB_BAR_PAGE_SHELL,
       )}
     >
-      <div className="mx-auto w-full max-w-screen-2xl">
-        <header className="mb-5 md:mb-6">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary md:text-xs">
-            Property Ratings
-          </p>
-          <h1 className="mt-1 font-heading text-2xl font-semibold leading-snug text-foreground md:text-3xl lg:text-[2rem]">
-            Know Before You Sign.
-          </h1>
-          <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            Anonymous ratings from verified tenants. Spot patterns before choosing your next
-            rental.
-          </p>
-        </header>
-
-        <section className="rounded-2xl border border-border bg-card/40 p-3 md:p-4">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="text"
-              value={searchInput}
-              onChange={(event) => setSearchInput(event.target.value)}
-              placeholder="Search by address, city, or property name..."
-              className="h-9 w-full rounded-xl border border-border bg-background pl-9 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none md:text-sm"
-            />
-          </div>
-        </section>
-
-        <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="h-9 w-full shrink-0 gap-1.5 rounded-xl border-border bg-card text-xs font-semibold text-foreground hover:bg-accent sm:w-auto sm:text-sm"
-            asChild
-          >
-            <Link href={createHref}>
-              <Plus className="size-3.5 shrink-0 sm:size-4" aria-hidden />
-              Create property
-            </Link>
-          </Button>
-        </div>
-
-        <section className="mt-3 flex flex-wrap gap-1.5 md:gap-2">
-          {RATING_FILTER_TAGS.map((tag) => {
-            const active = selectedTag === tag
-            return (
-              <button
-                key={tag}
-                type="button"
-                onClick={() => setSelectedTag(tag)}
-                className={[
-                  "rounded-full border px-3 py-1 text-xs font-medium transition md:px-3.5 md:py-1.5 md:text-[13px]",
-                  active
-                    ? "border-foreground bg-foreground text-white"
-                    : "border-border bg-background text-foreground hover:bg-accent",
-                ].join(" ")}
+      <div className="mx-auto w-full max-w-6xl">
+        <FadeIn>
+          <header className="mb-6 md:mb-8">
+            <div className="flex items-center justify-between gap-3">
+              <h1 className="font-heading text-3xl font-semibold text-foreground md:text-4xl">
+                Ratings
+              </h1>
+              <Button
+                variant="cta"
+                size="icon-lg"
+                className="size-11 shrink-0 rounded-full md:size-12"
+                asChild
               >
-                {tag}
-              </button>
-            )
-          })}
-        </section>
+                <Link href={createHref} aria-label="Create property">
+                  <Plus className="size-5 md:size-6" aria-hidden />
+                </Link>
+              </Button>
+            </div>
+            <p className="mt-2 max-w-2xl text-muted-foreground">
+              Anonymous ratings from verified tenants. Spot patterns before choosing your next
+              rental.
+            </p>
+          </header>
+        </FadeIn>
+
+        <FadeIn>
+          <div className="flex gap-2">
+            <div className="relative min-w-0 flex-1">
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                aria-hidden
+              />
+              <Input
+                type="search"
+                value={searchInput}
+                onChange={(event) => setSearchInput(event.target.value)}
+                placeholder="Search by address, city, or property name…"
+                className="h-11 rounded-2xl border-border bg-card pl-10"
+              />
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className={cn(
+                    "h-11 shrink-0 gap-1.5 rounded-2xl border-border bg-card px-3 sm:px-4",
+                    filterActive && "border-foreground bg-accent",
+                  )}
+                  aria-label={`Filter by issue type. Current: ${selectedTag}`}
+                >
+                  <ListFilter className="size-4 shrink-0" aria-hidden />
+                  <span className="hidden max-w-28 truncate text-sm font-medium sm:inline">
+                    {filterActive ? selectedTag : "Filter"}
+                  </span>
+                  <ChevronDown className="size-4 shrink-0 opacity-60" aria-hidden />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64">
+                <DropdownMenuLabel>Issue type</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuRadioGroup
+                  value={selectedTag}
+                  onValueChange={(value) => setSelectedTag(value as RatingFilterTag)}
+                >
+                  {RATING_FILTER_TAGS.map((tag) => (
+                    <DropdownMenuRadioItem key={tag} value={tag}>
+                      {tag}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </FadeIn>
 
         {showEmptySearch ? (
-          <section className="mt-4 rounded-2xl border border-border bg-card p-6 text-center md:p-8">
-            <p className="font-heading text-xl text-foreground md:text-2xl">
-              No such property found
-            </p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              We couldn&apos;t find a property matching{" "}
-              <span className="font-semibold text-foreground">&ldquo;{trimmedDebounced}&rdquo;</span>.
-              Add it now so other tenants can find it too.
-            </p>
-            <Button
-              size="sm"
-              className="mt-5 h-10 gap-1.5 rounded-full border-0 bg-foreground px-4 text-sm font-semibold text-white shadow-md hover:bg-foreground/90"
-              asChild
-            >
-              <Link href={createHref}>
-                <Plus className="size-4" />
-                Create property
-              </Link>
-            </Button>
-          </section>
+          <FadeIn>
+            <Card className="mt-6 gap-0 rounded-3xl border border-border py-0 text-center shadow-none ring-0">
+              <div className="px-6 py-10 md:px-8 md:py-12">
+                <p className="font-heading text-2xl font-semibold text-foreground">
+                  No such property found
+                </p>
+                <p className="mt-2 text-muted-foreground">
+                  We couldn&apos;t find a property matching{" "}
+                  <span className="font-semibold text-foreground">
+                    &ldquo;{trimmedDebounced}&rdquo;
+                  </span>
+                  . Add it so other tenants can find it too.
+                </p>
+                <Button variant="cta" className="mt-6 rounded-xl" asChild>
+                  <Link href={createHref}>
+                    <Plus className="size-4" aria-hidden />
+                    Create property
+                  </Link>
+                </Button>
+              </div>
+            </Card>
+          </FadeIn>
         ) : null}
 
         {showEmptyAll ? (
-          <section className="mt-4 rounded-2xl border border-border bg-card p-6 text-center md:p-8">
-            <p className="font-heading text-xl text-foreground md:text-2xl">
-              No properties yet
-            </p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Be the first to add a property and start the rating history.
-            </p>
-            <Button
-              size="sm"
-              className="mt-5 h-10 gap-1.5 rounded-full border-0 bg-foreground px-4 text-sm font-semibold text-white shadow-md hover:bg-foreground/90"
-              asChild
-            >
-              <Link href="/ratings/create">
-                <Plus className="size-4" />
-                Create property
-              </Link>
-            </Button>
-          </section>
+          <FadeIn>
+            <Card className="mt-6 gap-0 rounded-3xl border border-border py-0 text-center shadow-none ring-0">
+              <div className="px-6 py-10 md:px-8 md:py-12">
+                <p className="font-heading text-2xl font-semibold text-foreground">
+                  No properties yet
+                </p>
+                <p className="mt-2 text-muted-foreground">
+                  Be the first to add a property and start the rating history.
+                </p>
+                <Button variant="cta" className="mt-6 rounded-xl" asChild>
+                  <Link href="/ratings/create">
+                    <Plus className="size-4" aria-hidden />
+                    Create property
+                  </Link>
+                </Button>
+              </div>
+            </Card>
+          </FadeIn>
         ) : null}
 
         {showEmptyFilter ? (
-          <section className="mt-4 rounded-2xl border border-border bg-card p-8 text-center md:p-10">
-            <p className="font-heading text-xl text-foreground md:text-2xl">No properties found</p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              No listings match this issue tag in what&apos;s loaded so far. Try &ldquo;All
-              Properties&rdquo;, load more below, or pick another filter.
-            </p>
-          </section>
+          <FadeIn>
+            <Card className="mt-6 gap-0 rounded-3xl border border-border py-0 text-center shadow-none ring-0">
+              <div className="px-6 py-10 md:px-8 md:py-12">
+                <p className="font-heading text-2xl font-semibold text-foreground">
+                  No properties found
+                </p>
+                <p className="mt-2 text-muted-foreground">
+                  No listings match this issue tag in what&apos;s loaded so far. Try &ldquo;All
+                  Properties&rdquo;, scroll for more, or pick another filter.
+                </p>
+              </div>
+            </Card>
+          </FadeIn>
         ) : null}
 
         {loadingFirstPage ? (
-          <section className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4 xl:grid-cols-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div
-                key={i}
-                className="h-[22rem] animate-pulse rounded-2xl border border-border bg-card/60"
-              />
-            ))}
-          </section>
+          <div className="mt-6 flex justify-center py-16">
+            <ShieldLoader variant="ratings" embedded />
+          </div>
         ) : null}
 
         {hasCards ? (
-          <section className="mt-4 md:mt-5">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4 xl:grid-cols-4">
-              {filteredProperties.map((property) => (
-                <Link
-                  key={property._id}
-                  href={`/ratings/${property._id}`}
-                  className="group block overflow-hidden rounded-2xl border border-border bg-card shadow-sm outline-none transition hover:border-primary/40 hover:shadow-md focus-visible:ring-2 focus-visible:ring-primary/50"
-                >
-                  <article className="flex flex-col">
-                    <PropertyCardImage
-                      imageUrl={property.imageUrl}
-                      propertyId={property._id}
-                    />
-
-                    <div className="p-3 sm:p-3.5">
-                      <div className="mb-3 flex items-start justify-between gap-2">
-                        <div className="min-w-0 flex-1">
-                          <h2 className="line-clamp-2 font-heading text-sm font-semibold leading-snug text-foreground group-hover:text-foreground md:text-[0.9375rem]">
-                            {property.name}
-                          </h2>
-                          <p className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-muted-foreground md:text-xs">
-                            <MapPin className="size-3 shrink-0" />
-                            {property.reviewCount === 0
-                              ? "No reviews yet"
-                              : `${property.reviewCount} review${property.reviewCount === 1 ? "" : "s"}`}
-                          </p>
-                        </div>
-                        <p className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-accent px-2 py-0.5 text-xs font-semibold text-foreground">
-                          <Star className="size-3 fill-primary text-primary" />
-                          {property.overallRating != null
-                            ? property.overallRating.toFixed(1)
-                            : "—"}
-                        </p>
-                      </div>
-                      {property.tags.length > 0 ? (
-                        <div className="mt-3 -mx-3 overflow-x-auto overscroll-x-contain px-3 pb-0.5 [scrollbar-width:thin] sm:-mx-3.5 sm:px-3.5">
-                          <div className="flex w-max flex-nowrap gap-1.5">
-                            {property.tags.map((tag) => (
-                              <span
-                                key={tag}
-                                className="shrink-0 whitespace-nowrap rounded-full border border-border bg-accent px-2 py-0.5 text-[10px] font-medium text-muted-foreground md:text-xs"
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      ) : null}
-                    </div>
-                  </article>
-                </Link>
-              ))}
-            </div>
-
-          </section>
+          <FadeInStagger className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-5">
+            {filteredProperties.map((property) => (
+              <FadeIn key={property._id} stagger>
+                <PropertyRatingCard property={property} />
+              </FadeIn>
+            ))}
+          </FadeInStagger>
         ) : null}
 
         {(canLoadMore || loadingMore) &&
@@ -287,18 +268,14 @@ export default function RatingsPage() {
         !showEmptyAll ? (
           <div
             ref={sentinelRef}
-            className="mt-6 flex min-h-14 items-center justify-center py-4"
+            className="mt-8 flex min-h-14 items-center justify-center py-4"
           >
             {loadingMore ? (
               <span className="inline-flex items-center gap-3 text-sm text-muted-foreground">
                 <ShieldLoader variant="ratings" compact />
                 Loading more…
               </span>
-            ) : (
-              <span className="text-[11px] text-muted-foreground md:text-xs">
-                Scroll for more properties
-              </span>
-            )}
+            ) : null}
           </div>
         ) : null}
       </div>

@@ -1,7 +1,7 @@
 "use client"
 
-import { useAuth } from "@clerk/nextjs"
-import { Menu, X } from "lucide-react"
+import { SignOutButton, useAuth } from "@clerk/nextjs"
+import { LogOut, Menu, X } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect } from "react"
@@ -52,6 +52,23 @@ function NavTab({
   )
 }
 
+function AdminLogoutTab() {
+  return (
+    <SignOutButton signOutOptions={{ redirectUrl: "/" }}>
+      <button
+        type="button"
+        className={cn(
+          "flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg py-2 text-[0.7rem] font-medium transition-colors",
+          "text-muted-foreground hover:text-foreground/80",
+        )}
+      >
+        <LogOut className="size-6 shrink-0 text-muted-foreground" strokeWidth={1.5} aria-hidden />
+        <span className="truncate">Log out</span>
+      </button>
+    </SignOutButton>
+  )
+}
+
 export default function MobileTabBar() {
   const pathname = usePathname() ?? ""
   const { isSignedIn, isLoaded } = useAuth()
@@ -90,7 +107,9 @@ export default function MobileTabBar() {
               onNavigate={closeSidebar}
             />
           ))}
-          {!isAdmin ? (
+          {isAdmin ? (
+            <AdminLogoutTab />
+          ) : (
             <button
               type="button"
               onClick={toggleSidebar}
@@ -117,7 +136,7 @@ export default function MobileTabBar() {
               )}
               <span className="truncate">More</span>
             </button>
-          ) : null}
+          )}
         </div>
       </nav>
     </>

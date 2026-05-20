@@ -8,7 +8,9 @@ import { ShieldLoader } from "@/components/shared/shield-loader"
 import { useMutation } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024 // 5 MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"]
@@ -92,26 +94,22 @@ export function CreatePropertyForm({ initialName = "" }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="w-full min-w-0 space-y-6">
-      <div className="w-full min-w-0 rounded-2xl border border-border bg-background p-4 shadow-sm sm:p-5 md:p-6">
-        <h2 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary md:text-xs">
-          Property details
-        </h2>
-
-        <div className="mt-4 space-y-5">
+      <Card className="gap-0 rounded-3xl border border-border py-0 shadow-none ring-0">
+        <div className="space-y-5 p-4 sm:p-5 md:p-6">
           <div>
-            <label htmlFor={nameId} className="text-sm font-medium text-foreground">
+            <Label htmlFor={nameId} className="text-sm font-medium text-foreground">
               Property name <span className="text-destructive">*</span>
-            </label>
+            </Label>
             <Input
               id={nameId}
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. 1240 Oak Street, Apt 3B"
               maxLength={120}
-              className="mt-1.5 h-11 w-full min-w-0 rounded-xl border-border bg-accent px-3 text-sm text-foreground placeholder:text-muted-foreground"
+              className="mt-1.5 h-11 rounded-xl border-border bg-background"
               required
             />
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="mt-1.5 text-xs text-muted-foreground">
               Include the unit / suite so other tenants can find it.
             </p>
           </div>
@@ -130,7 +128,7 @@ export function CreatePropertyForm({ initialName = "" }: Props) {
             />
 
             {previewUrl ? (
-              <div className="relative mt-2 overflow-hidden rounded-2xl border border-border bg-accent">
+              <div className="relative mt-2 overflow-hidden rounded-2xl border border-border bg-card">
                 <div className="relative h-48 w-full sm:h-56">
                   <Image
                     src={previewUrl}
@@ -141,7 +139,7 @@ export function CreatePropertyForm({ initialName = "" }: Props) {
                     unoptimized
                   />
                 </div>
-                <div className="flex items-center justify-between gap-2 border-t border-border bg-background/95 px-3 py-2">
+                <div className="flex items-center justify-between gap-2 border-t border-border bg-background px-3 py-2">
                   <span className="truncate text-xs text-muted-foreground">
                     {file?.name ?? "Image selected"}
                   </span>
@@ -162,7 +160,7 @@ export function CreatePropertyForm({ initialName = "" }: Props) {
                       className="h-8 rounded-full text-muted-foreground hover:text-foreground"
                       onClick={() => handleSelectFile(null)}
                     >
-                      <X className="size-4" />
+                      <X className="size-4" aria-hidden />
                       Remove
                     </Button>
                   </div>
@@ -172,30 +170,27 @@ export function CreatePropertyForm({ initialName = "" }: Props) {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="mt-2 flex h-44 w-full flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-accent/60 text-center transition hover:border-primary/50 hover:bg-accent sm:h-52"
+                className="mt-2 flex h-44 w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-card text-center transition hover:border-primary/50 hover:bg-accent sm:h-52"
               >
-                <span className="flex size-10 items-center justify-center rounded-full bg-muted/35 text-foreground">
-                  <ImagePlus className="size-5" />
+                <span className="flex size-10 items-center justify-center rounded-full bg-accent text-foreground">
+                  <ImagePlus className="size-5" aria-hidden />
                 </span>
-                <span className="text-sm font-medium text-foreground">
-                  Click to upload a photo
-                </span>
+                <span className="text-sm font-medium text-foreground">Click to upload a photo</span>
                 <span className="text-xs text-muted-foreground">JPG, PNG, or WEBP · up to 5 MB</span>
               </button>
             )}
           </div>
         </div>
-      </div>
+      </Card>
 
-      {error ? (
-        <p className="text-sm font-medium text-destructive">{error}</p>
-      ) : null}
+      {error ? <p className="text-sm font-medium text-destructive">{error}</p> : null}
 
-      <div className="flex flex-col gap-3 pt-1">
+      <div className="flex flex-col gap-3">
         <Button
           type="submit"
+          variant="cta"
           disabled={!canSubmit}
-          className="h-12 w-full rounded-xl border-0 bg-foreground text-base font-semibold text-white shadow-md hover:bg-foreground/90 disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100 sm:h-14 sm:text-lg"
+          className="h-12 w-full rounded-xl text-base font-semibold sm:h-14 sm:text-lg"
         >
           {isSubmitting ? (
             <span className="inline-flex items-center gap-2">
@@ -204,7 +199,7 @@ export function CreatePropertyForm({ initialName = "" }: Props) {
             </span>
           ) : (
             <>
-              <Star className="size-4 fill-primary text-primary" strokeWidth={0} />
+              <Star className="size-4 fill-primary text-primary" strokeWidth={0} aria-hidden />
               Create &amp; rate now
             </>
           )}
