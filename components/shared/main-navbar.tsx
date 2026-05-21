@@ -1,36 +1,33 @@
-﻿"use client";
+﻿'use client';
 
-import { Show, UserButton, useAuth, useUser } from "@clerk/nextjs"
-import { useQuery } from "convex/react"
-import { Sparkles } from "lucide-react";
-import Link from "next/link";
-import { NavbarLogo } from "@/components/shared/navbar-logo";
-import { usePathname } from "next/navigation";
-import useCurrentUser from "@/app/hooks/useCurrentUser"
-import { api } from "@/convex/_generated/api";
-import { planDisplayLabel } from "@/lib/plans/plan-access";
-import { cn } from "@/lib/utils";
-import { isAuthPagePath, shouldHideTopNavbarOnMobile } from "@/lib/nav/visibility";
-import LandingNavbar from "@/components/shared/landing-navbar";
-import { Button } from "@/components/ui/button";
+import { Show, UserButton, useAuth, useUser } from '@clerk/nextjs';
+import { useQuery } from 'convex/react';
+import { Sparkles } from 'lucide-react';
+import Link from 'next/link';
+import { NavbarLogo } from '@/components/shared/navbar-logo';
+import { usePathname } from 'next/navigation';
+import useCurrentUser from '@/app/hooks/useCurrentUser';
+import { api } from '@/convex/_generated/api';
+import { planDisplayLabel } from '@/lib/plans/plan-access';
+import { cn } from '@/lib/utils';
+import { isAuthPagePath, shouldHideTopNavbarOnMobile } from '@/lib/nav/visibility';
+import LandingNavbar from '@/components/shared/landing-navbar';
+import { Button } from '@/components/ui/button';
 
 export default function Navbar() {
   const pathname = usePathname();
   const { isSignedIn } = useAuth();
   const { user: clerkUser } = useUser();
-  const billing = useQuery(api.planUsage.queries.current, clerkUser ? {} : "skip");
+  const billing = useQuery(api.planUsage.queries.current, clerkUser ? {} : 'skip');
   const { convexUser, isLoading, role } = useCurrentUser();
 
-  const planLabel =
-    role === "admin"
-      ? "Admin"
-      : planDisplayLabel(billing?.plan ?? convexUser?.plan);
+  const planLabel = role === 'admin' ? 'Admin' : planDisplayLabel(billing?.plan ?? convexUser?.plan);
 
   if (isAuthPagePath(pathname)) {
     return null;
   }
 
-  if (pathname === "/") {
+  if (pathname === '/') {
     return <LandingNavbar />;
   }
 
@@ -40,38 +37,38 @@ export default function Navbar() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 border-b border-border bg-card shadow-sm",
-        hideOnMobile && "max-md:hidden",
-        hideOnDesktop && "md:hidden",
+        'sticky top-0 z-50 border-b border-border bg-card shadow-sm',
+        hideOnMobile && 'max-md:hidden',
+        hideOnDesktop && 'md:hidden',
       )}
     >
-      <div className="mx-auto grid min-h-16 w-full min-w-0 max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-2 sm:min-h-[4.25rem] sm:gap-4 sm:px-6 lg:min-h-[4.5rem] lg:gap-6">
+      <div className='mx-auto grid min-h-16 w-full min-w-0 max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-2 sm:min-h-[4.25rem] sm:gap-4 sm:px-6 lg:min-h-[4.5rem] lg:gap-6'>
         <Link
-          href="/"
-          className="inline-flex min-w-0 max-w-full items-center overflow-hidden [&_img]:min-w-0 [&_img]:max-w-full [&_img]:shrink"
+          href='/'
+          className='inline-flex min-w-0 max-w-full items-center overflow-hidden [&_img]:min-w-0 [&_img]:max-w-full [&_img]:shrink'
         >
           <NavbarLogo priority />
         </Link>
 
-        <div className="flex shrink-0 items-center justify-self-end gap-2 sm:gap-3">
-          <Show when="signed-out">
-            <Button variant="default" className="h-10 rounded-full px-4 sm:px-5" asChild>
-              <Link href="/login">Sign in</Link>
+        <div className='flex shrink-0 items-center justify-self-end gap-2 sm:gap-3'>
+          <Show when='signed-out'>
+            <Button variant='default' className='h-10 rounded-full px-4 sm:px-5' asChild>
+              <Link href='/login'>Sign in</Link>
             </Button>
           </Show>
-          <Show when="signed-in">
+          <Show when='signed-in'>
             {!isLoading ? (
-              <Link href="/billing">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-primary-foreground">
-                <Sparkles className="size-3.5" />
-                {planLabel}
-              </span>
+              <Link href='/billing'>
+                <span className='inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-primary-foreground'>
+                  <Sparkles className='size-3.5' />
+                  {planLabel}
+                </span>
               </Link>
             ) : null}
             <UserButton
               appearance={{
                 elements: {
-                  avatarBox: "h-9 w-9 sm:h-10 sm:w-10",
+                  avatarBox: 'h-9 w-9 sm:h-10 sm:w-10',
                 },
               }}
             />
